@@ -435,7 +435,7 @@ See [ROADMAP.md](ROADMAP.md) for the full plan:
 
 Built for **IntraMind** by **CruxLabx**.
 
-**Creator:** Mounesh
+**Creator:** Mounesh Kodi
 
 ## License
 
