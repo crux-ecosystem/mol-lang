@@ -1,0 +1,84 @@
+-- ============================================================
+-- MOL TUTORIAL: Control Flow
+-- ============================================================
+-- Run this file: mol run tutorial/02_control_flow.mol
+-- ============================================================
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 6: if...then...end              │
+-- └─────────────────────────────────────────┘
+-- MOL uses NATURAL language: "if x is 1 then...end"
+-- No curly braces {}. No colons. Just English.
+
+let temperature be 36
+
+if temperature > 40 then
+  show "WARNING: Overheating!"
+elif temperature > 30 then
+  show "Temperature is normal: " + to_text(temperature)
+else
+  show "System is cool"
+end
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 7: Comparison Operators         │
+-- └─────────────────────────────────────────┘
+-- MOL uses `is` instead of `==`
+-- MOL uses `is not` instead of `!=`
+
+let status be "active"
+
+if status is "active" then
+  show "System is running"
+end
+
+let x be 10
+if x is not 0 then
+  show "x is non-zero: " + to_text(x)
+end
+
+-- Boolean logic: and, or, not
+if x > 5 and x < 20 then
+  show "x is between 5 and 20"
+end
+
+if x is 10 or x is 20 then
+  show "x is either 10 or 20"
+end
+
+if not false then
+  show "not false = true!"
+end
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 8: for...in...do...end          │
+-- └─────────────────────────────────────────┘
+-- Iterate over lists or ranges
+
+show ""
+show "Counting 0 to 4:"
+for i in range(5) do
+  show "  " + to_text(i)
+end
+
+show ""
+show "Looping over a list:"
+let colors be ["red", "green", "blue"]
+for color in colors do
+  show "  Color: " + color
+end
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 9: while...do...end             │
+-- └─────────────────────────────────────────┘
+show ""
+show "Countdown:"
+let countdown be 5
+while countdown > 0 do
+  show "  " + to_text(countdown) + "..."
+  set countdown to countdown - 1
+end
+show "  Liftoff!"
+
+show ""
+show "--- Control flow complete! Run tutorial/03_functions.mol next ---"

@@ -1,0 +1,23 @@
+[project]
+name = "mol-lang"
+version = "0.2.0"
+description = "MOL — The IntraMind Programming Language"
+requires-python = ">=3.10"
+dependencies = [
+    "lark>=1.1.0",
+]
+
+[project.scripts]
+mol = "mol.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["mol*"]

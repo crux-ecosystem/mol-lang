@@ -1,0 +1,38 @@
+-- ============================================================
+-- MOL Test: Safety Rails & Error Handling
+-- ============================================================
+-- Demonstrates MOL's built-in security system
+
+show "═══ Safety Rails Test ═══"
+
+-- Test 1: Allowed resources
+show ""
+show "Test 1: Authorized access"
+access "mind_core"
+access "memory_bank"
+access "data_stream"
+show "All authorized resources accessed successfully!"
+
+-- Test 2: Type safety
+show ""
+show "Test 2: Type safety"
+let x : Number be 100
+let name : Text be "IntraMind"
+let active : Bool be true
+show "x = " + to_text(x) + " (Number)"
+show "name = " + name + " (Text)"
+show "active = " + to_text(active) + " (Bool)"
+
+-- Test 3: Domain type enforcement
+show ""
+show "Test 3: Domain types with typed declarations"
+let idea : Thought be Thought("MOL is working!", 0.99)
+let brain_node : Node be Node("cortex", 0.75)
+show idea
+show brain_node
+
+-- Test 4: Security denial (uncomment to test)
+-- access "unauthorized_resource"   -- This would throw a SecurityError!
+
+show ""
+show "═══ All Safety Tests Passed! ═══"

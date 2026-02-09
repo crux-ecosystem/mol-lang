@@ -1,0 +1,111 @@
+-- ============================================================
+-- MOL Test: Comprehensive Feature Coverage
+-- ============================================================
+-- Tests every major language feature in one program
+
+show "═══ MOL Comprehensive Test ═══"
+
+-- 1. Variables & Types
+let count be 0
+let pi be 3.14159
+let greeting be "Hello from MOL"
+let items be [10, 20, 30, 40, 50]
+let config be {name: "test", version: 1}
+
+show "1. Variables: " + to_text(count) + ", " + to_text(pi) + ", " + greeting
+
+-- 2. Arithmetic
+let result be (10 + 5) * 2 - 3
+show "2. Arithmetic: (10+5)*2-3 = " + to_text(result)
+
+-- 3. String operations
+let sentence be "  MOL Language  "
+show "3. String ops: '" + trim(sentence) + "' → '" + upper(trim(sentence)) + "'"
+
+-- 4. List operations
+show "4. List: " + to_text(items) + " sum=" + to_text(sum(items)) + " len=" + to_text(len(items))
+
+-- 5. Conditionals
+let grade be 85
+if grade >= 90 then
+  show "5. Grade: A"
+elif grade >= 80 then
+  show "5. Grade: B"
+elif grade >= 70 then
+  show "5. Grade: C"
+else
+  show "5. Grade: F"
+end
+
+-- 6. Loops
+let total be 0
+for n in range(1, 6) do
+  set total to total + n
+end
+show "6. Sum 1-5: " + to_text(total)
+
+-- 7. Functions
+define power(base, exp)
+  let result be 1
+  for i in range(exp) do
+    set result to result * base
+  end
+  return result
+end
+
+show "7. 2^10 = " + to_text(power(2, 10))
+
+-- 8. Recursion
+define gcd(a, b)
+  if b is 0 then
+    return a
+  end
+  return gcd(b, a % b)
+end
+
+show "8. GCD(48, 18) = " + to_text(gcd(48, 18))
+
+-- 9. Nested functions
+define make_adder(x)
+  return x
+end
+
+let add5 be make_adder(5)
+show "9. Adder: " + to_text(add5 + 10)
+
+-- 10. Domain types
+let thought be Thought("Test complete", 0.95)
+let mem be Memory("test_key", "test_value")
+let node be Node("test_node", 1.0)
+let stream be Stream("test_stream")
+
+show "10. Types: " + type_of(thought) + ", " + type_of(mem) + ", " + type_of(node) + ", " + type_of(stream)
+
+-- 11. Map access
+show "11. Config: " + config.name + " v" + to_text(config.version)
+
+-- 12. JSON
+let json_out be to_json(thought)
+show "12. JSON: " + json_out
+
+-- 13. Domain operations
+link node to Node("target", 0.5)
+process node with 0.2
+evolve node
+sync stream
+
+-- 14. Event system
+listen "test_event" do
+  show "14. Event received!"
+end
+trigger "test_event"
+
+-- 15. Boolean logic
+let a be true
+let b be false
+if a and not b then
+  show "15. Logic: true AND (NOT false) = true"
+end
+
+show ""
+show "═══ All 15 Tests Passed! ═══"

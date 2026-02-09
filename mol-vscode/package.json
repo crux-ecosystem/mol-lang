@@ -1,0 +1,40 @@
+{
+  "name": "mol-language",
+  "displayName": "MOL Language",
+  "description": "Syntax highlighting and language support for the MOL programming language (IntraMind)",
+  "version": "0.1.0",
+  "publisher": "intramind",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "mol",
+        "aliases": ["MOL", "mol"],
+        "extensions": [".mol"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/mol-icon.png",
+          "dark": "./icons/mol-icon.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "mol",
+        "scopeName": "source.mol",
+        "path": "./syntaxes/mol.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "mol",
+        "path": "./snippets/mol.json"
+      }
+    ]
+  }
+}

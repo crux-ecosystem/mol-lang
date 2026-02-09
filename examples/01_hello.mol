@@ -1,0 +1,61 @@
+-- ============================================================
+-- MOL Example: Hello World & Basics
+-- ============================================================
+-- This is a comment in MOL (double-dash)
+
+-- Show is MOL's "print"
+show "Hello, World!"
+show "Welcome to MOL — The IntraMind Language"
+
+-- ── Variables ───────────────────────────────────────────────
+-- 'let' declares, 'be' assigns
+let name be "IntraMind"
+let version be 1.0
+show "System: " + name + " v" + to_text(version)
+
+-- Typed declarations (safety rail!)
+let score : Number be 42
+let greeting : Text be "Greetings, human"
+show greeting
+
+-- ── Arithmetic ──────────────────────────────────────────────
+let x be 10
+let y be 3
+show "x + y = " + to_text(x + y)
+show "x * y = " + to_text(x * y)
+show "x / y = " + to_text(x / y)
+
+-- ── Conditionals (natural flow) ────────────────────────────
+if score > 40 then
+  show "Score is excellent!"
+elif score > 20 then
+  show "Score is good"
+else
+  show "Keep trying"
+end
+
+-- ── Lists ───────────────────────────────────────────────────
+let fruits be ["apple", "banana", "cherry"]
+show "Fruits: " + to_text(fruits)
+show "First fruit: " + fruits[0]
+show "Count: " + to_text(len(fruits))
+
+-- ── Loops ───────────────────────────────────────────────────
+for fruit in fruits do
+  show "  → " + fruit
+end
+
+let counter be 0
+while counter < 3 do
+  show "  tick " + to_text(counter)
+  set counter to counter + 1
+end
+
+-- ── Functions ───────────────────────────────────────────────
+define greet(person)
+  show "Hello, " + person + "!"
+  return "greeted " + person
+end
+
+let result be greet("Mounesh")
+show result

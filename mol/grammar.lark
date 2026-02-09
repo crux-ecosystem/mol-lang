@@ -1,0 +1,156 @@
+// ============================================================
+// MOL Language Grammar — Lark EBNF Specification
+// ============================================================
+// A human-readable, domain-specific language for IntraMind.
+// Syntax is designed to be natural, safe, and expressive.
+// ============================================================
+
+start: (_NL* statement)*  _NL*
+
+// ── Statements ──────────────────────────────────────────────
+?statement: show_stmt
+          | declare_stmt
+          | assign_stmt
+          | if_stmt
+          | while_stmt
+          | for_stmt
+          | func_def
+          | return_stmt
+          | trigger_stmt
+          | link_stmt
+          | process_stmt
+          | access_stmt
+          | sync_stmt
+          | evolve_stmt
+          | emit_stmt
+          | listen_stmt
+          | block_stmt
+          | guard_stmt
+          | pipeline_def
+          | expr_stmt
+
+// ── Show (print) ───────────────────────────────────────────
+show_stmt: "show" expr
+
+// ── Variable Declaration ────────────────────────────────────
+declare_stmt: "let" NAME "be" expr              -> declare_infer
+            | "let" NAME ":" type_name "be" expr -> declare_typed
+
+// ── Assignment ──────────────────────────────────────────────
+assign_stmt: "set" NAME "to" expr
+
+// ── If / Else ───────────────────────────────────────────────
+if_stmt: "if" expr "then" _NL block elif_clause* else_clause? "end"
+elif_clause: "elif" expr "then" _NL block
+else_clause: "else" _NL block
+
+// ── While Loop ──────────────────────────────────────────────
+while_stmt: "while" expr "do" _NL block "end"
+
+// ── For Loop ────────────────────────────────────────────────
+for_stmt: "for" NAME "in" expr "do" _NL block "end"
+
+// ── Function Definition ─────────────────────────────────────
+func_def: "define" NAME "(" param_list? ")" _NL block "end"
+param_list: param ("," param)*
+param: NAME (":" type_name)?
+
+// ── Return ──────────────────────────────────────────────────
+return_stmt: "return" expr?
+
+// ── Domain-Specific Statements ──────────────────────────────
+trigger_stmt: "trigger" expr                      // fire an event/signal
+link_stmt: "link" expr "to" expr                  // connect two nodes
+process_stmt: "process" expr ("with" expr)?       // run a processing pipeline
+access_stmt: "access" expr                        // request access to a resource
+sync_stmt: "sync" expr                            // synchronize a data stream
+evolve_stmt: "evolve" expr                        // evolve/upgrade a node
+emit_stmt: "emit" expr                            // emit data to a stream
+listen_stmt: "listen" expr "do" _NL block "end"   // listen for events
+
+// ── Block (group of statements) ─────────────────────────────
+block: (_NL* statement _NL*)*
+block_stmt: "begin" _NL block "end"
+
+// ── Guard Statement ─────────────────────────────────────────
+guard_stmt: "guard" expr
+          | "guard" expr ":" ESCAPED_STRING       -> guard_msg
+
+// ── Pipeline Definition ─────────────────────────────────────
+pipeline_def: "pipeline" NAME "(" param_list? ")" _NL block "end"
+
+// ── Expression Statement (function calls etc.) ──────────────
+expr_stmt: expr
+
+// ── Types ───────────────────────────────────────────────────
+type_name: "Thought" -> type_thought
+         | "Memory"  -> type_memory
+         | "Node"    -> type_node
+         | "Stream"  -> type_stream
+         | "Number"  -> type_number
+         | "Text"    -> type_text
+         | "Bool"    -> type_bool
+         | "List"    -> type_list
+         | NAME      -> type_custom
+
+// ── Expressions ─────────────────────────────────────────────
+?expr: pipe_chain
+?pipe_chain: or_expr ("|>" _NL? or_expr)*        -> pipe_chain
+
+?or_expr: and_expr ("or" and_expr)*              -> or_expr
+?and_expr: not_expr ("and" not_expr)*            -> and_expr
+?not_expr: "not" not_expr                        -> not_expr
+         | comparison
+
+?comparison: addition (comp_op addition)*        -> comparison
+comp_op: "is" -> comp_eq
+       | "is" "not" -> comp_neq
+       | ">" -> comp_gt
+       | "<" -> comp_lt
+       | ">=" -> comp_gte
+       | "<=" -> comp_lte
+
+?addition: multiplication (add_op multiplication)* -> addition
+add_op: "+" -> op_add
+      | "-" -> op_sub
+
+?multiplication: unary (mul_op unary)*           -> multiplication
+mul_op: "*" -> op_mul
+      | "/" -> op_div
+      | "%" -> op_mod
+
+?unary: "-" unary                                -> neg
+      | atom
+
+?atom: NUMBER                                    -> number
+     | ESCAPED_STRING                            -> string
+     | "true"                                    -> true_lit
+     | "false"                                   -> false_lit
+     | "null"                                    -> null_lit
+     | "[" _NL? expr_list? _NL? "]"              -> list_lit
+     | "{" _NL? pair_list? _NL? "}"              -> map_lit
+     | NAME "(" arg_list? ")"                    -> func_call
+     | atom "." NAME "(" arg_list? ")"           -> method_call
+     | atom "." NAME                             -> field_access
+     | atom "[" expr "]"                         -> index_access
+     | NAME                                      -> var_ref
+     | "(" expr ")"                              -> group
+
+expr_list: expr ("," _NL? expr)*
+pair_list: pair ("," _NL? pair)*
+pair: (NAME | ESCAPED_STRING) ":" expr
+arg_list: expr ("," expr)*
+
+// ── Terminals ───────────────────────────────────────────────
+// NAME must exclude all keywords to avoid ambiguity
+NAME: /(?!(?:if|then|elif|else|end|while|for|in|do|define|return|begin|let|be|set|to|show|and|or|not|is|true|false|null|trigger|link|process|access|sync|evolve|emit|listen|with|pipeline|guard)\b)[a-zA-Z_][a-zA-Z0-9_]*/
+
+%import common.NUMBER
+%import common.ESCAPED_STRING
+%import common.WS_INLINE
+
+_NL: /(\s*\n)+/
+COMMENT.2: /--[^\n]*/
+
+%ignore WS_INLINE
+%ignore COMMENT

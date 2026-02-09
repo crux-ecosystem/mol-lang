@@ -1,0 +1,74 @@
+-- ============================================================
+-- MOL TUTORIAL: Learn MOL Step by Step
+-- ============================================================
+-- Run this file: mol run tutorial/01_basics.mol
+-- ============================================================
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 1: show — Your First Command    │
+-- └─────────────────────────────────────────┘
+-- In MOL, we use `show` instead of print() or console.log()
+-- It's simpler. No parentheses needed for strings.
+
+show "Hello! I'm learning MOL."
+show "MOL is built for IntraMind by CruxLabx."
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 2: Variables with let...be      │
+-- └─────────────────────────────────────────┘
+-- Instead of: x = 10  or  let x = 10
+-- MOL says:   let x be 10
+-- It reads like English!
+
+let my_name be "Mounesh"
+let age be 22
+let pi be 3.14159
+
+show "Name: " + my_name
+show "Age: " + to_text(age)
+show "Pi: " + to_text(pi)
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 3: Type Safety (Safety Rails!)  │
+-- └─────────────────────────────────────────┘
+-- You can ENFORCE types. If someone passes wrong data = ERROR!
+-- This prevents bugs before they happen.
+
+let score : Number be 100
+let title : Text be "IntraMind"
+let active : Bool be true
+
+show "Score: " + to_text(score)
+show "Title: " + title
+show "Active: " + to_text(active)
+
+-- Try uncommenting this line — it will throw a TypeError!
+-- let bad : Number be "not a number"
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 4: Math & Expressions           │
+-- └─────────────────────────────────────────┘
+let a be 20
+let b be 7
+
+show "a + b = " + to_text(a + b)
+show "a - b = " + to_text(a - b)
+show "a * b = " + to_text(a * b)
+show "a / b = " + to_text(a / b)
+show "a % b = " + to_text(a % b)
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 5: Changing Variables (set...to)│
+-- └─────────────────────────────────────────┘
+-- Once declared with `let`, update with `set...to`
+
+let counter be 0
+show "Before: " + to_text(counter)
+
+set counter to counter + 1
+set counter to counter + 1
+set counter to counter + 1
+show "After 3 increments: " + to_text(counter)
+
+show ""
+show "--- Basics complete! Run tutorial/02_control_flow.mol next ---"

@@ -1,0 +1,322 @@
+"""
+MOL Parser — Lark-based Lexer/Parser + AST Transformer
+========================================================
+
+Reads MOL source code, tokenizes it via Lark, and transforms
+the parse tree into a clean AST using the nodes from ast_nodes.py.
+"""
+
+import os
+from lark import Lark, Transformer, v_args, Token
+from mol.ast_nodes import *
+
+_GRAMMAR_PATH = os.path.join(os.path.dirname(__file__), "grammar.lark")
+
+
+def _get_parser() -> Lark:
+    """Create and return the Lark parser for MOL."""
+    with open(_GRAMMAR_PATH, "r") as f:
+        grammar = f.read()
+    return Lark(
+        grammar,
+        parser="lalr",
+        propagate_positions=True,
+        maybe_placeholders=True,
+    )
+
+
+_parser = _get_parser()
+
+
+# ── Transformer: parse-tree → AST ───────────────────────────
+@v_args(inline=True)
+class MOLTransformer(Transformer):
+    """Transforms the Lark parse tree into our AST node objects."""
+
+    # ── Program ──────────────────────────────────────────────
+    def start(self, *stmts):
+        return Program(statements=[s for s in stmts if s is not None])
+
+    # ── Literals ─────────────────────────────────────────────
+    def number(self, tok):
+        v = float(tok)
+        if v == int(v):
+            v = int(v)
+        return NumberLiteral(value=v)
+
+    def string(self, tok):
+        return StringLiteral(value=str(tok)[1:-1])  # strip quotes
+
+    def true_lit(self):
+        return BoolLiteral(value=True)
+
+    def false_lit(self):
+        return BoolLiteral(value=False)
+
+    def null_lit(self):
+        return NullLiteral()
+
+    def list_lit(self, items=None):
+        if items is None:
+            return ListLiteral(elements=[])
+        return ListLiteral(elements=items)
+
+    def expr_list(self, *items):
+        return list(items)
+
+    def map_lit(self, pairs=None):
+        if pairs is None:
+            return MapLiteral(pairs=[])
+        return MapLiteral(pairs=pairs)
+
+    def pair_list(self, *pairs):
+        return list(pairs)
+
+    def pair(self, key, value):
+        if isinstance(key, Token):
+            k = str(key)
+            if k.startswith('"') or k.startswith("'"):
+                k = k[1:-1]
+        else:
+            k = str(key)
+        return (k, value)
+
+    # ── Variables ────────────────────────────────────────────
+    def var_ref(self, name):
+        return VarRef(name=str(name))
+
+    def declare_infer(self, name, value):
+        return DeclareVar(name=str(name), value=value)
+
+    def declare_typed(self, name, type_n, value):
+        return DeclareVar(name=str(name), type_name=type_n, value=value)
+
+    def assign_stmt(self, name, value):
+        return AssignVar(name=str(name), value=value)
+
+    # ── Types ────────────────────────────────────────────────
+    def type_thought(self):  return "Thought"
+    def type_memory(self):   return "Memory"
+    def type_node(self):     return "Node"
+    def type_stream(self):   return "Stream"
+    def type_number(self):   return "Number"
+    def type_text(self):     return "Text"
+    def type_bool(self):     return "Bool"
+    def type_list(self):     return "List"
+    def type_custom(self, n): return str(n)
+
+    # ── Expressions ──────────────────────────────────────────
+    def or_expr(self, *args):
+        args = list(args)
+        if len(args) == 1:
+            return args[0]
+        result = args[0]
+        for i in range(1, len(args)):
+            result = LogicalOp(op="or", left=result, right=args[i])
+        return result
+
+    def and_expr(self, *args):
+        args = list(args)
+        if len(args) == 1:
+            return args[0]
+        result = args[0]
+        for i in range(1, len(args)):
+            result = LogicalOp(op="and", left=result, right=args[i])
+        return result
+
+    def not_expr(self, operand):
+        return NotOp(operand=operand)
+
+    def comparison(self, *args):
+        args = list(args)
+        if len(args) == 1:
+            return args[0]
+        # args: [left, op, right, op, right, ...]
+        result = args[0]
+        i = 1
+        while i < len(args):
+            op = args[i]
+            right = args[i + 1]
+            result = Comparison(op=op, left=result, right=right)
+            i += 2
+        return result
+
+    def comp_eq(self):    return "=="
+    def comp_neq(self):   return "!="
+    def comp_gt(self):    return ">"
+    def comp_lt(self):    return "<"
+    def comp_gte(self):   return ">="
+    def comp_lte(self):   return "<="
+
+    def addition(self, *args):
+        args = list(args)
+        if len(args) == 1:
+            return args[0]
+        result = args[0]
+        i = 1
+        while i < len(args):
+            op = args[i]
+            right = args[i + 1]
+            result = BinaryOp(op=op, left=result, right=right)
+            i += 2
+        return result
+
+    def op_add(self):  return "+"
+    def op_sub(self):  return "-"
+
+    def multiplication(self, *args):
+        args = list(args)
+        if len(args) == 1:
+            return args[0]
+        result = args[0]
+        i = 1
+        while i < len(args):
+            op = args[i]
+            right = args[i + 1]
+            result = BinaryOp(op=op, left=result, right=right)
+            i += 2
+        return result
+
+    def op_mul(self):  return "*"
+    def op_div(self):  return "/"
+    def op_mod(self):  return "%"
+
+    def neg(self, operand):
+        return UnaryOp(op="-", operand=operand)
+
+    def group(self, expr):
+        return Group(expr=expr)
+
+    # ── Access / Calls ───────────────────────────────────────
+    def field_access(self, obj, name):
+        return FieldAccess(obj=obj, field_name=str(name))
+
+    def index_access(self, obj, idx):
+        return IndexAccess(obj=obj, index=idx)
+
+    def method_call(self, obj, name, args=None):
+        return MethodCall(obj=obj, method=str(name), args=args or [])
+
+    def func_call(self, name, args=None):
+        return FuncCall(name=str(name), args=args or [])
+
+    def arg_list(self, *args):
+        return list(args)
+
+    # ── Functions ────────────────────────────────────────────
+    def func_def(self, name, params, body):
+        return FuncDef(
+            name=str(name),
+            params=params if params else [],
+            body=body if body else [],
+        )
+
+    def param_list(self, *params):
+        return list(params)
+
+    def param(self, name, type_n=None):
+        return (str(name), type_n)
+
+    def return_stmt(self, value=None):
+        return ReturnStmt(value=value)
+
+    # ── Control Flow ─────────────────────────────────────────
+    def if_stmt(self, cond, body, *rest):
+        elifs = []
+        else_body = None
+        for item in rest:
+            if item is None:
+                continue
+            if isinstance(item, tuple) and item[0] == "__elif__":
+                elifs.append((item[1], item[2]))
+            elif isinstance(item, tuple) and item[0] == "__else__":
+                else_body = item[1]
+        return IfStmt(
+            condition=cond,
+            body=body,
+            elif_clauses=elifs,
+            else_body=else_body,
+        )
+
+    def elif_clause(self, cond, body):
+        return ("__elif__", cond, body)
+
+    def else_clause(self, body):
+        return ("__else__", body)
+
+    def while_stmt(self, cond, body):
+        return WhileStmt(condition=cond, body=body)
+
+    def for_stmt(self, name, iterable, body):
+        return ForStmt(var_name=str(name), iterable=iterable, body=body)
+
+    # ── Block ────────────────────────────────────────────────
+    def block(self, *stmts):
+        return [s for s in stmts if s is not None]
+
+    def block_stmt(self, body):
+        return BlockStmt(body=body)
+
+    # ── Show ─────────────────────────────────────────────────
+    def show_stmt(self, value):
+        return ShowStmt(value=value)
+
+    # ── Domain-Specific ──────────────────────────────────────
+    def trigger_stmt(self, event):
+        return TriggerStmt(event=event)
+
+    def link_stmt(self, source, target):
+        return LinkStmt(source=source, target=target)
+
+    def process_stmt(self, target, with_expr=None):
+        return ProcessStmt(target=target, with_expr=with_expr)
+
+    def access_stmt(self, resource):
+        return AccessStmt(resource=resource)
+
+    def sync_stmt(self, stream):
+        return SyncStmt(stream=stream)
+
+    def evolve_stmt(self, node):
+        return EvolveStmt(node=node)
+
+    def emit_stmt(self, data):
+        return EmitStmt(data=data)
+
+    def listen_stmt(self, event, body):
+        return ListenStmt(event=event, body=body)
+
+    # ── Expression Statement ─────────────────────────────────
+    def expr_stmt(self, expr):
+        return ExprStmt(expr=expr)
+
+    # ── Pipe Chain ───────────────────────────────────────────
+    def pipe_chain(self, *args):
+        # Filter out any Token objects (anonymous terminals like "|>")
+        stages = [a for a in args if not isinstance(a, Token)]
+        if len(stages) == 1:
+            return stages[0]
+        return PipeChain(stages=stages)
+
+    # ── Guard ────────────────────────────────────────────────
+    def guard_stmt(self, cond):
+        return GuardStmt(condition=cond)
+
+    def guard_msg(self, cond, msg):
+        return GuardStmt(condition=cond, message=str(msg)[1:-1])
+
+    # ── Pipeline Definition ──────────────────────────────────
+    def pipeline_def(self, name, params, body):
+        return PipelineDef(
+            name=str(name),
+            params=params if params else [],
+            body=body if body else [],
+        )
+
+
+# ── Public API ───────────────────────────────────────────────
+def parse(source: str) -> Program:
+    """Parse MOL source code and return the AST."""
+    tree = _parser.parse(source + "\n")
+    transformer = MOLTransformer()
+    return transformer.transform(tree)
