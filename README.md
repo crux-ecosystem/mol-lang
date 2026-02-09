@@ -220,5 +220,5 @@ MOL is the language layer of IntraMind, a cognitive computing platform that mode
   <a href="https://github.com/crux-ecosystem/MOL">Source</a> •
   <a href="https://github.com/crux-ecosystem/MOL/blob/main/LANGUAGE_SPEC.md">Spec</a> •
   <a href="https://github.com/crux-ecosystem/MOL/blob/main/CHANGELOG.md">Changelog</a> •
-  <a href="https://medium.com/@cruxlabx/introducing-mol">Blog</a>
+  <a href="[https://medium.com/@cruxlabx/introducing-mol](https://medium.com/@kaliyugiheart/introducing-mol-we-built-a-programming-language-where-pipelines-trace-themselves-f9b2a6526c49)">Blog</a>
 </p>
