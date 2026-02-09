@@ -182,33 +182,6 @@ guard len(data) > 0 : "Empty dataset"
 ╚══════════════════════════════════════════════════════╝
 ```
 
----
-
-## Get Started
-
-```bash
-# Clone and install
-git clone https://github.com/crux-ecosystem/MOL.git
-cd MOL
-python -m venv .venv && source .venv/bin/activate
-pip install -e .
-
-# Run your first program
-echo 'show "Hello from MOL!"' > hello.mol
-mol run hello.mol
-
-# Run with auto-tracing
-mol run examples/08_rag_pipeline.mol
-
-# Run without traces
-mol run examples/01_hello.mol --no-trace
-
-# REPL
-mol repl
-
-# Transpile to Python
-mol transpile my_program.mol --target python
-```
 
 ---
 
