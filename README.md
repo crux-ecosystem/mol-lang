@@ -233,7 +233,7 @@ mol transpile my_program.mol --target python
 
 ## Built By
 
-**[CruxLabx](https://github.com/crux-ecosystem)** — Building the cognitive infrastructure for IntraMind.
+**[CruxLabx](https://github.com/crux-ecosystem)** — Building the cognitive infrastructure.
 
 MOL is the language layer of IntraMind, a cognitive computing platform that models thinking, memory, and reasoning as first-class computational primitives.
 
