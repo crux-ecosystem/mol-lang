@@ -9,10 +9,11 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.2.0-blue?style=flat-square" alt="version">
+  <img src="https://img.shields.io/badge/version-0.3.0-blue?style=flat-square" alt="version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="license">
   <img src="https://img.shields.io/badge/python-3.10%2B-yellow?style=flat-square" alt="python">
-  <img src="https://img.shields.io/badge/tests-43%20passing-brightgreen?style=flat-square" alt="tests">
+  <img src="https://img.shields.io/badge/tests-68%20passing-brightgreen?style=flat-square" alt="tests">
+  <img src="https://img.shields.io/badge/stdlib-90%2B%20functions-orange?style=flat-square" alt="stdlib">
   <img src="https://img.shields.io/badge/pipe_operator-%7C%3E-purple?style=flat-square" alt="pipe">
 </p>
 
@@ -160,22 +161,22 @@ guard len(data) > 0 : "Empty dataset"
 
 ```
 ╔══════════════════════════════════════════════════════╗
-║  MOL v0.2.0                                         ║
+║  MOL v0.3.0                                         ║
 ║                                                      ║
 ║  Keywords:    let, be, show, if/elif/else/end,       ║
-║              for/in/do, while, fn/return,            ║
-║              pipeline, guard                         ║
+║              for/in/do, while, define/return,        ║
+║              pipeline, guard, set/to                 ║
 ║                                                      ║
 ║  Operators:   |>  (pipe with auto-trace)             ║
-║              +  -  *  /  %  ^                        ║
-║              ==  !=  >  <  >=  <=  is                ║
+║              +  -  *  /  %                           ║
+║              is  is not  >  <  >=  <=                ║
 ║              and  or  not                            ║
 ║                                                      ║
-║  Types:      Text, Number, Boolean, List, Map        ║
-║              Thought, Memory, Node, Signal           ║
+║  Types:      Text, Number, Bool, List, Map           ║
+║              Thought, Memory, Node, Stream           ║
 ║              Document, Chunk, Embedding, VectorStore ║
 ║                                                      ║
-║  Stdlib:     45+ built-in functions                  ║
+║  Stdlib:     90+ built-in functions                  ║
 ║  Transpile:  Python & JavaScript                     ║
 ║  Extension:  VS Code syntax highlighting             ║
 ╚══════════════════════════════════════════════════════╝
@@ -189,17 +190,20 @@ guard len(data) > 0 : "Empty dataset"
 | Component | Status |
 |:---|:---:|
 | LALR Parser (Lark) | ✅ Stable |
-| Interpreter | ✅ 43 tests passing |
+| Interpreter | ✅ 68 tests passing |
 | Pipe `\|>` + Auto-Trace | ✅ Production ready |
-| Domain Types (12 types) | ✅ Complete |
-| Stdlib (45+ functions) | ✅ Complete |
+| Domain Types (8 types) | ✅ Complete |
+| Stdlib (90+ functions) | ✅ Complete |
+| Functional (map/filter/reduce) | ✅ v0.3.0 |
+| Math & Statistics | ✅ v0.3.0 |
+| Hashing & Encoding | ✅ v0.3.0 |
 | Guard Assertions | ✅ Complete |
 | Python Transpiler | ✅ Complete |
 | JS Transpiler | ✅ Complete |
 | VS Code Extension | ✅ Syntax + Snippets |
-| Package Manager | 🔜 v0.3.0 |
-| LSP Server | 🔜 v0.4.0 |
-| WASM Runtime | 🔜 v0.5.0 |
+| Sovereign AI / Agents | 🔜 v0.4.0 |
+| Async Pipelines | 🔜 v0.5.0 |
+| Package Manager | 🔜 v1.0.0 |
 
 ---
 
