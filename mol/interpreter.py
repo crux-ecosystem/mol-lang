@@ -73,6 +73,13 @@ class MOLFunction:
         self.params = params      # list of (name, type_or_None)
         self.body = body          # list of statements
         self.closure_env = closure_env
+        self._interpreter = None  # set by interpreter after creation
+
+    def __call__(self, *args):
+        """Allow MOLFunction to be used as a Python callable."""
+        if self._interpreter is None:
+            raise MOLRuntimeError(f"Function '{self.name}' has no interpreter bound")
+        return self._interpreter._invoke_callable(self, list(args), self.name)
 
 
 class MOLPipeline:
@@ -83,6 +90,12 @@ class MOLPipeline:
         self.params = params
         self.body = body
         self.closure_env = closure_env
+        self._interpreter = None
+
+    def __call__(self, *args):
+        if self._interpreter is None:
+            raise MOLRuntimeError(f"Pipeline '{self.name}' has no interpreter bound")
+        return self._interpreter._invoke_callable(self, list(args), self.name)
 
 
 class Interpreter:
@@ -184,6 +197,7 @@ class Interpreter:
     # ── Functions ────────────────────────────────────────────
     def _exec_FuncDef(self, node: FuncDef, env):
         func = MOLFunction(node.name, node.params, node.body, env)
+        func._interpreter = self
         env.set(node.name, func)
         return func
 
@@ -301,6 +315,7 @@ class Interpreter:
     # ── Pipeline Definition ──────────────────────────────────
     def _exec_PipelineDef(self, node: PipelineDef, env):
         pipe = MOLPipeline(node.name, node.params, node.body, env)
+        pipe._interpreter = self
         env.set(node.name, pipe)
         return pipe
 

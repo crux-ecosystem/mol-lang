@@ -39,3 +39,6 @@ htmlcov/
 *.zip
 addition.mol
 my_first_program.mol
+
+# MkDocs
+site/

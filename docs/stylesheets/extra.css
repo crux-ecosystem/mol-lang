@@ -1,0 +1,94 @@
+:root {
+  --md-primary-fg-color: #7c3aed;
+  --md-accent-fg-color: #e94560;
+}
+
+/* Hero section */
+.md-typeset .hero {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.md-typeset .hero h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #7c3aed, #e94560);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.md-typeset .hero .tagline {
+  font-size: 1.3rem;
+  color: var(--md-default-fg-color--light);
+  margin-bottom: 2rem;
+}
+
+/* Feature grid */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.feature-card {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card h3 {
+  margin-top: 0;
+  color: var(--md-primary-fg-color);
+}
+
+/* Trace output styling */
+.trace-output {
+  background: #1a1a2e;
+  border-radius: 8px;
+  padding: 1rem;
+  color: #a0a0b0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+}
+
+.trace-output .trace-header {
+  color: #7c3aed;
+}
+
+.trace-output .trace-timing {
+  color: #00d2ff;
+}
+
+.trace-output .trace-type {
+  color: #e94560;
+}
+
+/* Badge styling */
+.badge-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+/* Comparison table */
+.md-typeset table:not([class]) th {
+  background: var(--md-primary-fg-color);
+  color: white;
+}
+
+/* Code annotation popup */
+.md-typeset .md-annotation__index {
+  background: var(--md-accent-fg-color);
+}

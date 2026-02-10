@@ -6,6 +6,31 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [0.3.0] — 2026-02-10
+
+### Added — Universal Algorithms (42 new functions)
+
+- **Functional programming:** `map`, `filter`, `reduce`, `find`, `every`, `some`, `group_by`
+- **List operations:** `flatten`, `unique`, `zip`, `enumerate`, `count`, `find_index`, `take`, `drop`, `chunk_list`
+- **Math:** `floor`, `ceil`, `log`, `sin`, `cos`, `tan`, `pow`, `clamp`, `lerp`, `pi`, `e`
+- **Statistics:** `mean`, `median`, `stdev`, `variance`, `percentile`
+- **String:** `starts_with`, `ends_with`, `pad_left`, `pad_right`, `repeat`, `char_at`, `index_of`, `format`
+- **Hashing:** `hash` (SHA-256/MD5/SHA-1/SHA-512), `uuid`, `base64_encode`, `base64_decode`
+- **Sorting:** `sort_by`, `sort_desc`, `binary_search`
+- **Random:** `random`, `random_int`, `shuffle`, `sample`, `choice`
+- **Maps:** `merge`, `pick`, `omit`
+- **Type checks:** `is_null`, `is_number`, `is_text`, `is_list`, `is_map`
+- **Output:** `print`
+
+### Changed
+
+- User-defined functions (`MOLFunction`) are now first-class Python callables
+- Total stdlib: 90+ functions
+- Tests: 68 passing (25 new)
+- MkDocs Material documentation site with 20+ pages
+
+---
+
 ## [0.2.0] — 2026-02-09
 
 ### Added — The Pipeline Release

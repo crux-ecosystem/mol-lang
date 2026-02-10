@@ -1,6 +1,6 @@
 [project]
 name = "mol-lang"
-version = "0.2.0"
+version = "0.3.0"
 description = "MOL — The IntraMind Programming Language"
 requires-python = ">=3.10"
 dependencies = [
