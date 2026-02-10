@@ -15,6 +15,8 @@
   <img src="https://img.shields.io/badge/tests-68%20passing-brightgreen?style=flat-square" alt="tests">
   <img src="https://img.shields.io/badge/stdlib-90%2B%20functions-orange?style=flat-square" alt="stdlib">
   <img src="https://img.shields.io/badge/pipe_operator-%7C%3E-purple?style=flat-square" alt="pipe">
+  <img src="https://img.shields.io/badge/playground-online-ff69b4?style=flat-square" alt="playground">
+  <img src="https://img.shields.io/badge/binary-standalone-red?style=flat-square" alt="binary">
 </p>
 
 <p align="center">
@@ -22,6 +24,8 @@
   <a href="#the-solution">Solution</a> •
   <a href="#see-it-in-action">Demo</a> •
   <a href="#language-at-a-glance">Language</a> •
+  <a href="#try-it-online">Playground</a> •
+  <a href="#try-it-online">Playground</a> •
   <a href="https://medium.com/@cruxlabx/introducing-mol">Blog Post</a>
 </p>
 
@@ -185,6 +189,98 @@ guard len(data) > 0 : "Empty dataset"
 
 ---
 
+## Try It Online
+
+MOL has a **web playground** — write and run MOL code directly in your browser:
+
+```bash
+# Run locally
+pip install mol-lang
+mol run your_program.mol
+
+# Or use the web playground
+git clone https://github.com/crux-ecosystem/MOL.git
+cd MOL && pip install -e ".[dev]" fastapi uvicorn
+python playground/server.py
+# Open http://localhost:8000
+```
+
+The playground features:
+- **8 built-in examples** (hello world, pipelines, RAG, algorithms, domain types)
+- **Auto-tracing output** — see pipeline execution in real-time
+- **Shareable links** — share your MOL code with anyone
+- **Ctrl+Enter** to run, Tab for indentation
+
+---
+
+## Standalone Binary
+
+Get MOL as a **single executable** — no Python required:
+
+```bash
+# Build the standalone binary (8.7 MB)
+python build_dist.py pyinstaller
+
+# Run anywhere
+./dist/mol run program.mol
+./dist/mol version
+./dist/mol repl
+```
+
+Also available as a pip-installable wheel:
+```bash
+pip install mol-lang
+mol run program.mol
+```
+
+---
+
+## Try It Online
+
+MOL has a **web playground** — write and run MOL code directly in your browser:
+
+```bash
+# Run locally
+pip install mol-lang
+mol run your_program.mol
+
+# Or use the web playground
+git clone https://github.com/crux-ecosystem/MOL.git
+cd MOL && pip install -e ".[dev]" fastapi uvicorn
+python playground/server.py
+# Open http://localhost:8000
+```
+
+The playground features:
+- **8 built-in examples** (hello world, pipelines, RAG, algorithms, domain types)
+- **Auto-tracing output** — see pipeline execution in real-time
+- **Shareable links** — share your MOL code with anyone
+- **Ctrl+Enter** to run, Tab for indentation
+
+---
+
+## Standalone Binary
+
+Get MOL as a **single executable** — no Python required:
+
+```bash
+# Build the standalone binary (8.7 MB)
+python build_dist.py pyinstaller
+
+# Run anywhere
+./dist/mol run program.mol
+./dist/mol version
+./dist/mol repl
+```
+
+Also available as a pip-installable wheel:
+```bash
+pip install mol-lang
+mol run program.mol
+```
+
+---
+
 ## Project Status
 
 | Component | Status |
@@ -201,7 +297,12 @@ guard len(data) > 0 : "Empty dataset"
 | Python Transpiler | ✅ Complete |
 | JS Transpiler | ✅ Complete |
 | VS Code Extension | ✅ Syntax + Snippets |
-| Sovereign AI / Agents | 🔜 v0.4.0 |
+| Online Playground | ✅ FastAPI + 8 examples |
+| Standalone Binary | ✅ 8.7 MB single file |
+| Online Playground | ✅ FastAPI + 8 examples |
+| Standalone Binary | ✅ 8.7 MB single file |
+| PyPI Package | 🔜 v0.4.0 |
+| Cloud Playground | 🔜 v0.4.0 |
 | Async Pipelines | 🔜 v0.5.0 |
 | Package Manager | 🔜 v1.0.0 |
 
