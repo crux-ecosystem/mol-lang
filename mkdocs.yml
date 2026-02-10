@@ -1,0 +1,122 @@
+site_name: MOL Language
+site_description: The cognitive programming language with auto-tracing pipelines
+site_author: CruxLabx / IntraMind
+site_url: https://crux-ecosystem.github.io/MOL
+
+repo_name: crux-ecosystem/MOL
+repo_url: https://github.com/crux-ecosystem/MOL
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: deep purple
+      accent: pink
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: deep purple
+      accent: pink
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
+
+plugins:
+  - search
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - admonition
+  - attr_list
+  - md_in_html
+  - def_list
+  - footnotes
+  - tables
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/crux-ecosystem
+  generator: false
+  version:
+    provider: mike
+
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - Your First Program: getting-started/first-program.md
+  - Language Guide:
+    - Overview: guide/overview.md
+    - Variables & Types: guide/variables.md
+    - Control Flow: guide/control-flow.md
+    - Functions: guide/functions.md
+    - Pipe Operator: guide/pipes.md
+    - Domain Types: guide/domain-types.md
+    - Safety & Guards: guide/safety.md
+    - Algorithms: guide/algorithms.md
+  - API Reference:
+    - Standard Library: reference/stdlib.md
+    - Domain Types: reference/types.md
+    - CLI: reference/cli.md
+    - Grammar: reference/grammar.md
+  - Tutorials:
+    - RAG Pipeline: tutorials/rag-pipeline.md
+    - Data Processing: tutorials/data-processing.md
+    - Neural Simulation: tutorials/neural-sim.md
+  - Ecosystem:
+    - VS Code Extension: ecosystem/vscode.md
+    - Transpiler: ecosystem/transpiler.md
+    - Roadmap: ecosystem/roadmap.md
+  - Changelog: changelog.md
+  - Contributing: contributing.md

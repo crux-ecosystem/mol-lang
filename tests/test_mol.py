@@ -470,6 +470,257 @@ show "pipeline works"
     assert "pipeline works" in interp.output
 
 
+# ── v0.3.0: Algorithm & Functional Programming Tests ─────────
+
+def test_flatten():
+    interp = run("""
+let nested be [[1, 2], [3, [4, 5]]]
+show len(flatten(nested))
+""")
+    assert interp.output == ["5"]
+
+
+def test_unique():
+    interp = run("""
+let dupes be [1, 2, 2, 3, 1, 4]
+show len(unique(dupes))
+""")
+    assert interp.output == ["4"]
+
+
+def test_zip_lists():
+    interp = run("""
+let pairs be zip([1, 2, 3], ["a", "b", "c"])
+show len(pairs)
+show pairs[0][1]
+""")
+    assert interp.output == ["3", "a"]
+
+
+def test_enumerate_list():
+    interp = run("""
+let items be enumerate(["x", "y", "z"])
+show items[0][0]
+show items[2][1]
+""")
+    assert interp.output == ["0", "z"]
+
+
+def test_count():
+    interp = run("""
+show count([1, 2, 1, 3, 1], 1)
+""")
+    assert interp.output == ["3"]
+
+
+def test_find_index():
+    interp = run("""
+show find_index([10, 20, 30, 40], 30)
+""")
+    assert interp.output == ["2"]
+
+
+def test_take_drop():
+    interp = run("""
+show len(take([1, 2, 3, 4, 5], 3))
+show len(drop([1, 2, 3, 4, 5], 2))
+""")
+    assert interp.output == ["3", "3"]
+
+
+def test_chunk_list():
+    interp = run("""
+let chunks be chunk_list([1, 2, 3, 4, 5], 2)
+show len(chunks)
+""")
+    assert interp.output == ["3"]
+
+
+def test_math_functions():
+    interp = run("""
+show floor(3.7)
+show ceil(3.2)
+show pow(2, 10)
+show clamp(15, 0, 10)
+""")
+    assert interp.output[0] == "3"
+    assert interp.output[1] == "4"
+    assert float(interp.output[2]) == 1024.0
+    assert float(interp.output[3]) == 10.0
+
+
+def test_statistics():
+    interp = run("""
+show mean([1, 2, 3, 4, 5])
+show median([1, 3, 5, 7])
+""")
+    assert float(interp.output[0]) == 3.0
+    assert float(interp.output[1]) == 4.0
+
+
+def test_string_algorithms():
+    interp = run("""
+show starts_with("hello world", "hello")
+show ends_with("hello world", "world")
+show pad_left("42", 5, "0")
+show repeat("ha", 3)
+show char_at("hello", 1)
+show index_of("hello world", "world")
+""")
+    assert interp.output == ["true", "true", "00042", "hahaha", "e", "6"]
+
+
+def test_hash_function():
+    interp = run("""
+let h be hash("hello")
+show len(h)
+""")
+    assert interp.output == ["64"]  # SHA-256 hex = 64 chars
+
+
+def test_base64():
+    interp = run("""
+let encoded be base64_encode("hello")
+let decoded be base64_decode(encoded)
+show decoded
+""")
+    assert interp.output == ["hello"]
+
+
+def test_sort_desc():
+    interp = run("""
+let sorted be sort_desc([3, 1, 4, 1, 5])
+show sorted[0]
+show sorted[1]
+""")
+    assert interp.output == ["5", "4"]
+
+
+def test_binary_search():
+    interp = run("""
+show binary_search([1, 2, 3, 4, 5], 3)
+show binary_search([1, 2, 3, 4, 5], 99)
+""")
+    assert interp.output == ["2", "-1"]
+
+
+def test_random_int():
+    interp = run("""
+let r be random_int(1, 100)
+show r >= 1 and r <= 100
+""")
+    assert interp.output == ["true"]
+
+
+def test_merge_maps():
+    interp = run("""
+let a be {"name": "MOL"}
+let b be {"version": 3}
+let c be merge(a, b)
+show c.name
+show c.version
+""")
+    assert interp.output == ["MOL", "3"]
+
+
+def test_pick_omit():
+    interp = run("""
+let user be {"name": "Mounesh", "age": 25, "role": "builder"}
+let picked be pick(user, "name", "role")
+show len(keys(picked))
+let omitted be omit(user, "age")
+show len(keys(omitted))
+""")
+    assert interp.output == ["2", "2"]
+
+
+def test_type_checks():
+    interp = run("""
+show is_number(42)
+show is_text("hello")
+show is_list([1, 2])
+show is_map({"a": 1})
+show is_null(null)
+""")
+    assert interp.output == ["true", "true", "true", "true", "true"]
+
+
+def test_lerp():
+    interp = run("""
+show lerp(0, 100, 0.5)
+show lerp(0, 100, 0)
+show lerp(0, 100, 1)
+""")
+    assert float(interp.output[0]) == 50.0
+    assert float(interp.output[1]) == 0.0
+    assert float(interp.output[2]) == 100.0
+
+
+def test_format_string():
+    interp = run("""
+show format("Hello, {}! You are {} years old.", "MOL", "2")
+""")
+    assert interp.output == ["Hello, MOL! You are 2 years old."]
+
+
+def test_uuid():
+    interp = run("""
+let id be uuid()
+show len(id)
+""")
+    assert interp.output == ["36"]  # UUID format: 8-4-4-4-12 = 36 chars
+
+
+def test_map_filter_reduce():
+    interp = run("""
+define double(x)
+  return x * 2
+end
+
+define is_big(x)
+  return x > 5
+end
+
+define add(a, b)
+  return a + b
+end
+
+let nums be [1, 2, 3, 4, 5]
+let doubled be map(nums, double)
+show doubled[0]
+show doubled[4]
+
+let big be filter(doubled, is_big)
+show len(big)
+
+let total be reduce(nums, add, 0)
+show total
+""")
+    assert interp.output == ["2", "10", "3", "15"]
+
+
+def test_every_some():
+    interp = run("""
+define is_positive(x)
+  return x > 0
+end
+
+show every([1, 2, 3], is_positive)
+show every([-1, 2, 3], is_positive)
+show some([-1, 2, -3], is_positive)
+show some([-1, -2, -3], is_positive)
+""")
+    assert interp.output == ["true", "false", "true", "false"]
+
+
+def test_pipes_with_algorithms():
+    interp = run("""
+let result be unique([3, 1, 4, 1, 5]) |> sort |> to_text
+show result
+""")
+    assert "3" in interp.output[0]
+
+
 if __name__ == "__main__":
     tests = [v for k, v in globals().items() if k.startswith("test_")]
     passed = 0

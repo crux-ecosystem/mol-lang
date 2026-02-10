@@ -105,7 +105,7 @@
       "patterns": [
         {
           "name": "support.function.builtin.mol",
-          "match": "\\b(len|type_of|to_text|to_number|range|abs|round|sqrt|max|min|sum|sort|reverse|push|pop|keys|values|contains|join|split|upper|lower|trim|replace|slice|clock|wait|to_json|from_json|inspect|load_text|chunk|embed|store|retrieve|cosine_sim|think|recall|classify|summarize|display|tap|assert_min|assert_not_null)\\b"
+          "match": "\\b(len|type_of|to_text|to_number|range|abs|round|sqrt|max|min|sum|sort|reverse|push|pop|keys|values|contains|join|split|upper|lower|trim|replace|slice|clock|wait|to_json|from_json|inspect|load_text|chunk|embed|store|retrieve|cosine_sim|think|recall|classify|summarize|display|tap|assert_min|assert_not_null|map|filter|reduce|flatten|unique|zip|enumerate|count|find|find_index|take|drop|group_by|chunk_list|every|some|floor|ceil|log|sin|cos|tan|pi|e|pow|clamp|lerp|mean|median|stdev|variance|percentile|starts_with|ends_with|pad_left|pad_right|repeat|char_at|index_of|format|hash|uuid|base64_encode|base64_decode|sort_by|sort_desc|binary_search|random|random_int|shuffle|sample|choice|print|merge|pick|omit|is_null|is_number|is_text|is_list|is_map)\\b"
         }
       ]
     },
