@@ -1,10 +1,12 @@
 # MOL — The IntraMind Programming Language
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.2.0-blue" alt="version">
+  <img src="https://img.shields.io/badge/version-0.3.0-blue" alt="version">
   <img src="https://img.shields.io/badge/license-Proprietary-red" alt="license">
   <img src="https://img.shields.io/badge/python-3.10%2B-green" alt="python">
-  <img src="https://img.shields.io/badge/tests-43%20passed-brightgreen" alt="tests">
+  <img src="https://img.shields.io/badge/tests-68%20passed-brightgreen" alt="tests">
+  <img src="https://img.shields.io/badge/stdlib-90%2B%20functions-orange" alt="stdlib">
+  <img src="https://img.shields.io/badge/docs-GitHub%20Pages-blueviolet" alt="docs">
   <img src="https://img.shields.io/badge/built%20for-IntraMind-purple" alt="intramind">
 </p>
 
@@ -292,13 +294,20 @@ let x : Number be "hello"   -- 🚫 MOLTypeError at declaration
 
 ---
 
-## Standard Library (45+ functions)
+## Standard Library (90+ functions)
 
 | Category | Functions |
 |---|---|
-| **General** | `len`, `type_of`, `to_text`, `to_number`, `range`, `abs`, `round`, `sqrt`, `max`, `min`, `sum` |
-| **Collections** | `sort`, `reverse`, `push`, `pop`, `keys`, `values`, `contains`, `join`, `slice` |
-| **Strings** | `split`, `upper`, `lower`, `trim`, `replace` |
+| **General** | `len`, `type_of`, `to_text`, `to_number`, `range`, `abs`, `round`, `sqrt`, `max`, `min`, `sum`, `print` |
+| **Functional** | `map`, `filter`, `reduce`, `flatten`, `unique`, `zip`, `enumerate`, `count`, `find`, `find_index`, `take`, `drop`, `group_by`, `chunk_list`, `every`, `some` |
+| **Math** | `floor`, `ceil`, `log`, `sin`, `cos`, `tan`, `pi`, `e`, `pow`, `clamp`, `lerp` |
+| **Statistics** | `mean`, `median`, `stdev`, `variance`, `percentile` |
+| **Collections** | `sort`, `sort_by`, `sort_desc`, `binary_search`, `reverse`, `push`, `pop`, `keys`, `values`, `contains`, `join`, `slice` |
+| **Strings** | `split`, `upper`, `lower`, `trim`, `replace`, `starts_with`, `ends_with`, `pad_left`, `pad_right`, `repeat`, `char_at`, `index_of`, `format` |
+| **Hashing & Encoding** | `hash`, `uuid`, `base64_encode`, `base64_decode` |
+| **Random** | `random`, `random_int`, `shuffle`, `sample`, `choice` |
+| **Map Utilities** | `merge`, `pick`, `omit` |
+| **Type Checks** | `is_null`, `is_number`, `is_text`, `is_list`, `is_map` |
 | **Serialization** | `to_json`, `from_json`, `inspect` |
 | **Time** | `clock`, `wait` |
 | **RAG Pipeline** | `load_text`, `chunk`, `embed`, `store`, `retrieve`, `cosine_sim` |
@@ -357,7 +366,7 @@ Included in `mol-vscode/`. Features:
 ### Install
 
 ```bash
-cp -r mol-vscode/ ~/.vscode/extensions/mol-language-0.2.0
+cp -r mol-vscode/ ~/.vscode/extensions/mol-language-0.3.0
 # Restart VS Code
 ```
 
@@ -368,19 +377,21 @@ cp -r mol-vscode/ ~/.vscode/extensions/mol-language-0.2.0
 ```
 MOL/
 ├── mol/                        # Language implementation
-│   ├── __init__.py             # Package metadata (v0.2.0)
+│   ├── __init__.py             # Package metadata (v0.3.0)
 │   ├── grammar.lark            # Lark EBNF grammar specification
 │   ├── parser.py               # LALR parser + AST transformer
 │   ├── ast_nodes.py            # 35+ AST node dataclasses
 │   ├── interpreter.py          # Visitor-pattern interpreter with auto-tracing
 │   ├── types.py                # Domain types (8 types)
-│   ├── stdlib.py               # 45+ built-in functions
+│   ├── stdlib.py               # 90+ built-in functions
 │   ├── transpiler.py           # Python & JavaScript transpiler
 │   └── cli.py                  # CLI interface
+├── docs/                       # MkDocs Material documentation source
 ├── examples/                   # 8 example programs
 ├── tutorial/                   # 6 tutorial files + cheatsheet
-├── tests/test_mol.py           # 43 tests (all passing)
+├── tests/test_mol.py           # 68 tests (all passing)
 ├── mol-vscode/                 # VS Code extension
+├── mkdocs.yml                  # MkDocs configuration
 ├── pyproject.toml              # Python project config
 ├── LANGUAGE_SPEC.md            # Formal language specification
 ├── CHANGELOG.md                # Version history
@@ -416,7 +427,7 @@ source .venv/bin/activate
 python tests/test_mol.py
 ```
 
-43 tests covering: variables, arithmetic, control flow, functions, recursion, lists, maps, strings, domain types, typed declarations, access control, events, pipes, guards, pipelines, chunking, embedding, vector search, and full RAG integration.
+68 tests covering: variables, arithmetic, control flow, functions, recursion, lists, maps, strings, domain types, typed declarations, access control, events, pipes, guards, pipelines, chunking, embedding, vector search, full RAG integration, functional programming (map/filter/reduce), math functions, statistics, string algorithms, hashing, sorting, and type checks.
 
 ---
 
@@ -424,10 +435,14 @@ python tests/test_mol.py
 
 See [ROADMAP.md](ROADMAP.md) for the full plan:
 
-- **v0.2.0** (current) — Pipeline operator, RAG types, auto-tracing
-- **v0.3.0** — Sovereign AI, agent blocks, local model registry
-- **v0.4.0** — Production runtime, async pipelines, HTTP server
+- **v0.3.0** (current) — 42 universal algorithms, 90+ stdlib functions, MkDocs documentation site
+- **v0.4.0** — Sovereign AI, agent blocks, local model registry
+- **v0.5.0** — Production runtime, async pipelines, HTTP server
 - **v1.0.0** — Full ecosystem, package manager, cloud deployment
+
+### 📖 Documentation
+
+Full documentation available at: **[https://crux-ecosystem.github.io/MOL/](https://crux-ecosystem.github.io/MOL/)**
 
 ---
 
