@@ -248,6 +248,9 @@ def main():
     # mol version
     sub.add_parser("version", help="Show version")
 
+    # mol lsp
+    sub.add_parser("lsp", help="Start Language Server (stdio)")
+
     args = parser.parse_args()
 
     if args.command == "run":
@@ -260,6 +263,9 @@ def main():
         repl()
     elif args.command == "version":
         print(f"MOL v{__version__}")
+    elif args.command == "lsp":
+        from mol.lsp_server import main as lsp_main
+        lsp_main()
     else:
         print(BANNER)
         parser.print_help()

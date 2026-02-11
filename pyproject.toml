@@ -38,6 +38,10 @@ content-type = "text/markdown"
 mol = "mol.cli:main"
 
 [project.optional-dependencies]
+lsp = [
+    "pygls>=2.0",
+    "lsprotocol>=2024.0.0",
+]
 dev = [
     "pytest>=7.0",
 ]
