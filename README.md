@@ -25,8 +25,8 @@
   <a href="#the-solution">Solution</a> •
   <a href="#see-it-in-action">Demo</a> •
   <a href="#language-at-a-glance">Language</a> •
-  <a href="#try-it-online">Playground</a> •
-  <a href="https://medium.com/@cruxlabx/introducing-mol">Blog Post</a>
+  <a href="http://135.235.138.217:8000/">Playground</a> •
+  <a href="[https://medium.com/@kaliyugiheart/introducing-mol-we-built-a-programming-language-where-pipelines-trace-themselves-f9b2a6526c49">Blog Post</a>
 </p>
 
 ---
