@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from mol.parser import parse
 from mol.interpreter import Interpreter
 
-app = FastAPI(title="MOL Playground", version="0.3.0")
+app = FastAPI(title="MOL Playground", version="0.4.0")
 
 app.add_middleware(
     CORSMiddleware,

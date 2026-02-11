@@ -1,0 +1,122 @@
+-- ═══════════════════════════════════════════════════════
+--  MOL Example: LLM Integration Demo
+--  Shows how MOL's pipeline & domain types model
+--  real LLM/AI agent workflows
+-- ═══════════════════════════════════════════════════════
+
+show "=== LLM Integration Workflow ==="
+show ""
+
+-- ─── Agent Memory System ─────────────────────────
+show "--- Agent Memory System ---"
+
+let system_prompt be Thought("You are a helpful coding assistant", 1.0)
+let user_query be Thought("How do I sort a list in MOL?", 0.95)
+let context be Thought("MOL has sort() and sort_desc() stdlib functions", 0.88)
+
+show "System: " + to_text(system_prompt.content)
+show "User: " + to_text(user_query.content)
+show "Context: " + to_text(context.content)
+
+-- Store in memory
+let conversation be Memory("chat_session", "coding assistant conversation")
+show conversation
+
+-- ─── Document Q&A Pipeline ───────────────────────
+show ""
+show "--- Document Q&A Pipeline ---"
+
+let docs be [
+  Document("api_docs.txt", "The sort function takes a list and returns a new sorted list in ascending order. Use sort_desc for descending order. The sort_by function sorts a list of maps by a specific key."),
+  Document("tutorial.txt", "To get started with MOL, install it with pip install mol-lang. Create a file with .mol extension and run it with mol run yourfile.mol. MOL uses natural English-like syntax."),
+  Document("faq.txt", "MOL supports 90+ standard library functions including map, filter, reduce for functional programming, mean, median, stdev for statistics, and md5, sha256 for hashing.")
+]
+
+-- Process each document through the RAG pipeline
+for doc in docs do
+  let idx be doc |> chunk(80) |> embed |> store("llm_kb")
+end
+
+show "Processed " + to_text(len(docs)) + " documents into knowledge base"
+
+-- ─── Multi-Step Reasoning Chain ──────────────────
+show ""
+show "--- Reasoning Chain ---"
+
+-- Simulate chain-of-thought
+let step1 be Thought("User wants to sort data", 0.92)
+let step2 be Thought("MOL has sort() built-in", 0.97)
+let step3 be Thought("sort() returns ascending, sort_desc() returns descending", 0.95)
+let step4 be Thought("Provide example: show sort([3,1,2]) gives [1,2,3]", 0.99)
+
+let chain be [step1, step2, step3, step4]
+
+show "Chain of Thought:"
+let step_num be 1
+for step in chain do
+  show "  " + to_text(step_num) + ". " + to_text(step.content) + " (conf: " + to_text(step.confidence) + ")"
+  set step_num to step_num + 1
+end
+
+-- Validate chain confidence
+let min_conf be 1.0
+for step in chain do
+  if step.confidence < min_conf then
+    set min_conf to step.confidence
+  end
+end
+guard min_conf > 0.8 : "Reasoning chain confidence too low"
+show "Chain confidence: " + to_text(min_conf) + " ✓"
+
+-- ─── Response Generation ─────────────────────────
+show ""
+show "--- Generated Response ---"
+
+let response be "To sort a list in MOL, use the built-in sort() function:"
+let code_example be "let numbers be [5, 3, 8, 1, 4]"
+let code_result be "show sort(numbers)    -- [1, 3, 4, 5]"
+let code_desc be "show sort_desc(numbers) -- [5, 4, 3, 1]"
+
+show response
+show ""
+show "  " + code_example
+show "  " + code_result
+show "  " + code_desc
+
+-- ─── Feedback Loop ───────────────────────────────
+show ""
+show "--- Feedback ---"
+let feedback be Thought("Response was helpful and accurate", 0.96)
+show "User feedback: " + to_text(feedback.content)
+show "Satisfaction: " + to_text(feedback.confidence * 100) + "%"
+
+let session_log be Memory("feedback", "positive response on sorting query")
+show session_log
+
+-- ─── Neural Agent Architecture ───────────────────
+show ""
+show "--- Agent Architecture ---"
+
+let perception be Node("perception", 0.8)
+let reasoning be Node("reasoning", 0.9)
+let memory_node be Node("memory", 0.7)
+let action be Node("action", 0.85)
+
+link perception to reasoning
+link reasoning to memory_node
+link memory_node to action
+
+-- Train the agent
+evolve perception
+evolve reasoning
+evolve memory_node
+evolve action
+
+show "Agent nodes evolved:"
+show "  " + to_text(perception)
+show "  " + to_text(reasoning)
+show "  " + to_text(memory_node)
+show "  " + to_text(action)
+
+show ""
+show "=== LLM Integration Complete ==="
