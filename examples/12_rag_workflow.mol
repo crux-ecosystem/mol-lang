@@ -1,0 +1,92 @@
+-- ═══════════════════════════════════════════════════════
+--  MOL Example: Full RAG Workflow
+--  Document ingestion → Chunking → Embedding → 
+--  Storage → Retrieval → Reasoning → Validation
+-- ═══════════════════════════════════════════════════════
+
+show "=== Full RAG Workflow ==="
+show ""
+
+-- Step 1: Document Ingestion
+show "--- Step 1: Document Ingestion ---"
+let doc1 be Document("ai_basics.txt", "Artificial intelligence is the simulation of human intelligence by machines. Machine learning is a subset of AI that enables systems to learn from data. Deep learning uses neural networks with multiple layers to model complex patterns.")
+
+let doc2 be Document("rag_guide.txt", "Retrieval-Augmented Generation combines information retrieval with text generation. It first retrieves relevant documents from a knowledge base, then uses them as context for generating accurate responses. RAG reduces hallucination in large language models.")
+
+let doc3 be Document("neural_nets.txt", "Neural networks consist of interconnected nodes organized in layers. Each connection has a weight that is adjusted during training. Convolutional neural networks are specialized for image processing. Transformer architectures use self-attention mechanisms for sequence processing.")
+
+show doc1
+show doc2
+show doc3
+
+-- Step 2: Build Knowledge Base with Pipelines
+show ""
+show "--- Step 2: Build Knowledge Base ---"
+let index1 be doc1 |> chunk(100) |> embed |> store("knowledge")
+let index2 be doc2 |> chunk(100) |> embed |> store("knowledge")
+let index3 be doc3 |> chunk(100) |> embed |> store("knowledge")
+
+show "Knowledge base built with 3 documents"
+
+-- Step 3: Query the Knowledge Base
+show ""
+show "--- Step 3: Retrieval ---"
+let query1 be "What is machine learning?"
+let results1 be retrieve(query1, "knowledge", 3)
+show "Query: " + query1
+show "Results: " + to_text(results1)
+
+let query2 be "How does RAG reduce hallucination?"
+let results2 be retrieve(query2, "knowledge", 2)
+show ""
+show "Query: " + query2
+show "Results: " + to_text(results2)
+
+-- Step 4: Cognitive Processing
+show ""
+show "--- Step 4: Cognitive Processing ---"
+let thought1 be Thought("Machine learning enables pattern recognition", 0.89)
+let thought2 be Thought("RAG improves factual accuracy", 0.94)
+let thought3 be Thought("Neural networks model complex relationships", 0.82)
+
+show thought1
+show thought2
+show thought3
+
+-- Step 5: Memory Storage
+show ""
+show "--- Step 5: Memory Storage ---"
+let session_memory be Memory("rag_session", "Full RAG workflow completed")
+show session_memory
+
+-- Step 6: Neural Network Simulation
+show ""
+show "--- Step 6: Neural Simulation ---"
+let input_node be Node("input_layer", 0.7)
+let hidden_node be Node("hidden_layer", 0.5)
+let output_node be Node("output_layer", 0.9)
+
+link input_node to hidden_node
+link hidden_node to output_node
+
+-- Evolve through training
+evolve input_node
+evolve hidden_node
+evolve output_node
+
+show input_node
+show hidden_node
+show output_node
+
+-- Step 7: Validation with Guards
+show ""
+show "--- Step 7: Validation ---"
+guard thought2.confidence > 0.5 : "RAG confidence too low"
+show "All validations passed!"
+
+show ""
+show "=== RAG Workflow Complete ==="
+show "Documents: 3"
+show "Queries: 2"
+show "Thoughts: 3"
+show "Neural nodes: 3"

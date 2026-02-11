@@ -1,0 +1,60 @@
+-- ═══════════════════════════════════════════════════════
+--  MOL Example: Data Processing Pipeline
+--  Real-world data transformation workflow
+-- ═══════════════════════════════════════════════════════
+
+show "=== Data Processing Pipeline ==="
+show ""
+
+-- Simulated dataset: user activity logs
+let users be [
+  {"name": "Alice", "age": 28, "score": 92, "active": true},
+  {"name": "Bob", "age": 35, "score": 67, "active": false},
+  {"name": "Charlie", "age": 22, "score": 88, "active": true},
+  {"name": "Diana", "age": 41, "score": 45, "active": true},
+  {"name": "Eve", "age": 19, "score": 95, "active": true},
+  {"name": "Frank", "age": 33, "score": 73, "active": false},
+  {"name": "Grace", "age": 26, "score": 81, "active": true},
+  {"name": "Hank", "age": 45, "score": 56, "active": true}
+]
+
+show "Total users: " + to_text(len(users))
+
+-- Extract scores and compute statistics
+let scores be []
+for user in users do
+  push(scores, user["score"])
+end
+
+show ""
+show "--- Score Statistics ---"
+show "Mean score: " + to_text(mean(scores))
+show "Median score: " + to_text(median(scores))
+show "Std deviation: " + to_text(stdev(scores))
+show "Min: " + to_text(min(scores))
+show "Max: " + to_text(max(scores))
+
+-- Categorize users by score
+show ""
+show "--- User Categories ---"
+for user in users do
+  let category be "Average"
+  if user["score"] >= 90 then
+    set category to "Top Performer"
+  elif user["score"] >= 70 then
+    set category to "Good"
+  elif user["score"] < 60 then
+    set category to "Needs Improvement"
+  end
+  show user["name"] + ": " + to_text(user["score"]) + " → " + category
+end
+
+-- Pipeline: process a report string
+show ""
+show "--- Report Pipeline ---"
+let report be "  quarterly performance report: q4 2025  "
+let processed be report |> trim |> upper |> replace("2025", "2026") |> split(":")
+show processed
+
+show ""
+show "=== Pipeline complete ==="

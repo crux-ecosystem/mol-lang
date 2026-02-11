@@ -6,6 +6,32 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [0.4.0] — 2026-02-11
+
+### Added — Docker, Examples & Distribution
+
+- **Docker support:** Multi-mode Docker image (`docker run mol run program.mol`, `docker run mol` for playground)
+- **5 new examples:** Data processing pipelines, functional programming patterns, full RAG workflow, math/stats/hashing showcase, LLM integration simulation
+- **Demo GIF:** Terminal recording showcasing MOL features for README
+- **Demo program:** `examples/demo.mol` — concise feature showcase
+
+### Changed
+
+- Dockerfile uses Python 3.12-slim (f-string backslash support)
+- Docker entrypoint supports: `playground`, `run`, `repl`, `version`, `parse`, `transpile`, `help`
+- Docker image size: ~144 MB
+- All 14 example programs verified passing
+- Tests: 68 passing (no regressions)
+
+### Infrastructure
+
+- Published to PyPI: `pip install mol-lang`
+- Online playground deployed at http://135.235.138.217:8000
+- Blog post and social media launch materials
+- Strategy document for distribution
+
+---
+
 ## [0.3.0] — 2026-02-10
 
 ### Added — Universal Algorithms (42 new functions)
