@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.3.0-blue?style=flat-square" alt="version">
+  <img src="https://img.shields.io/badge/version-0.4.0-blue?style=flat-square" alt="version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="license">
   <img src="https://img.shields.io/badge/python-3.10%2B-yellow?style=flat-square" alt="python">
   <img src="https://img.shields.io/badge/tests-68%20passing-brightgreen?style=flat-square" alt="tests">
@@ -27,6 +27,10 @@
   <a href="#language-at-a-glance">Language</a> •
   <a href="http://135.235.138.217:8000/">Playground</a> •
   <a href="https://medium.com/@kaliyugiheart/introducing-mol-we-built-a-programming-language-where-pipelines-trace-themselves-f9b2a6526c49">Blog Post</a>
+</p>
+
+<p align="center">
+  <img src="assets/demo.gif" alt="MOL Demo" width="700">
 </p>
 
 ---
@@ -165,7 +169,7 @@ guard len(data) > 0 : "Empty dataset"
 
 ```
 ╔══════════════════════════════════════════════════════╗
-║  MOL v0.3.0                                         ║
+║  MOL v0.4.0                                         ║
 ║                                                      ║
 ║  Keywords:    let, be, show, if/elif/else/end,       ║
 ║              for/in/do, while, define/return,        ║
@@ -218,6 +222,28 @@ mol repl
 
 ---
 
+## Docker
+
+Run MOL anywhere with Docker — zero installation:
+
+```bash
+# Run a program
+docker run -v $(pwd):/code mol run /code/program.mol
+
+# Launch the playground
+docker run -p 8000:8000 mol
+
+# Interactive REPL
+docker run -it mol repl
+
+# Check version
+docker run mol version
+```
+
+Image size: **~144 MB** (Python 3.12-slim)
+
+---
+
 ## Standalone Binary
 
 Get MOL as a **single executable** — no Python required:
@@ -258,8 +284,9 @@ mol run program.mol
 | VS Code Extension | ✅ Syntax + Snippets |
 | Online Playground | ✅ Live · 8 examples |
 | Standalone Binary | ✅ 8.7 MB single file |
-| PyPI Package | 🔜 v0.4.0 |
-| Cloud Playground | 🔜 v0.4.0 |
+| Docker Image | ✅ 144 MB multi-mode |
+| PyPI Package | ✅ [mol-lang](https://pypi.org/project/mol-lang/) |
+| Cloud Playground | ✅ [Live](http://135.235.138.217:8000) |
 | Async Pipelines | 🔜 v0.5.0 |
 | Package Manager | 🔜 v1.0.0 |
 

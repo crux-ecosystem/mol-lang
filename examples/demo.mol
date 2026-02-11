@@ -1,0 +1,30 @@
+-- MOL Demo: The Cognitive Programming Language
+show "Hello, World!"
+
+-- Variables & data types
+let name be "MOL"
+let version be 0.4
+show name + " v" + to_text(version)
+
+-- Cognitive pipeline with auto-trace
+let processed be "  hello, intramind!  " |> trim |> upper |> split(",") |> join(" &")
+show processed
+
+-- Lists & higher-order functions
+let nums be [1, 2, 3, 4, 5]
+define double(x)
+  return x * 2
+end
+let doubled be map(nums, double)
+show "Doubled: " + to_text(doubled)
+
+-- Functions
+define greet(who)
+  return "Welcome to " + who + "!"
+end
+
+show greet("CruxLabx")
+
+-- Neural node (built-in AI primitive)
+let node be Node("analyzer", 0.95)
+show to_text(node)
