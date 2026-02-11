@@ -159,6 +159,15 @@ class PythonTranspiler:
         self._indent -= 1
         self._line("")
 
+    def _emit_UseStmt(self, node):
+        if node.alias:
+            self._line(f"import mol_packages.{node.module} as {node.alias}  # use \"{node.module}\" as {node.alias}")
+        elif node.symbols:
+            syms = ", ".join(node.symbols)
+            self._line(f"from mol_packages.{node.module} import {syms}  # use \"{node.module}\" : {syms}")
+        else:
+            self._line(f"from mol_packages.{node.module} import *  # use \"{node.module}\"")
+
     # ── Expressions ──────────────────────────────────────────
     def _expr_NumberLiteral(self, node): return str(node.value)
     def _expr_StringLiteral(self, node): return repr(node.value)
@@ -336,6 +345,49 @@ class JavaScriptTranspiler:
         self._indent -= 1
         self._line("}")
         self._line("")
+
+    def _emit_UseStmt(self, node):
+        if node.alias:
+            self._line(f"const {node.alias} = __mol_require__(\"{node.module}\");  // use \"{node.module}\" as {node.alias}")
+        elif node.symbols:
+            syms = ", ".join(node.symbols)
+            self._line(f"const {{ {syms} }} = __mol_require__(\"{node.module}\");  // use \"{node.module}\" : {syms}")
+        else:
+            self._line(f"Object.assign(globalThis, __mol_require__(\"{node.module}\"));  // use \"{node.module}\"")
+
+    # ── Missing statements for WASM target ───────────────────
+    def _emit_LinkStmt(self, node):
+        src = self._emit_expr(node.source)
+        tgt = self._emit_expr(node.target)
+        self._line(f"console.log(`[MOL] Linked: ${{{src}}} → ${{{tgt}}}`);");
+
+    def _emit_ProcessStmt(self, node):
+        tgt = self._emit_expr(node.target)
+        self._line(f"console.log(`[MOL] Processed: ${{{tgt}}}`);");
+
+    def _emit_AccessStmt(self, node):
+        res = self._emit_expr(node.resource)
+        self._line(f"console.log(`[MOL] Access: ${{{res}}}`);");
+
+    def _emit_SyncStmt(self, node):
+        self._line(f"console.log(`[MOL] Synced: ${{{self._emit_expr(node.stream)}}}`);");
+
+    def _emit_EvolveStmt(self, node):
+        self._line(f"console.log(`[MOL] Evolved: ${{{self._emit_expr(node.node)}}}`);");
+
+    def _emit_EmitStmt(self, node):
+        self._line(f"console.log(`[MOL] Emitted: ${{{self._emit_expr(node.data)}}}`);");
+
+    def _emit_ListenStmt(self, node):
+        self._line(f"// listen for {self._emit_expr(node.event)}")
+
+    def _emit_BlockStmt(self, node):
+        self._line("{")
+        self._indent += 1
+        for s in node.body:
+            self._emit_stmt(s)
+        self._indent -= 1
+        self._line("}")
 
     # ── Expressions ──────────────────────────────────────────
     def _expr_NumberLiteral(self, node): return str(node.value)

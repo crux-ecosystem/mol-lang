@@ -27,6 +27,7 @@ start: (_NL* statement)*  _NL*
           | block_stmt
           | guard_stmt
           | pipeline_def
+          | use_stmt
           | expr_stmt
 
 // ── Show (print) ───────────────────────────────────────────
@@ -78,6 +79,11 @@ guard_stmt: "guard" expr
 
 // ── Pipeline Definition ─────────────────────────────────────
 pipeline_def: "pipeline" NAME "(" param_list? ")" _NL block "end"
+
+// ── Use (import) Statement ──────────────────────────────────
+use_stmt: "use" ESCAPED_STRING                                       -> use_all
+        | "use" ESCAPED_STRING ":" NAME ("," NAME)*                  -> use_named
+        | "use" ESCAPED_STRING "as" NAME                             -> use_alias
 
 // ── Expression Statement (function calls etc.) ──────────────
 expr_stmt: expr
@@ -143,7 +149,7 @@ arg_list: expr ("," expr)*
 
 // ── Terminals ───────────────────────────────────────────────
 // NAME must exclude all keywords to avoid ambiguity
-NAME: /(?!(?:if|then|elif|else|end|while|for|in|do|define|return|begin|let|be|set|to|show|and|or|not|is|true|false|null|trigger|link|process|access|sync|evolve|emit|listen|with|pipeline|guard)\b)[a-zA-Z_][a-zA-Z0-9_]*/
+NAME: /(?!(?:if|then|elif|else|end|while|for|in|do|define|return|begin|let|be|set|to|show|and|or|not|is|true|false|null|trigger|link|process|access|sync|evolve|emit|listen|with|pipeline|guard|use|as)\b)[a-zA-Z_][a-zA-Z0-9_]*/
 
 %import common.NUMBER
 %import common.ESCAPED_STRING

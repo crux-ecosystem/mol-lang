@@ -313,6 +313,16 @@ class MOLTransformer(Transformer):
             body=body if body else [],
         )
 
+    # ── Use (import) Statement ───────────────────────────────
+    def use_all(self, module):
+        return UseStmt(module=str(module)[1:-1])
+
+    def use_named(self, module, *names):
+        return UseStmt(module=str(module)[1:-1], symbols=[str(n) for n in names])
+
+    def use_alias(self, module, alias):
+        return UseStmt(module=str(module)[1:-1], alias=str(alias))
+
 
 # ── Public API ───────────────────────────────────────────────
 def parse(source: str) -> Program:
