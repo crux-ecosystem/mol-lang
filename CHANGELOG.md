@@ -8,8 +8,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [0.4.0] — 2026-02-11
 
-### Added — Docker, Examples & Distribution
+### Added — Docker, Examples, Distribution & LSP
 
+- **Language Server Protocol (LSP):** Full LSP server (`mol/lsp_server.py`) with 6 capabilities:
+  - **Autocomplete:** 112 stdlib functions, 35 keywords, user-defined symbols, 9 code snippets, pipe-aware suggestions
+  - **Hover documentation:** Rich Markdown docs with parameters, return types, and code examples
+  - **Diagnostics:** Real-time parse error reporting on open/change/save
+  - **Signature help:** Active parameter tracking for all stdlib functions
+  - **Go-to-definition:** Jump to user-defined variables and functions
+  - **Document symbols:** Outline view of functions and variables
+- **VS Code LSP client extension:** TypeScript extension (`mol-vscode/`) with server lifecycle management, restart command, and run-file command
+- **CLI subcommand:** `mol lsp` starts the language server via stdio
 - **Docker support:** Multi-mode Docker image (`docker run mol run program.mol`, `docker run mol` for playground)
 - **5 new examples:** Data processing pipelines, functional programming patterns, full RAG workflow, math/stats/hashing showcase, LLM integration simulation
 - **Demo GIF:** Terminal recording showcasing MOL features for README
@@ -22,6 +31,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 - Docker image size: ~144 MB
 - All 14 example programs verified passing
 - Tests: 68 passing (no regressions)
+- VS Code extension updated from v0.1.0 to v0.4.0 with LSP client
+
+### Dependencies
+
+- Added optional LSP dependencies: `pygls>=2.0`, `lsprotocol>=2024.0.0` (`pip install mol-lang[lsp]`)
+- VS Code extension: `vscode-languageclient ^9.0.1`
 
 ### Infrastructure
 
