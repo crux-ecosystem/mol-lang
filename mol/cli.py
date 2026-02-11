@@ -251,6 +251,47 @@ def main():
     # mol lsp
     sub.add_parser("lsp", help="Start Language Server (stdio)")
 
+    # mol init
+    sub.add_parser("init", help="Create a new mol.pkg.json")
+
+    # mol install
+    install_p = sub.add_parser("install", help="Install a package")
+    install_p.add_argument("package", help="Package name")
+    install_p.add_argument("--version", "-v", default="latest", help="Version")
+
+    # mol uninstall
+    uninstall_p = sub.add_parser("uninstall", help="Uninstall a package")
+    uninstall_p.add_argument("package", help="Package name")
+
+    # mol list
+    sub.add_parser("list", help="List installed packages")
+
+    # mol search
+    search_p = sub.add_parser("search", help="Search for packages")
+    search_p.add_argument("query", help="Search query")
+
+    # mol publish
+    sub.add_parser("publish", help="Publish package to registry")
+
+    # mol build
+    build_p = sub.add_parser("build", help="Compile MOL to JS/WASM bundle")
+    build_p.add_argument("file", help="Path to .mol file")
+    build_p.add_argument(
+        "--target", "-t",
+        choices=["js", "browser", "node"],
+        default="browser",
+        help="Build target (default: browser)",
+    )
+    build_p.add_argument(
+        "--output", "-o",
+        default=None,
+        help="Output file path",
+    )
+    build_p.add_argument(
+        "--minify", action="store_true",
+        help="Minify the output",
+    )
+
     args = parser.parse_args()
 
     if args.command == "run":
@@ -266,6 +307,27 @@ def main():
     elif args.command == "lsp":
         from mol.lsp_server import main as lsp_main
         lsp_main()
+    elif args.command == "init":
+        from mol.package_manager import cmd_init
+        cmd_init()
+    elif args.command == "install":
+        from mol.package_manager import cmd_install
+        cmd_install(args)
+    elif args.command == "uninstall":
+        from mol.package_manager import cmd_uninstall
+        cmd_uninstall(args)
+    elif args.command == "list":
+        from mol.package_manager import cmd_list
+        cmd_list()
+    elif args.command == "search":
+        from mol.package_manager import cmd_search
+        cmd_search(args)
+    elif args.command == "publish":
+        from mol.package_manager import cmd_publish
+        cmd_publish()
+    elif args.command == "build":
+        from mol.wasm_builder import cmd_build
+        cmd_build(args)
     else:
         print(BANNER)
         parser.print_help()

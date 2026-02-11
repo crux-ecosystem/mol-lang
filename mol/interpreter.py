@@ -319,6 +319,48 @@ class Interpreter:
         env.set(node.name, pipe)
         return pipe
 
+    # ── Use (import) Statement ───────────────────────────────
+    def _exec_UseStmt(self, node, env):
+        """Handle 'use' — import package or file into current scope."""
+        from mol.package_manager import (
+            get_package_exports, load_mol_file, BUILTIN_PACKAGES
+        )
+
+        module = node.module
+        exports = {}
+
+        # Determine if it's a file path or a package name
+        if module.endswith(".mol") or module.startswith("./") or module.startswith("../") or "/" in module:
+            # Local file import
+            try:
+                exports = load_mol_file(module)
+            except FileNotFoundError as exc:
+                raise MOLRuntimeError(str(exc))
+        else:
+            # Package import
+            exports = get_package_exports(module)
+            if not exports:
+                raise MOLRuntimeError(f"Package not found: '{module}'. Run 'mol install {module}' first.")
+
+        if node.alias:
+            # use "math" as M → create namespace map
+            env.set(node.alias, exports)
+        elif node.symbols:
+            # use "math" : sin, cos → import specific symbols
+            for sym in node.symbols:
+                if sym in exports:
+                    env.set(sym, exports[sym])
+                else:
+                    raise MOLRuntimeError(
+                        f"Symbol '{sym}' not found in package '{module}'"
+                    )
+        else:
+            # use "math" → import all exports
+            for name, val in exports.items():
+                env.set(name, val)
+
+        return None
+
     # ── Expression Evaluation ────────────────────────────────
     def _eval(self, node, env: Environment):
         if node is None:

@@ -6,6 +6,61 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [0.5.0] — 2026-02-11
+
+### Added — Package Manager & WASM Compilation
+
+- **Package Manager** (`mol/package_manager.py`):
+  - `mol init` — create `mol.pkg.json` project manifest
+  - `mol install <pkg>` — install packages from registry or built-ins
+  - `mol uninstall <pkg>` — remove installed packages
+  - `mol list` — list installed packages
+  - `mol search <query>` — search the registry
+  - `mol publish` — package and prepare for publishing
+  - 7 built-in packages: `std`, `math`, `text`, `collections`, `crypto`, `random`, `rag`
+  - Dependency lockfile (`mol.lock.json`)
+  - GitHub-based registry support with offline fallback
+
+- **`use` statement** — Module import system:
+  - `use "math"` — import all exports from a package
+  - `use "math" : sin, cos` — import specific symbols
+  - `use "pkg" as P` — import with namespace alias
+  - `use "./file.mol"` — import local MOL files
+  - New grammar rules, AST node (`UseStmt`), parser, interpreter, and transpiler support
+
+- **WASM/Browser Compilation** (`mol/wasm_builder.py`):
+  - `mol build file.mol` — compile to standalone HTML with embedded JS (default)
+  - `mol build file.mol --target js` — standalone JavaScript file
+  - `mol build file.mol --target node` — Node.js module
+  - `--minify` flag for production builds
+  - `--output/-o` for custom output path
+  - Professional browser UI with dark terminal theme
+
+- **MOL JavaScript Runtime** (`mol/runtime.js`):
+  - Complete port of 90+ stdlib functions to JavaScript
+  - Domain types: Thought, Memory, Node, Stream
+  - Built-in module system (`__mol_require__`)
+  - All math, text, collections, crypto, random, and RAG functions
+  - Works in both browser and Node.js environments
+
+- **JS Transpiler** — completed missing statement handlers:
+  - `LinkStmt`, `ProcessStmt`, `AccessStmt`, `SyncStmt`
+  - `EvolveStmt`, `EmitStmt`, `ListenStmt`, `BlockStmt`
+  - `UseStmt` (maps to `__mol_require__`)
+
+- **2 new examples:**
+  - `15_packages.mol` — Package imports and modular code
+  - `16_browser.mol` — Full browser-ready program demo
+
+### Changed
+
+- Grammar updated with `use` and `as` keywords
+- `NAME` terminal regex excludes `use` and `as`
+- Tests: 68 passing (no regressions)
+- All 16 examples verified
+
+---
+
 ## [0.4.0] — 2026-02-11
 
 ### Added — Docker, Examples, Distribution & LSP

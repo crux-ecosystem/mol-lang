@@ -253,3 +253,20 @@ class PipelineDef(ASTNode):
     name: str = ""
     params: list = field(default_factory=list)
     body: list = field(default_factory=list)
+
+
+# ── Module System (v0.5.0) ──────────────────────────────────
+@dataclass
+class UseStmt(ASTNode):
+    """Import a package or file.
+
+    Forms:
+      use "math"                → import all from built-in math package
+      use "math" : sin, cos     → import specific symbols
+      use "./utils.mol"         → import local .mol file
+      use "pkg" as P            → import with alias (namespace)
+    """
+    module: str = ""
+    symbols: list = field(default_factory=list)   # empty = import all
+    alias: Optional[str] = None                    # 'as' alias
+
