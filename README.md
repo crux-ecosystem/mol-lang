@@ -17,6 +17,7 @@
   <img src="https://img.shields.io/badge/pipe_operator-%7C%3E-purple?style=flat-square" alt="pipe">
   <img src="https://img.shields.io/badge/playground-online-ff69b4?style=flat-square" alt="playground">
   <img src="https://img.shields.io/badge/binary-standalone-red?style=flat-square" alt="binary">
+  <a href="https://pypi.org/project/mol-lang/"><img src="https://img.shields.io/pypi/v/mol-lang?style=flat-square&color=blue" alt="PyPI"></a>
 </p>
 
 <p align="center">
@@ -204,11 +205,16 @@ Features:
 - **Shareable links** — share your MOL programs with anyone
 - **Ctrl+Enter** to run, Tab for indentation
 
-Or install locally:
+Install with pip:
 ```bash
 pip install mol-lang
 mol run your_program.mol
+mol repl
 ```
+
+<p align="center">
+  <a href="https://pypi.org/project/mol-lang/"><strong>View on PyPI →</strong></a>
+</p>
 
 ---
 
