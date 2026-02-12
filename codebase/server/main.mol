@@ -1,0 +1,156 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL Web API Server
+-- ══════════════════════════════════════════════════════════
+-- A full REST API server built entirely in MOL.
+-- Demonstrates: routing, CRUD, JSON, middleware, serve().
+-- ══════════════════════════════════════════════════════════
+
+use "server/router.mol"
+use "server/middleware.mol"
+
+-- ══════════════════════════════════════════════════════════
+-- In-memory data store
+-- ══════════════════════════════════════════════════════════
+let db be {
+  "users": [],
+  "next_id": 1
+}
+
+-- ══════════════════════════════════════════════════════════
+-- Route Handlers
+-- ══════════════════════════════════════════════════════════
+
+-- GET /
+define handle_root(ctx)
+  return json_response({
+    "name": "MOL API Server",
+    "version": "0.9.0",
+    "endpoints": ["/api/users", "/api/users/:id", "/api/health"]
+  })
+end
+
+-- GET /api/health
+define handle_health(ctx)
+  return json_response({
+    "status": "healthy",
+    "uptime": clock(),
+    "users_count": len(db["users"])
+  })
+end
+
+-- GET /api/users
+define handle_list_users(ctx)
+  return json_response({"users": db["users"], "count": len(db["users"])})
+end
+
+-- GET /api/users/:id
+define handle_get_user(ctx)
+  let user_id be to_number(ctx["params"]["id"])
+  for user in db["users"] do
+    if user["id"] is user_id then
+      return json_response(user)
+    end
+  end
+  return not_found()
+end
+
+-- POST /api/users
+define handle_create_user(ctx)
+  let body be ctx["json"]
+  if body is null then
+    return bad_request("JSON body required")
+  end
+  if body["name"] is null then
+    return bad_request("Field 'name' is required")
+  end
+
+  let user be {
+    "id": db["next_id"],
+    "name": body["name"],
+    "email": body["email"],
+    "created_at": clock()
+  }
+  set db["next_id"] to db["next_id"] + 1
+  push(db["users"], user)
+  return created(user)
+end
+
+-- PUT /api/users/:id
+define handle_update_user(ctx)
+  let user_id be to_number(ctx["params"]["id"])
+  let body be ctx["json"]
+  if body is null then
+    return bad_request("JSON body required")
+  end
+
+  for i in range(len(db["users"])) do
+    if db["users"][i]["id"] is user_id then
+      let user be db["users"][i]
+      if body["name"] is not null then
+        set user["name"] to body["name"]
+      end
+      if body["email"] is not null then
+        set user["email"] to body["email"]
+      end
+      return json_response(user)
+    end
+  end
+  return not_found()
+end
+
+-- DELETE /api/users/:id
+define handle_delete_user(ctx)
+  let user_id be to_number(ctx["params"]["id"])
+  let original_len be len(db["users"])
+  set db["users"] to filter(db["users"], fn(u) -> u["id"] is not user_id)
+  if len(db["users"]) < original_len then
+    return no_content()
+  end
+  return not_found()
+end
+
+-- ══════════════════════════════════════════════════════════
+-- Register Routes
+-- ══════════════════════════════════════════════════════════
+get("/", handle_root)
+get("/api/health", handle_health)
+get("/api/users", handle_list_users)
+get("/api/users/:id", handle_get_user)
+post("/api/users", handle_create_user)
+put("/api/users/:id", handle_update_user)
+del("/api/users/:id", handle_delete_user)
+
+-- ══════════════════════════════════════════════════════════
+-- Server Handler
+-- ══════════════════════════════════════════════════════════
+define handle_request(request)
+  log_request(request)
+
+  -- Handle CORS preflight
+  if request["method"] is "OPTIONS" then
+    return add_cors({"status": 204, "headers": {}, "body": ""})
+  end
+
+  let response be dispatch(request)
+  return add_cors(response)
+end
+
+-- ══════════════════════════════════════════════════════════
+-- Start Server
+-- ══════════════════════════════════════════════════════════
+show("══════════════════════════════════════════")
+show("  MOL API Server v0.9.0")
+show("  Starting on http://localhost:8080")
+show("══════════════════════════════════════════")
+show("")
+show("  Routes:")
+show("    GET    /")
+show("    GET    /api/health")
+show("    GET    /api/users")
+show("    GET    /api/users/:id")
+show("    POST   /api/users")
+show("    PUT    /api/users/:id")
+show("    DELETE /api/users/:id")
+show("")
+
+serve(8080, handle_request)

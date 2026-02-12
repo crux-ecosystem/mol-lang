@@ -1,0 +1,214 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL Standard Library — String Utilities
+-- ══════════════════════════════════════════════════════════
+-- Extended string manipulation functions written in pure MOL.
+-- ══════════════════════════════════════════════════════════
+
+-- Pad string on the left
+define pad_left(s, width, ch)
+  let result be s
+  while len(result) < width do
+    set result to ch + result
+  end
+  return result
+end
+
+-- Pad string on the right
+define pad_right(s, width, ch)
+  let result be s
+  while len(result) < width do
+    set result to result + ch
+  end
+  return result
+end
+
+-- Center a string
+define center(s, width, ch)
+  let total_pad be width - len(s)
+  if total_pad <= 0 then
+    return s
+  end
+  let left_pad be total_pad / 2
+  let right_pad be total_pad - left_pad
+  let result be s
+  for i in range(left_pad) do
+    set result to ch + result
+  end
+  for i in range(right_pad) do
+    set result to result + ch
+  end
+  return result
+end
+
+-- Repeat a string n times
+define str_repeat(s, n)
+  let result be ""
+  for i in range(n) do
+    set result to result + s
+  end
+  return result
+end
+
+-- Check if string starts with prefix
+define starts_with(s, prefix)
+  if len(prefix) > len(s) then
+    return false
+  end
+  return slice(s, 0, len(prefix)) is prefix
+end
+
+-- Check if string ends with suffix
+define ends_with(s, suffix)
+  if len(suffix) > len(s) then
+    return false
+  end
+  return slice(s, len(s) - len(suffix)) is suffix
+end
+
+-- Count occurrences of substring
+define count_substr(s, sub)
+  let count be 0
+  let i be 0
+  while i <= len(s) - len(sub) do
+    if slice(s, i, i + len(sub)) is sub then
+      set count to count + 1
+      set i to i + len(sub)
+    else
+      set i to i + 1
+    end
+  end
+  return count
+end
+
+-- Capitalize first letter of each word
+define title_case(s)
+  let words be split(s, " ")
+  let result be []
+  for word in words do
+    if len(word) > 0 then
+      let first be upper(slice(word, 0, 1))
+      let rest be lower(slice(word, 1))
+      push(result, first + rest)
+    else
+      push(result, word)
+    end
+  end
+  return join(result, " ")
+end
+
+-- Reverse a string
+define str_reverse(s)
+  let chars be split(s, "")
+  return join(reverse(chars), "")
+end
+
+-- Check if string is a palindrome
+define is_palindrome(s)
+  let cleaned be lower(s)
+  return cleaned is str_reverse(cleaned)
+end
+
+-- Truncate string with ellipsis
+define truncate(s, max_len)
+  if len(s) <= max_len then
+    return s
+  end
+  return slice(s, 0, max_len - 3) + "..."
+end
+
+-- Slugify a string (lowercase, replace spaces with dashes)
+define slugify(s)
+  let result be lower(trim(s))
+  set result to replace(result, " ", "-")
+  return result
+end
+
+-- Extract numbers from a string
+define extract_numbers(s)
+  let digits be "0123456789"
+  let current be ""
+  let result be []
+  for ch in split(s, "") do
+    if contains(digits, ch) then
+      set current to current + ch
+    else
+      if len(current) > 0 then
+        push(result, to_number(current))
+        set current to ""
+      end
+    end
+  end
+  if len(current) > 0 then
+    push(result, to_number(current))
+  end
+  return result
+end
+
+-- Wrap text at given width
+define word_wrap(s, width)
+  let words be split(s, " ")
+  let lines be []
+  let current_line be ""
+  for word in words do
+    if len(current_line) + len(word) + 1 > width and len(current_line) > 0 then
+      push(lines, current_line)
+      set current_line to word
+    elif len(current_line) is 0 then
+      set current_line to word
+    else
+      set current_line to current_line + " " + word
+    end
+  end
+  if len(current_line) > 0 then
+    push(lines, current_line)
+  end
+  return join(lines, "\n")
+end
+
+-- Simple template interpolation: template("Hello {name}!", {"name": "World"})
+define template(tmpl, vars)
+  let result be tmpl
+  for key in keys(vars) do
+    set result to replace(result, "{" + key + "}", to_text(vars[key]))
+  end
+  return result
+end
+
+-- Char code at position
+define char_at(s, index)
+  return slice(s, index, index + 1)
+end
+
+-- Count words in a string
+define word_count(s)
+  let words be split(trim(s), " ")
+  return len(filter(words, fn(w) -> len(w) > 0))
+end
+
+-- Camel case: "hello world" -> "helloWorld"
+define camel_case(s)
+  let words be split(s, " ")
+  if len(words) is 0 then
+    return ""
+  end
+  let result be lower(words[0])
+  for i in range(1, len(words)) do
+    let word be words[i]
+    if len(word) > 0 then
+      set result to result + upper(slice(word, 0, 1)) + lower(slice(word, 1))
+    end
+  end
+  return result
+end
+
+-- Snake case: "Hello World" -> "hello_world"
+define snake_case(s)
+  return replace(lower(trim(s)), " ", "_")
+end
+
+export pad_left, pad_right, center, str_repeat,
+       starts_with, ends_with, count_substr,
+       title_case, str_reverse, is_palindrome,
+       truncate, slugify, extract_numbers,
+       word_wrap, template, char_at, word_count,
+       camel_case, snake_case

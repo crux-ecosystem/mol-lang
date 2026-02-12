@@ -77,6 +77,9 @@ def _builtin_len(obj):
 
 
 def _builtin_type_of(obj):
+    # Check for MOLStructInstance first (imported lazily to avoid circular import)
+    if hasattr(obj, '_struct_def') and hasattr(obj._struct_def, 'name'):
+        return obj._struct_def.name
     type_map = {
         int: "Number",
         float: "Number",
@@ -172,7 +175,14 @@ def _builtin_join(lst, sep=" "):
 
 
 def _builtin_split(text, sep=" "):
+    if sep == "":
+        return list(text)  # Split into individual characters
     return text.split(sep)
+
+
+def _builtin_chars(text):
+    """Split a string into a list of individual characters."""
+    return list(str(text))
 
 
 def _builtin_upper(text):
@@ -511,6 +521,12 @@ def _builtin_assert_false(value):
     return True
 
 
+def _builtin_panic(msg="panic"):
+    """Halt execution with error message."""
+    from mol.interpreter import MOLRuntimeError
+    raise MOLRuntimeError(str(msg))
+
+
 def _create_document(source="", content=""):
     return Document(source=str(source), content=str(content))
 
@@ -557,6 +573,7 @@ class MOLChannel:
         try:
             return self._queue.get(timeout=timeout)
         except _queue.Empty:
+            from mol.interpreter import MOLRuntimeError
             raise MOLRuntimeError("Channel receive timed out")
 
     def try_receive(self):
@@ -616,6 +633,7 @@ def _builtin_race(*args):
     """Return the result of whichever task finishes first."""
     tasks = args if not (len(args) == 1 and isinstance(args[0], list)) else args[0]
     if not tasks:
+        from mol.interpreter import MOLRuntimeError
         raise MOLRuntimeError("race() requires at least one task")
     # Support both MOLTask objects and a list of tasks
     futures = {}
@@ -1227,6 +1245,145 @@ def _builtin_url_encode(params):
     return str(params)
 
 
+# ── HTTP Server (v0.9.0) ────────────────────────────────────
+
+_active_server = None
+_server_handler = None
+_mol_interpreter = None
+
+
+def _builtin_serve(port, handler):
+    """Start an HTTP server: serve(8080, fn(req) -> response_map)
+
+    handler receives a map: { method, path, headers, body, query }
+    handler should return:  { status, body, headers? }
+    """
+    import http.server
+    import json as _json_mod
+    global _active_server, _server_handler, _mol_interpreter
+
+    _server_handler = handler
+
+    class MOLHandler(http.server.BaseHTTPRequestHandler):
+        def _handle(self):
+            from urllib.parse import urlparse, parse_qs
+            parsed = urlparse(self.path)
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length).decode('utf-8') if content_length > 0 else ""
+
+            # Parse query string
+            query = {}
+            for k, v in parse_qs(parsed.query).items():
+                query[k] = v[0] if len(v) == 1 else v
+
+            req = {
+                "method": self.command,
+                "path": parsed.path,
+                "headers": dict(self.headers),
+                "body": body,
+                "query": query,
+            }
+
+            try:
+                # Try parsing body as JSON
+                if body and self.headers.get('Content-Type', '').startswith('application/json'):
+                    req["json"] = _json_mod.loads(body)
+            except Exception:
+                pass
+
+            try:
+                if hasattr(_server_handler, '_interpreter') and _server_handler._interpreter is not None:
+                    response = _server_handler._interpreter._invoke_callable(_server_handler, [req], getattr(_server_handler, 'name', '<handler>'))
+                elif callable(_server_handler):
+                    response = _server_handler(req)
+                else:
+                    response = {"status": 500, "body": "Invalid handler"}
+            except Exception as e:
+                response = {"status": 500, "body": f"Server error: {e}"}
+
+            if not isinstance(response, dict):
+                response = {"status": 200, "body": str(response)}
+
+            status = int(response.get("status", 200))
+            resp_body = response.get("body", "")
+            resp_headers = response.get("headers", {})
+
+            self.send_response(status)
+            content_type = resp_headers.get("Content-Type", "application/json")
+            self.send_header("Content-Type", content_type)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            for k, v in resp_headers.items():
+                if k != "Content-Type":
+                    self.send_header(k, v)
+            self.end_headers()
+
+            if isinstance(resp_body, (dict, list)):
+                self.wfile.write(_json_mod.dumps(resp_body).encode('utf-8'))
+            else:
+                self.wfile.write(str(resp_body).encode('utf-8'))
+
+        def do_GET(self):
+            self._handle()
+
+        def do_POST(self):
+            self._handle()
+
+        def do_PUT(self):
+            self._handle()
+
+        def do_DELETE(self):
+            self._handle()
+
+        def do_PATCH(self):
+            self._handle()
+
+        def do_OPTIONS(self):
+            self.send_response(200)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+            self.end_headers()
+
+        def log_message(self, fmt, *args):
+            print(f"  {self.command} {self.path} → {args[1] if len(args) > 1 else '?'}")
+
+    server = http.server.HTTPServer(("0.0.0.0", int(port)), MOLHandler)
+    _active_server = server
+    print(f"🚀 MOL server running on http://localhost:{port}")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\n🛑 Server stopped")
+        server.server_close()
+    return None
+
+
+def _builtin_json_parse(text):
+    """Parse a JSON string into a MOL value."""
+    import json as _j
+    return _j.loads(text)
+
+
+def _builtin_json_stringify(value):
+    """Convert a MOL value to a JSON string."""
+    import json as _j
+
+    def _convert(v):
+        if v is None:
+            return None
+        if isinstance(v, (int, float, str, bool)):
+            return v
+        if isinstance(v, list):
+            return [_convert(i) for i in v]
+        if isinstance(v, dict):
+            return {str(k): _convert(val) for k, val in v.items()}
+        if hasattr(v, '_fields'):
+            return {k: _convert(val) for k, val in v._fields.items()}
+        return str(v)
+
+    return _j.dumps(_convert(value))
+
+
 # ── Standard Library Registry ────────────────────────────────
 STDLIB: dict[str, callable] = {
     # General utilities
@@ -1250,6 +1407,7 @@ STDLIB: dict[str, callable] = {
     "contains": _builtin_contains,
     "join": _builtin_join,
     "split": _builtin_split,
+    "chars": _builtin_chars,
     "upper": _builtin_upper,
     "lower": _builtin_lower,
     "trim": _builtin_trim,
@@ -1367,6 +1525,8 @@ STDLIB: dict[str, callable] = {
     "assert_true": _builtin_assert_true,
     "assert_false": _builtin_assert_false,
 
+    # Error handling
+    "panic": _builtin_panic,
     # Concurrency (v0.7.0)
     "channel": _builtin_channel,
     "send": _builtin_send,
@@ -1394,4 +1554,9 @@ STDLIB: dict[str, callable] = {
     # HTTP (v0.8.0)
     "fetch": _builtin_fetch,
     "url_encode": _builtin_url_encode,
+
+    # HTTP Server + JSON (v0.9.0)
+    "serve": _builtin_serve,
+    "json_parse": _builtin_json_parse,
+    "json_stringify": _builtin_json_stringify,
 }

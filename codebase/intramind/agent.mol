@@ -1,0 +1,148 @@
+-- ══════════════════════════════════════════════════════════
+-- IntraMind — Agent Core
+-- ══════════════════════════════════════════════════════════
+-- The central Agent struct with think-act-observe loop.
+-- Integrates memory, knowledge, and reasoning.
+-- ══════════════════════════════════════════════════════════
+
+use "intramind/memory.mol"
+use "intramind/knowledge.mol"
+use "intramind/reasoning.mol"
+
+-- ── Action ──────────────────────────────────────────────
+struct Action do
+  name, params, description
+end
+
+define new_action(name, params, description)
+  return Action { name: name, params: params, description: description }
+end
+
+-- ── Agent ───────────────────────────────────────────────
+struct Agent do
+  name,
+  memory,
+  knowledge,
+  reasoning,
+  goals,
+  status,
+  turn,
+  tools,
+  log
+end
+
+impl Agent do
+  -- Register a tool (function) the agent can use
+  define register_tool(self, name, handler)
+    set self.tools[name] to handler
+    return self
+  end
+
+  -- Set a goal for the agent
+  define set_goal(self, goal)
+    self.goals.push_goal(goal)
+    self.memory.remember("Goal set: " + goal, "goals", 9)
+    return self
+  end
+
+  -- Think: analyze situation and decide next action
+  define think(self)
+    let context be self.memory.short_term.recall_recent(5)
+    let current_goal be self.goals.current_goal()
+
+    self.memory.remember("Thinking about: " + to_text(current_goal), "reasoning", 3)
+
+    -- Run inference engine
+    let new_facts be self.reasoning.infer()
+    if len(new_facts) > 0 then
+      self.memory.remember("Derived " + to_text(len(new_facts)) + " new facts", "reasoning", 5)
+    end
+
+    set self.turn to self.turn + 1
+    set self.status to "thinking"
+    return self
+  end
+
+  -- Act: execute an action
+  define act(self, action_name, params)
+    set self.status to "acting"
+
+    let tool be self.tools[action_name]
+    let result be null
+    if tool is not null then
+      try
+        let tool_fn be tool
+        set result to tool_fn(params)
+      rescue e
+        set result to "Error: " + to_text(e)
+      end
+    else
+      set result to "Unknown tool: " + action_name
+    end
+
+    let log_entry be {"turn": self.turn, "action": action_name, "params": params, "result": result}
+    push(self.log, log_entry)
+
+    self.memory.remember("Acted: " + action_name + " -> " + to_text(result), "actions", 5)
+    return result
+  end
+
+  -- Observe: process feedback/observations
+  define observe(self, observation)
+    set self.status to "observing"
+    self.memory.remember(observation, "observations", 4)
+
+    -- Check if current goal is achieved
+    let current be self.goals.current_goal()
+    if current is not null and contains(to_text(observation), "done") then
+      self.goals.complete_goal()
+      self.memory.remember("Goal completed: " + to_text(current), "goals", 8)
+    end
+
+    return self
+  end
+
+  -- Run one think-act-observe cycle
+  define step(self, action_name, params, observation)
+    self.think()
+    let result be self.act(action_name, params)
+    self.observe(observation)
+    return result
+  end
+
+  -- Get agent status report
+  define report(self)
+    return {
+      "name": self.name,
+      "status": self.status,
+      "turn": self.turn,
+      "current_goal": self.goals.current_goal(),
+      "goals_progress": self.goals.progress(),
+      "memory": self.memory.stats(),
+      "knowledge": self.knowledge.stats(),
+      "reasoning": self.reasoning.stats(),
+      "log_entries": len(self.log)
+    }
+  end
+
+  -- Get action history
+  define history(self)
+    return self.log
+  end
+end
+
+define new_agent(name)
+  return Agent {
+    name: name,
+    memory: new_working_memory(50),
+    knowledge: new_knowledge_graph(),
+    reasoning: new_inference_engine(),
+    goals: new_goal_stack(),
+    status: "idle",
+    turn: 0,
+    tools: {},
+    log: []
+  }
+end
+
+export Agent, Action, new_agent, new_action

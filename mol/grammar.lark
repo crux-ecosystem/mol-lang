@@ -3,9 +3,9 @@
 // ============================================================
 // A human-readable, domain-specific language for IntraMind.
 // Syntax is designed to be natural, safe, and expressive.
-// v0.6.0 — Pattern matching, error handling, lambdas,
-//           string interpolation, destructuring, null safety,
-//           built-in testing, chained comparisons.
+// v0.9.0 — Field/index mutation, self-hosted stdlib & apps,
+//           JSON functions, HTTP server, zero-arg lambdas,
+//           IntraMind AI core, web API framework.
 // ============================================================
 
 start: (_NL* statement)*  _NL*
@@ -56,6 +56,10 @@ name_list: NAME ("," NAME)*
 
 // ── Assignment ──────────────────────────────────────────────
 assign_stmt: "set" NAME "to" expr
+           | "set" NAME "." NAME "to" expr            -> assign_field_stmt
+           | "set" NAME "[" expr "]" "to" expr        -> assign_index_stmt
+           | "set" NAME "." NAME "[" expr "]" "to" expr -> assign_field_index_stmt
+           | "set" NAME "[" expr "]" "[" expr "]" "to" expr -> assign_index_index_stmt
 
 // ── If / Else ───────────────────────────────────────────────
 if_stmt: "if" expr "then" _NL block elif_clause* else_clause? "end"
@@ -124,7 +128,7 @@ ensure_clause: "ensure" _NL block                                    -> ensure_c
 test_block: "test" ESCAPED_STRING "do" _NL block "end"               -> test_block
 
 // ── Export Statement (module system) ────────────────────────
-export_stmt: "export" NAME ("," NAME)*                               -> export_stmt
+export_stmt: "export" NAME ("," _NL? NAME)*                          -> export_stmt
 
 // ── Expression Statement (function calls etc.) ──────────────
 expr_stmt: expr

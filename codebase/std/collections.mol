@@ -1,0 +1,223 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL Standard Library — Collections
+-- ══════════════════════════════════════════════════════════
+-- Self-hosted data structures written in pure MOL.
+-- Stack, Queue, Set, Pair, LinkedList
+-- ══════════════════════════════════════════════════════════
+
+-- ── Stack (LIFO) ────────────────────────────────────────
+struct Stack do
+  items
+end
+
+impl Stack do
+  define stack_push(self, val)
+    push(self.items, val)
+    return self
+  end
+
+  define stack_pop(self)
+    if len(self.items) is 0 then
+      return null
+    end
+    return pop(self.items)
+  end
+
+  define peek(self)
+    if len(self.items) is 0 then
+      return null
+    end
+    return self.items[len(self.items) - 1]
+  end
+
+  define size(self)
+    return len(self.items)
+  end
+
+  define is_empty(self)
+    return len(self.items) is 0
+  end
+
+  define to_list(self)
+    return reverse(self.items)
+  end
+end
+
+define new_stack()
+  return Stack { items: [] }
+end
+
+-- ── Queue (FIFO) ────────────────────────────────────────
+struct Queue do
+  items
+end
+
+impl Queue do
+  define enqueue(self, val)
+    push(self.items, val)
+    return self
+  end
+
+  define dequeue(self)
+    if len(self.items) is 0 then
+      return null
+    end
+    let first be self.items[0]
+    set self.items to drop(self.items, 1)
+    return first
+  end
+
+  define front(self)
+    if len(self.items) is 0 then
+      return null
+    end
+    return self.items[0]
+  end
+
+  define size(self)
+    return len(self.items)
+  end
+
+  define is_empty(self)
+    return len(self.items) is 0
+  end
+
+  define to_list(self)
+    return self.items
+  end
+end
+
+define new_queue()
+  return Queue { items: [] }
+end
+
+-- ── Set (unique values) ─────────────────────────────────
+struct MolSet do
+  items
+end
+
+impl MolSet do
+  define add(self, val)
+    if not contains(self.items, val) then
+      push(self.items, val)
+    end
+    return self
+  end
+
+  define remove(self, val)
+    set self.items to filter(self.items, fn(x) -> x is not val)
+    return self
+  end
+
+  define has(self, val)
+    return contains(self.items, val)
+  end
+
+  define size(self)
+    return len(self.items)
+  end
+
+  define union_with(self, other)
+    let result be new_set()
+    for item in self.items do
+      result.add(item)
+    end
+    for item in other.items do
+      result.add(item)
+    end
+    return result
+  end
+
+  define intersect(self, other)
+    let result be new_set()
+    for item in self.items do
+      if other.has(item) then
+        result.add(item)
+      end
+    end
+    return result
+  end
+
+  define diff(self, other)
+    let result be new_set()
+    for item in self.items do
+      if not other.has(item) then
+        result.add(item)
+      end
+    end
+    return result
+  end
+
+  define to_list(self)
+    return self.items
+  end
+end
+
+define new_set()
+  return MolSet { items: [] }
+end
+
+-- ── Pair (key-value tuple) ──────────────────────────────
+struct Pair do
+  key, value
+end
+
+define pair(k, v)
+  return Pair { key: k, value: v }
+end
+
+-- ── Range Iterator ──────────────────────────────────────
+define range_iter(start, stop, step)
+  let i be start
+  while i < stop do
+    yield i
+    set i to i + step
+  end
+end
+
+-- ── Linked List ─────────────────────────────────────────
+struct ListNode do
+  value, next
+end
+
+struct LinkedList do
+  head, length
+end
+
+impl LinkedList do
+  define prepend(self, val)
+    let node be ListNode { value: val, next: self.head }
+    set self.head to node
+    set self.length to self.length + 1
+    return self
+  end
+
+  define first(self)
+    if self.head is null then
+      return null
+    end
+    return self.head.value
+  end
+
+  define size(self)
+    return self.length
+  end
+
+  define to_list(self)
+    let result be []
+    let current be self.head
+    while current is not null do
+      push(result, current.value)
+      set current to current.next
+    end
+    return result
+  end
+end
+
+define new_linked_list()
+  return LinkedList { head: null, length: 0 }
+end
+
+export Stack, Queue, MolSet, Pair, ListNode, LinkedList,
+       new_stack, new_queue, new_set, pair, new_linked_list,
+       range_iter

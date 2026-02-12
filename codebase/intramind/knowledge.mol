@@ -1,0 +1,157 @@
+-- ══════════════════════════════════════════════════════════
+-- IntraMind — Knowledge Graph
+-- ══════════════════════════════════════════════════════════
+-- Graph-based knowledge representation for AI agents.
+-- ══════════════════════════════════════════════════════════
+
+-- ── Knowledge Node ──────────────────────────────────────
+struct KNode do
+  id, label, category, properties
+end
+
+define new_knode(id, label, category)
+  return KNode {
+    id: id,
+    label: label,
+    category: category,
+    properties: {}
+  }
+end
+
+-- ── Knowledge Edge ──────────────────────────────────────
+struct KEdge do
+  source, target, relation, weight
+end
+
+define new_kedge(source, target, relation, weight)
+  return KEdge {
+    source: source,
+    target: target,
+    relation: relation,
+    weight: weight
+  }
+end
+
+-- ── Knowledge Graph ─────────────────────────────────────
+struct KnowledgeGraph do
+  nodes, edges, adjacency
+end
+
+impl KnowledgeGraph do
+  define add_node(self, node)
+    set self.nodes[node.id] to node
+    if self.adjacency[node.id] is null then
+      set self.adjacency[node.id] to []
+    end
+    return self
+  end
+
+  define add_edge(self, edge)
+    push(self.edges, edge)
+    if self.adjacency[edge.source] is null then
+      set self.adjacency[edge.source] to []
+    end
+    push(self.adjacency[edge.source], edge)
+    return self
+  end
+
+  define get_node(self, id)
+    return self.nodes[id]
+  end
+
+  define neighbors(self, node_id)
+    let edges be self.adjacency[node_id]
+    if edges is null then
+      return []
+    end
+    let result be []
+    for edge in edges do
+      let target be self.nodes[edge.target]
+      if target is not null then
+        push(result, target)
+      end
+    end
+    return result
+  end
+
+  define find_by_category(self, category)
+    let result be []
+    for id in keys(self.nodes) do
+      let node be self.nodes[id]
+      if node.category is category then
+        push(result, node)
+      end
+    end
+    return result
+  end
+
+  define find_by_label(self, keyword)
+    let result be []
+    for id in keys(self.nodes) do
+      let node be self.nodes[id]
+      if contains(node.label, keyword) then
+        push(result, node)
+      end
+    end
+    return result
+  end
+
+  define relations_of(self, node_id)
+    let edges be self.adjacency[node_id]
+    if edges is null then
+      return []
+    end
+    let result be []
+    for edge in edges do
+      push(result, {
+        "target": edge.target,
+        "relation": edge.relation,
+        "weight": edge.weight
+      })
+    end
+    return result
+  end
+
+  define path_exists(self, from_id, to_id)
+    -- BFS to check connectivity
+    let visited be {}
+    let queue be [from_id]
+    while len(queue) > 0 do
+      let current be queue[0]
+      set queue to drop(queue, 1)
+      if current is to_id then
+        return true
+      end
+      if visited[current] is null then
+        set visited[current] to true
+        let edges be self.adjacency[current]
+        if edges is not null then
+          for edge in edges do
+            if visited[edge.target] is null then
+              push(queue, edge.target)
+            end
+          end
+        end
+      end
+    end
+    return false
+  end
+
+  define stats(self)
+    return {
+      "nodes": len(keys(self.nodes)),
+      "edges": len(self.edges)
+    }
+  end
+end
+
+define new_knowledge_graph()
+  return KnowledgeGraph {
+    nodes: {},
+    edges: [],
+    adjacency: {}
+  }
+end
+
+export KNode, KEdge, KnowledgeGraph,
+       new_knode, new_kedge, new_knowledge_graph

@@ -74,6 +74,20 @@ class AssignVar(ASTNode):
     value: Any = None
 
 
+@dataclass
+class AssignField(ASTNode):
+    obj: Any = None
+    field_name: str = ""
+    value: Any = None
+
+
+@dataclass
+class AssignIndex(ASTNode):
+    obj: Any = None
+    index: Any = None
+    value: Any = None
+
+
 # ── Expressions ──────────────────────────────────────────────
 @dataclass
 class BinaryOp(ASTNode):

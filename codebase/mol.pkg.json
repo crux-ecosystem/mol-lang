@@ -1,0 +1,10 @@
+{
+  "name": "mol-codebase",
+  "version": "0.1.0",
+  "description": "The MOL self-hosted codebase — stdlib, IntraMind core, apps, and web API",
+  "author": "CruxLabx / Mounesh",
+  "main": "main.mol",
+  "license": "MIT",
+  "dependencies": {},
+  "keywords": ["mol", "intramind", "cruxlabx", "self-hosted"]
+}

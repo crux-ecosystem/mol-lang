@@ -118,6 +118,24 @@ class MOLTransformer(Transformer):
     def assign_stmt(self, name, value):
         return AssignVar(name=str(name), value=value)
 
+    def assign_field_stmt(self, obj_name, field_name, value):
+        from mol.ast_nodes import VarRef
+        return AssignField(obj=VarRef(name=str(obj_name)), field_name=str(field_name), value=value)
+
+    def assign_index_stmt(self, obj_name, index, value):
+        from mol.ast_nodes import VarRef
+        return AssignIndex(obj=VarRef(name=str(obj_name)), index=index, value=value)
+
+    def assign_field_index_stmt(self, obj_name, field_name, index, value):
+        from mol.ast_nodes import VarRef, FieldAccess
+        obj = FieldAccess(obj=VarRef(name=str(obj_name)), field_name=str(field_name))
+        return AssignIndex(obj=obj, index=index, value=value)
+
+    def assign_index_index_stmt(self, obj_name, first_index, second_index, value):
+        from mol.ast_nodes import VarRef, IndexAccess
+        obj = IndexAccess(obj=VarRef(name=str(obj_name)), index=first_index)
+        return AssignIndex(obj=obj, index=second_index, value=value)
+
     # ── Types ────────────────────────────────────────────────
     def type_thought(self):  return "Thought"
     def type_memory(self):   return "Memory"
@@ -416,7 +434,11 @@ class MOLTransformer(Transformer):
         return TestBlock(description=str(desc)[1:-1], body=body)
 
     # ── v0.6.0 — Lambda Expression ──────────────────────────
-    def lambda_expr(self, names, body):
+    def lambda_expr(self, *args):
+        if len(args) == 1:
+            # No parameters: fn() -> body
+            return LambdaExpr(params=[], body=args[0])
+        names, body = args
         params = names if names else []
         return LambdaExpr(params=params, body=body)
 

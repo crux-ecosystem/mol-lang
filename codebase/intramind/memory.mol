@@ -1,0 +1,178 @@
+-- ══════════════════════════════════════════════════════════
+-- IntraMind — Memory System
+-- ══════════════════════════════════════════════════════════
+-- Short-term and long-term memory for AI agents,
+-- written in pure MOL.
+-- ══════════════════════════════════════════════════════════
+
+-- ── Memory Entry ────────────────────────────────────────
+struct MemoryEntry do
+  content, category, timestamp, importance, tags
+end
+
+define new_memory(content, category, importance)
+  return MemoryEntry {
+    content: content,
+    category: category,
+    timestamp: clock(),
+    importance: importance,
+    tags: []
+  }
+end
+
+-- ── Short-Term Memory (limited capacity, recent items) ──
+struct ShortTermMemory do
+  entries, capacity
+end
+
+impl ShortTermMemory do
+  define store(self, entry)
+    push(self.entries, entry)
+    -- Evict oldest if over capacity
+    if len(self.entries) > self.capacity then
+      set self.entries to drop(self.entries, 1)
+    end
+    return self
+  end
+
+  define recall(self, category)
+    return filter(self.entries, fn(e) -> e.category is category)
+  end
+
+  define recall_recent(self, n)
+    let start be len(self.entries) - n
+    if start < 0 then
+      set start to 0
+    end
+    return slice(self.entries, start)
+  end
+
+  define search(self, keyword)
+    return filter(self.entries, fn(e) -> contains(e.content, keyword))
+  end
+
+  define clear(self)
+    set self.entries to []
+    return self
+  end
+
+  define size(self)
+    return len(self.entries)
+  end
+end
+
+define new_short_term(capacity)
+  return ShortTermMemory { entries: [], capacity: capacity }
+end
+
+-- ── Long-Term Memory (persistent, indexed) ──────────────
+struct LongTermMemory do
+  entries, index
+end
+
+impl LongTermMemory do
+  define store(self, entry)
+    push(self.entries, entry)
+    -- Index by category
+    let cat be entry.category
+    if self.index[cat] is null then
+      set self.index[cat] to []
+    end
+    push(self.index[cat], len(self.entries) - 1)
+    return self
+  end
+
+  define recall(self, category)
+    let indices be self.index[category]
+    if indices is null then
+      return []
+    end
+    let result be []
+    for idx in indices do
+      push(result, self.entries[idx])
+    end
+    return result
+  end
+
+  define search(self, keyword)
+    return filter(self.entries, fn(e) -> contains(e.content, keyword))
+  end
+
+  define important(self, threshold)
+    return filter(self.entries, fn(e) -> e.importance >= threshold)
+  end
+
+  define size(self)
+    return len(self.entries)
+  end
+
+  define summarize(self)
+    let categories be keys(self.index)
+    let summary be {}
+    for cat in categories do
+      set summary[cat] to len(self.index[cat])
+    end
+    return summary
+  end
+end
+
+define new_long_term()
+  return LongTermMemory { entries: [], index: {} }
+end
+
+-- ── Working Memory (combines short + long term) ─────────
+struct WorkingMemory do
+  short_term, long_term, context
+end
+
+impl WorkingMemory do
+  define remember(self, content, category, importance)
+    let entry be new_memory(content, category, importance)
+    self.short_term.store(entry)
+    -- Important memories also go to long-term
+    if importance >= 7 then
+      self.long_term.store(entry)
+    end
+    return self
+  end
+
+  define recall(self, category)
+    let short be self.short_term.recall(category)
+    let long be self.long_term.recall(category)
+    return flatten([short, long])
+  end
+
+  define search(self, keyword)
+    let short be self.short_term.search(keyword)
+    let long be self.long_term.search(keyword)
+    return flatten([short, long])
+  end
+
+  define set_context(self, ctx)
+    set self.context to ctx
+    return self
+  end
+
+  define get_context(self)
+    return self.context
+  end
+
+  define stats(self)
+    return {
+      "short_term": self.short_term.size(),
+      "long_term": self.long_term.size(),
+      "has_context": self.context is not null
+    }
+  end
+end
+
+define new_working_memory(capacity)
+  return WorkingMemory {
+    short_term: new_short_term(capacity),
+    long_term: new_long_term(),
+    context: null
+  }
+end
+
+export MemoryEntry, ShortTermMemory, LongTermMemory, WorkingMemory,
+       new_memory, new_short_term, new_long_term, new_working_memory
