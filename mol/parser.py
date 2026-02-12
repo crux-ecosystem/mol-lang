@@ -33,6 +33,30 @@ _parser = _get_parser()
 class MOLTransformer(Transformer):
     """Transforms the Lark parse tree into our AST node objects."""
 
+    def __default_token__(self, tok):
+        return tok
+
+    def _apply_meta(self, tree, result):
+        """After transforming a tree, apply its meta (line/col) to the result AST node."""
+        if isinstance(result, ASTNode) and hasattr(tree, 'meta'):
+            meta = tree.meta
+            if hasattr(meta, 'line') and meta.line is not None:
+                result.line = meta.line
+                result.column = getattr(meta, 'column', 0) or 0
+        return result
+
+    def _call_userfunc_token(self, token):
+        return token
+
+    def __default__(self, data, children, meta):
+        """Fallback for rules without explicit handlers."""
+        return children
+
+    def _transform_tree(self, tree):
+        """Override to inject line/col from Lark meta into AST nodes."""
+        result = super()._transform_tree(tree)
+        return self._apply_meta(tree, result)
+
     # ── Program ──────────────────────────────────────────────
     def start(self, *stmts):
         return Program(statements=[s for s in stmts if s is not None])
@@ -204,7 +228,15 @@ class MOLTransformer(Transformer):
         return list(args)
 
     # ── Functions ────────────────────────────────────────────
-    def func_def(self, name, params, body):
+    def func_def(self, name, *args):
+        # When param_list is absent, Lark passes (name, body)
+        # When present, it passes (name, params, body)
+        if len(args) == 1:
+            params = []
+            body = args[0]
+        else:
+            params = args[0]
+            body = args[1]
         return FuncDef(
             name=str(name),
             params=params if params else [],
@@ -394,6 +426,42 @@ class MOLTransformer(Transformer):
 
     def await_expr(self, expr):
         return AwaitExpr(expr=expr)
+
+    # ── v0.8.0 — Structs ────────────────────────────────────
+    def struct_field(self, *args):
+        name = str(args[0])
+        type_name = str(args[1]) if len(args) > 1 else None
+        return (name, type_name)
+
+    def struct_fields(self, *fields):
+        return list(fields)
+
+    def struct_def(self, name, fields):
+        return StructDef(name=str(name), fields=fields)
+
+    def impl_methods(self, *methods):
+        return list(methods)
+
+    def impl_block(self, name, methods):
+        return ImplBlock(struct_name=str(name), methods=methods)
+
+    def struct_literal(self, name, *pairs):
+        # pairs may be: a single pair_list (list of tuples) or individual tuples
+        fields = []
+        for p in pairs:
+            if isinstance(p, list):
+                fields.extend(p)
+            else:
+                fields.append(p)
+        return StructLiteral(struct_name=str(name), fields=fields)
+
+    # ── v0.8.0 — Yield ──────────────────────────────────────
+    def yield_stmt(self, value):
+        return YieldStmt(value=value)
+
+    # ── v0.8.0 — Export ─────────────────────────────────────
+    def export_stmt(self, *names):
+        return ExportStmt(names=[str(n) for n in names])
 
     # ── v0.6.0 — Match Expression ───────────────────────────
     def match_expr(self, subject, *arms):

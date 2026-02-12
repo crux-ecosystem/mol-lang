@@ -1065,6 +1065,168 @@ def _builtin_is_map(val):
     return isinstance(val, dict)
 
 
+# ── File I/O (v0.8.0) ───────────────────────────────────────
+import os as _os
+
+def _builtin_read_file(path):
+    """Read file contents: read_file("data.txt") → "contents..." """
+    try:
+        with open(path, "r") as f:
+            return f.read()
+    except FileNotFoundError:
+        raise MOLSecurityError(f"File not found: {path}")
+    except PermissionError:
+        raise MOLSecurityError(f"Permission denied: {path}")
+    except Exception as e:
+        raise MOLSecurityError(f"Cannot read file: {e}")
+
+
+def _builtin_write_file(path, content):
+    """Write to file: write_file("out.txt", "hello")"""
+    try:
+        with open(path, "w") as f:
+            f.write(str(content))
+        return True
+    except PermissionError:
+        raise MOLSecurityError(f"Permission denied: {path}")
+    except Exception as e:
+        raise MOLSecurityError(f"Cannot write file: {e}")
+
+
+def _builtin_append_file(path, content):
+    """Append to file: append_file("log.txt", "new line\\n")"""
+    try:
+        with open(path, "a") as f:
+            f.write(str(content))
+        return True
+    except PermissionError:
+        raise MOLSecurityError(f"Permission denied: {path}")
+    except Exception as e:
+        raise MOLSecurityError(f"Cannot append to file: {e}")
+
+
+def _builtin_file_exists(path):
+    """Check if file exists: file_exists("data.txt") → true"""
+    return _os.path.exists(path)
+
+
+def _builtin_list_dir(path="."):
+    """List directory: list_dir("./src") → ["file1.mol", "file2.mol"]"""
+    try:
+        return sorted(_os.listdir(path))
+    except FileNotFoundError:
+        raise MOLSecurityError(f"Directory not found: {path}")
+    except PermissionError:
+        raise MOLSecurityError(f"Permission denied: {path}")
+
+
+def _builtin_delete_file(path):
+    """Delete file: delete_file("temp.txt")"""
+    try:
+        _os.remove(path)
+        return True
+    except FileNotFoundError:
+        raise MOLSecurityError(f"File not found: {path}")
+    except PermissionError:
+        raise MOLSecurityError(f"Permission denied: {path}")
+
+
+def _builtin_make_dir(path):
+    """Create directory: make_dir("./output")"""
+    try:
+        _os.makedirs(path, exist_ok=True)
+        return True
+    except PermissionError:
+        raise MOLSecurityError(f"Permission denied: {path}")
+
+
+def _builtin_file_size(path):
+    """Get file size in bytes: file_size("data.bin") → 1024"""
+    try:
+        return _os.path.getsize(path)
+    except FileNotFoundError:
+        raise MOLSecurityError(f"File not found: {path}")
+
+
+def _builtin_path_join(*parts):
+    """Join path components: path_join("src", "main.mol") → "src/main.mol" """
+    return _os.path.join(*parts)
+
+
+def _builtin_path_dir(path):
+    """Get directory: path_dir("/a/b/c.txt") → "/a/b" """
+    return _os.path.dirname(path)
+
+
+def _builtin_path_base(path):
+    """Get basename: path_base("/a/b/c.txt") → "c.txt" """
+    return _os.path.basename(path)
+
+
+def _builtin_path_ext(path):
+    """Get extension: path_ext("file.mol") → ".mol" """
+    return _os.path.splitext(path)[1]
+
+
+# ── HTTP (v0.8.0) ───────────────────────────────────────────
+import urllib.request as _urllib_req
+import urllib.error as _urllib_err
+import urllib.parse as _urllib_parse
+
+def _builtin_fetch(url, options=None):
+    """HTTP fetch: fetch("https://api.example.com/data") → response map
+    Options: {"method": "POST", "headers": {...}, "body": "..."}"""
+    if options is None:
+        options = {}
+
+    method = options.get("method", "GET") if isinstance(options, dict) else "GET"
+    headers = options.get("headers", {}) if isinstance(options, dict) else {}
+    body = options.get("body", None) if isinstance(options, dict) else None
+
+    try:
+        if body is not None:
+            if isinstance(body, dict):
+                body = json.dumps(body).encode("utf-8")
+                if "Content-Type" not in headers:
+                    headers["Content-Type"] = "application/json"
+            elif isinstance(body, str):
+                body = body.encode("utf-8")
+
+        req = _urllib_req.Request(url, data=body, headers=headers, method=method.upper())
+        with _urllib_req.urlopen(req, timeout=30) as resp:
+            resp_body = resp.read().decode("utf-8")
+            # Try to parse JSON
+            try:
+                data = json.loads(resp_body)
+            except (json.JSONDecodeError, ValueError):
+                data = resp_body
+            return {
+                "status": resp.status,
+                "body": data,
+                "headers": dict(resp.getheaders()),
+                "ok": 200 <= resp.status < 300,
+            }
+    except _urllib_err.HTTPError as e:
+        resp_body = e.read().decode("utf-8", errors="replace")
+        return {
+            "status": e.code,
+            "body": resp_body,
+            "headers": dict(e.headers),
+            "ok": False,
+        }
+    except _urllib_err.URLError as e:
+        return {"status": 0, "body": str(e.reason), "headers": {}, "ok": False}
+    except Exception as e:
+        return {"status": 0, "body": str(e), "headers": {}, "ok": False}
+
+
+def _builtin_url_encode(params):
+    """URL-encode a map: url_encode({"q": "hello world"}) → "q=hello+world" """
+    if isinstance(params, dict):
+        return _urllib_parse.urlencode(params)
+    return str(params)
+
+
 # ── Standard Library Registry ────────────────────────────────
 STDLIB: dict[str, callable] = {
     # General utilities
@@ -1214,4 +1376,22 @@ STDLIB: dict[str, callable] = {
     "race": _builtin_race,
     "wait_all": _builtin_wait_all,
     "task_done": _builtin_task_done,
+
+    # File I/O (v0.8.0)
+    "read_file": _builtin_read_file,
+    "write_file": _builtin_write_file,
+    "append_file": _builtin_append_file,
+    "file_exists": _builtin_file_exists,
+    "list_dir": _builtin_list_dir,
+    "delete_file": _builtin_delete_file,
+    "make_dir": _builtin_make_dir,
+    "file_size": _builtin_file_size,
+    "path_join": _builtin_path_join,
+    "path_dir": _builtin_path_dir,
+    "path_base": _builtin_path_base,
+    "path_ext": _builtin_path_ext,
+
+    # HTTP (v0.8.0)
+    "fetch": _builtin_fetch,
+    "url_encode": _builtin_url_encode,
 }

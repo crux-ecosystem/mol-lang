@@ -1103,6 +1103,321 @@ await worker
     assert "6" in interp.output[0]
 
 
+# ══════════════════════════════════════════════════════════════
+# v0.8.0 TESTS — Structs, Generators, Modules, File I/O, HTTP
+# ══════════════════════════════════════════════════════════════
+
+# ── Structs ──────────────────────────────────────────────────
+def test_struct_definition():
+    interp = run("""
+struct Point do
+  x,
+  y
+end
+show Point
+""")
+    assert "<struct Point>" in interp.output[0]
+
+
+def test_struct_literal_creation():
+    interp = run("""
+struct Point do
+  x,
+  y
+end
+let p be Point { x: 10, y: 20 }
+show p
+""")
+    assert "Point" in interp.output[0]
+    assert "10" in interp.output[0]
+    assert "20" in interp.output[0]
+
+
+def test_struct_field_access():
+    interp = run("""
+struct Point do
+  x,
+  y
+end
+let p be Point { x: 42, y: 99 }
+show p.x
+show p.y
+""")
+    assert interp.output[0] == "42"
+    assert interp.output[1] == "99"
+
+
+def test_struct_constructor_call():
+    interp = run("""
+struct Color do
+  r,
+  g,
+  b
+end
+let c be Color(255, 128, 0)
+show c.r
+show c.g
+show c.b
+""")
+    assert interp.output == ["255", "128", "0"]
+
+
+def test_struct_impl_methods():
+    interp = run("""
+struct Rect do
+  w,
+  h
+end
+
+impl Rect do
+  define area()
+    return self.w * self.h
+  end
+
+  define perimeter()
+    return 2 * (self.w + self.h)
+  end
+end
+
+let r be Rect { w: 5, h: 3 }
+show r.area()
+show r.perimeter()
+""")
+    assert interp.output == ["15", "16"]
+
+
+def test_struct_method_with_args():
+    interp = run("""
+struct Point do
+  x,
+  y
+end
+
+impl Point do
+  define distance(other)
+    let dx be self.x - other.x
+    let dy be self.y - other.y
+    return sqrt(dx * dx + dy * dy)
+  end
+end
+
+let a be Point(0, 0)
+let b be Point(3, 4)
+show a.distance(b)
+""")
+    assert interp.output[0] == "5"
+
+
+def test_struct_missing_field_defaults_null():
+    interp = run("""
+struct Config do
+  host,
+  port
+end
+let c be Config { host: "localhost" }
+show c.host
+show c.port
+""")
+    assert interp.output[0] == "localhost"
+    assert interp.output[1] == "null"
+
+
+# ── Generators ───────────────────────────────────────────────
+def test_generator_basic():
+    interp = run("""
+define counter(n)
+  for i in range(n) do
+    yield i
+  end
+end
+
+let gen be counter(5)
+let items be gen.to_list()
+show items
+""")
+    assert interp.output[0] == "[0, 1, 2, 3, 4]"
+
+
+def test_generator_is_lazy():
+    interp = run("""
+define evens(n)
+  for i in range(n) do
+    if i % 2 is 0 then
+      yield i
+    end
+  end
+end
+
+let gen be evens(10)
+show gen
+let lst be gen.to_list()
+show lst
+""")
+    assert "Generator" in interp.output[0]
+    assert interp.output[1] == "[0, 2, 4, 6, 8]"
+
+
+def test_generator_for_iteration():
+    interp = run("""
+define squares(n)
+  for i in range(n) do
+    yield i * i
+  end
+end
+
+let result be []
+for val in squares(4) do
+  push(result, val)
+end
+show result
+""")
+    assert interp.output[0] == "[0, 1, 4, 9]"
+
+
+def test_generator_fibonacci():
+    interp = run("""
+define fib(n)
+  let a be 0
+  let b be 1
+  for i in range(n) do
+    yield a
+    let temp be a + b
+    set a to b
+    set b to temp
+  end
+end
+
+let nums be fib(8).to_list()
+show nums
+""")
+    assert interp.output[0] == "[0, 1, 1, 2, 3, 5, 8, 13]"
+
+
+# ── File I/O ─────────────────────────────────────────────────
+def test_file_write_and_read():
+    interp = run("""
+write_file("/tmp/mol_test_v080.txt", "hello mol")
+let content be read_file("/tmp/mol_test_v080.txt")
+show content
+delete_file("/tmp/mol_test_v080.txt")
+""")
+    assert interp.output[0] == "hello mol"
+
+
+def test_file_append():
+    interp = run("""
+write_file("/tmp/mol_test_append.txt", "line1")
+append_file("/tmp/mol_test_append.txt", "\\nline2")
+let content be read_file("/tmp/mol_test_append.txt")
+show content
+delete_file("/tmp/mol_test_append.txt")
+""")
+    assert "line1" in interp.output[0]
+
+
+def test_file_exists():
+    interp = run("""
+write_file("/tmp/mol_test_exists.txt", "x")
+show file_exists("/tmp/mol_test_exists.txt")
+delete_file("/tmp/mol_test_exists.txt")
+show file_exists("/tmp/mol_test_exists.txt")
+""")
+    assert interp.output[0] == "true"
+    assert interp.output[1] == "false"
+
+
+def test_path_functions():
+    interp = run("""
+show path_join("src", "main.mol")
+show path_base("/a/b/c.txt")
+show path_ext("file.mol")
+show path_dir("/a/b/c.txt")
+""")
+    assert interp.output[0] == "src/main.mol"
+    assert interp.output[1] == "c.txt"
+    assert interp.output[2] == ".mol"
+    assert interp.output[3] == "/a/b"
+
+
+def test_make_dir_and_list_dir():
+    interp = run("""
+make_dir("/tmp/mol_testdir_v080")
+write_file("/tmp/mol_testdir_v080/a.txt", "a")
+write_file("/tmp/mol_testdir_v080/b.txt", "b")
+let files be list_dir("/tmp/mol_testdir_v080")
+show files
+delete_file("/tmp/mol_testdir_v080/a.txt")
+delete_file("/tmp/mol_testdir_v080/b.txt")
+""")
+    assert "a.txt" in interp.output[0]
+    assert "b.txt" in interp.output[0]
+
+
+# ── HTTP Fetch ───────────────────────────────────────────────
+def test_fetch_get():
+    interp = run("""
+let resp be fetch("https://httpbin.org/get")
+show resp.ok
+show resp.status
+""")
+    assert interp.output[0] == "true"
+    assert interp.output[1] == "200"
+
+
+# ── Module System / Export ───────────────────────────────────
+def test_export_statement_parses():
+    """Test that export statement parses without errors."""
+    interp = run("""
+define helper()
+  return 42
+end
+export helper
+show helper()
+""")
+    assert interp.output[0] == "42"
+
+
+# ── Line Tracking ───────────────────────────────────────────
+def test_ast_has_line_info():
+    """Verify AST nodes carry line info from parser."""
+    from mol.parser import parse
+    code = "let x be 42\nshow x"
+    ast = parse(code)
+    assert ast.statements[0].line == 1
+    assert ast.statements[1].line == 2
+
+
+# ── Transpiler Struct ────────────────────────────────────────
+def test_transpile_struct_python():
+    from mol.transpiler import PythonTranspiler
+    from mol.parser import parse
+    code = """
+struct Point do
+  x,
+  y
+end
+"""
+    ast = parse(code)
+    py = PythonTranspiler().transpile(ast)
+    assert "class Point:" in py
+    assert "self.x" in py
+
+
+def test_transpile_struct_js():
+    from mol.transpiler import JavaScriptTranspiler
+    from mol.parser import parse
+    code = """
+struct Point do
+  x,
+  y
+end
+"""
+    ast = parse(code)
+    js = JavaScriptTranspiler().transpile(ast)
+    assert "class Point" in js
+    assert "this.x" in js
+
+
 if __name__ == "__main__":
     tests = [v for k, v in globals().items() if k.startswith("test_")]
     passed = 0

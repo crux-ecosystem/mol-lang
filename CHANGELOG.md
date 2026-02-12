@@ -6,6 +6,50 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [0.8.0] — 2025-02-12
+
+### Added — Structs, Generators, File I/O, HTTP, Better Errors
+
+- **Structs with methods** (`struct`/`impl`):
+  - `struct Point do x, y end` — define user-defined types
+  - Constructor-style: `Point(10, 20)` or literal-style: `Point { x: 10, y: 20 }`
+  - `impl Point do define method() ... end end` — attach methods with `self` binding
+  - Field access: `p.x`, method calls: `p.distance(other)`
+  - Runtime classes: `MOLStructDef`, `MOLStructInstance`
+
+- **Generators/Iterators** (`yield`):
+  - `yield expr` inside functions creates lazy generators
+  - `gen.to_list()` — materialize generator to list
+  - `gen.next()` — get next value
+  - For-loop iteration over generators
+  - Proper step-by-step generator execution with nested control flow support
+
+- **Module system** (`export`):
+  - `export name1, name2` — explicitly control module exports
+  - Without `export`, all user-defined symbols are exported (backward compatible)
+  - Works with existing `use "file.mol"` import system
+
+- **File I/O** (12 new stdlib functions):
+  - `read_file(path)`, `write_file(path, content)`, `append_file(path, content)`
+  - `file_exists(path)`, `file_size(path)`, `delete_file(path)`
+  - `make_dir(path)`, `list_dir(path)`
+  - `path_join(...)`, `path_dir(path)`, `path_base(path)`, `path_ext(path)`
+
+- **HTTP** (2 new stdlib functions):
+  - `fetch(url, options?)` — HTTP requests with method/headers/body support
+  - `url_encode(params)` — URL-encode query parameters
+  - Auto-parses JSON responses, returns `{status, body, headers, ok}` map
+
+- **Better error messages**:
+  - Line/column tracking from parser through to runtime errors
+  - Error messages include file name and line number: `[main.mol:5] Division by zero`
+  - AST nodes carry line/column info from Lark's position propagation
+
+- **Transpiler support** for all v0.8.0 features (Python + JavaScript targets)
+- 21 new tests (123 total), new example: `examples/19_structs_modules.mol`
+
+---
+
 ## [0.5.0] — 2026-02-11
 
 ### Added — Package Manager & WASM Compilation
