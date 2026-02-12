@@ -1,0 +1,29 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL Web Framework — Middleware
+-- ══════════════════════════════════════════════════════════
+-- CORS, logging, and request processing middleware.
+-- ══════════════════════════════════════════════════════════
+
+-- ── Logger middleware ───────────────────────────────────
+define log_request(request)
+  let method be request["method"]
+  let path be request["path"]
+  let ts be to_text(clock())
+  show("[" + ts + "] " + method + " " + path)
+end
+
+-- ── CORS headers ────────────────────────────────────────
+define add_cors(response)
+  let headers be response["headers"]
+  set headers["Access-Control-Allow-Origin"] to "*"
+  set headers["Access-Control-Allow-Methods"] to "GET, POST, PUT, DELETE, OPTIONS"
+  set headers["Access-Control-Allow-Headers"] to "Content-Type, Authorization"
+  return response
+end
+
+-- ── Apply middleware pipeline ───────────────────────────
+-- Note: with_middleware is not used — main.mol calls
+-- log_request and add_cors directly for simplicity.
+-- Keeping as a reference for future framework work.
+
+export log_request, add_cors

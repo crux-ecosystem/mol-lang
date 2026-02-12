@@ -1,0 +1,123 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL CLI App — Data Pipeline
+-- ══════════════════════════════════════════════════════════
+-- A functional data processing pipeline demonstrating
+-- MOL's pipe operator and functional style.
+-- ══════════════════════════════════════════════════════════
+
+use "std/algorithms.mol"
+use "std/string_utils.mol"
+use "std/math_ext.mol"
+
+-- ── Sample Data ─────────────────────────────────────────
+let sales_data be [
+  {"product": "Widget A", "price": 29.99, "quantity": 150, "region": "North"},
+  {"product": "Widget B", "price": 49.99, "quantity": 80, "region": "South"},
+  {"product": "Gadget X", "price": 99.99, "quantity": 45, "region": "North"},
+  {"product": "Gadget Y", "price": 149.99, "quantity": 30, "region": "East"},
+  {"product": "Widget C", "price": 19.99, "quantity": 200, "region": "South"},
+  {"product": "Gadget Z", "price": 199.99, "quantity": 15, "region": "North"},
+  {"product": "Widget D", "price": 39.99, "quantity": 120, "region": "East"},
+  {"product": "Gadget W", "price": 79.99, "quantity": 60, "region": "South"}
+]
+
+-- ── Pipeline Functions ──────────────────────────────────
+
+-- Calculate revenue for each item
+define calc_revenue(items)
+  return map(items, fn(item) -> {
+    "product": item["product"],
+    "price": item["price"],
+    "quantity": item["quantity"],
+    "region": item["region"],
+    "revenue": item["price"] * item["quantity"]
+  })
+end
+
+-- Filter high-value items
+define high_value(items)
+  return filter(items, fn(item) -> item["revenue"] > 3000)
+end
+
+-- Group by region
+define group_by_region(items)
+  let groups be {}
+  for item in items do
+    let region be item["region"]
+    if groups[region] is null then
+      set groups[region] to []
+    end
+    push(groups[region], item)
+  end
+  return groups
+end
+
+-- Summarize each group
+define summarize_groups(groups)
+  let summaries be {}
+  for region in keys(groups) do
+    let items be groups[region]
+    let revenues be map(items, fn(i) -> i["revenue"])
+    set summaries[region] to {
+      "count": len(items),
+      "total_revenue": sum(revenues),
+      "avg_revenue": mean(revenues),
+      "products": map(items, fn(i) -> i["product"])
+    }
+  end
+  return summaries
+end
+
+-- ── Run Pipeline ────────────────────────────────────────
+show("═══════════════════════════════════════════════")
+show("       MOL Data Pipeline Demo")
+show("═══════════════════════════════════════════════")
+show("")
+
+-- Step 1: Calculate revenue
+let with_revenue be calc_revenue(sales_data)
+show("Step 1: Revenue calculated for " + to_text(len(with_revenue)) + " items")
+
+-- Step 2: Filter high-value
+let high be high_value(with_revenue)
+show("Step 2: " + to_text(len(high)) + " high-value items (>$3000)")
+
+-- Step 3: Group by region
+let grouped be group_by_region(with_revenue)
+show("Step 3: Grouped into " + to_text(len(keys(grouped))) + " regions")
+
+-- Step 4: Summarize
+let summary be summarize_groups(grouped)
+show("Step 4: Summary generated")
+show("")
+
+-- Display results
+show("── Regional Summary ─────────────────────────")
+for region in keys(summary) do
+  let s be summary[region]
+  show("  " + pad_right(region, 8, " ") + " | " + to_text(s["count"]) + " items | $" + to_text(s["total_revenue"]) + " total")
+end
+
+-- Overall stats
+let all_revenues be map(with_revenue, fn(i) -> i["revenue"])
+show("")
+show("── Overall Statistics ───────────────────────")
+show("  Total items:    " + to_text(len(sales_data)))
+show("  Total revenue:  $" + to_text(sum(all_revenues)))
+show("  Average:        $" + to_text(mean(all_revenues)))
+show("  Median:         $" + to_text(median(all_revenues)))
+show("  Std deviation:  $" + to_text(std_dev(all_revenues)))
+
+-- Find top product by revenue
+let top_revenue be 0
+let top_name be ""
+for item in with_revenue do
+  if item["revenue"] > top_revenue then
+    set top_revenue to item["revenue"]
+    set top_name to item["product"]
+  end
+end
+show("")
+show("  Top product: " + top_name + " ($" + to_text(top_revenue) + ")")
+show("")
+show("Pipeline complete!")

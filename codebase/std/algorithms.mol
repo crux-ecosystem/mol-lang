@@ -1,0 +1,291 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL Standard Library — Algorithms
+-- ══════════════════════════════════════════════════════════
+-- Sorting, searching, graph traversal, and classic algorithms
+-- written in pure MOL.
+-- ══════════════════════════════════════════════════════════
+
+-- ── Sorting ─────────────────────────────────────────────
+
+-- Bubble Sort (simple, educational)
+define bubble_sort(lst)
+  let arr be lst
+  let n be len(arr)
+  for i in range(n) do
+    for j in range(n - i - 1) do
+      if arr[j] > arr[j + 1] then
+        let temp be arr[j]
+        set arr[j] to arr[j + 1]
+        set arr[j + 1] to temp
+      end
+    end
+  end
+  return arr
+end
+
+-- Insertion Sort (good for small/nearly-sorted data)
+define insertion_sort(lst)
+  let arr be lst
+  let n be len(arr)
+  for i in range(1, n) do
+    let key be arr[i]
+    let j be i - 1
+    while j >= 0 and arr[j] > key do
+      set arr[j + 1] to arr[j]
+      set j to j - 1
+    end
+    set arr[j + 1] to key
+  end
+  return arr
+end
+
+-- Merge Sort (O(n log n), stable)
+define merge_sort(lst)
+  if len(lst) <= 1 then
+    return lst
+  end
+  let mid be floor(len(lst) / 2)
+  let left be merge_sort(slice(lst, 0, mid))
+  let right be merge_sort(slice(lst, mid))
+  return _merge(left, right)
+end
+
+define _merge(left, right)
+  let result be []
+  let i be 0
+  let j be 0
+  while i < len(left) and j < len(right) do
+    if left[i] <= right[j] then
+      push(result, left[i])
+      set i to i + 1
+    else
+      push(result, right[j])
+      set j to j + 1
+    end
+  end
+  while i < len(left) do
+    push(result, left[i])
+    set i to i + 1
+  end
+  while j < len(right) do
+    push(result, right[j])
+    set j to j + 1
+  end
+  return result
+end
+
+-- Quick Sort (O(n log n) average, in-place partition)
+define quick_sort(lst)
+  if len(lst) <= 1 then
+    return lst
+  end
+  let pivot be lst[0]
+  let less be filter(slice(lst, 1), fn(x) -> x < pivot)
+  let equal be filter(lst, fn(x) -> x is pivot)
+  let greater be filter(slice(lst, 1), fn(x) -> x >= pivot)
+  let sorted_less be quick_sort(less)
+  let sorted_greater be quick_sort(greater)
+  return flatten([sorted_less, equal, sorted_greater])
+end
+
+-- ── Searching ───────────────────────────────────────────
+
+-- Linear Search (returns index or -1)
+define linear_search(lst, target)
+  for i in range(len(lst)) do
+    if lst[i] is target then
+      return i
+    end
+  end
+  return -1
+end
+
+-- Binary Search (sorted list, returns index or -1)
+define bin_search(lst, target)
+  let low be 0
+  let high be len(lst) - 1
+  while low <= high do
+    let mid be floor((low + high) / 2)
+    if lst[mid] is target then
+      return mid
+    elif lst[mid] < target then
+      set low to mid + 1
+    else
+      set high to mid - 1
+    end
+  end
+  return -1
+end
+
+-- ── Graph Algorithms ────────────────────────────────────
+
+-- BFS (Breadth-First Search)
+-- graph: map of node → list of neighbors
+define bfs(graph, start)
+  let visited be []
+  let queue be [start]
+  while len(queue) > 0 do
+    let node be queue[0]
+    set queue to drop(queue, 1)
+    if not contains(visited, node) then
+      push(visited, node)
+      let neighbors be graph[node] ?? []
+      for neighbor in neighbors do
+        if not contains(visited, neighbor) then
+          push(queue, neighbor)
+        end
+      end
+    end
+  end
+  return visited
+end
+
+-- DFS (Depth-First Search)
+define dfs(graph, start)
+  let visited be []
+  let stack be [start]
+  while len(stack) > 0 do
+    let node be pop(stack)
+    if not contains(visited, node) then
+      push(visited, node)
+      let neighbors be graph[node] ?? []
+      for neighbor in reverse(neighbors) do
+        if not contains(visited, neighbor) then
+          push(stack, neighbor)
+        end
+      end
+    end
+  end
+  return visited
+end
+
+-- ── Classic Algorithms ──────────────────────────────────
+
+-- Fibonacci sequence
+define fibonacci_seq(n)
+  let result be []
+  let a be 0
+  let b be 1
+  for i in range(n) do
+    push(result, a)
+    let temp be a + b
+    set a to b
+    set b to temp
+  end
+  return result
+end
+
+-- Factorial
+define factorial(n)
+  if n <= 1 then
+    return 1
+  end
+  return n * factorial(n - 1)
+end
+
+-- GCD (Greatest Common Divisor)
+define gcd(a, b)
+  while b is not 0 do
+    let temp be b
+    set b to a % b
+    set a to temp
+  end
+  return a
+end
+
+-- LCM (Least Common Multiple)
+define lcm(a, b)
+  return abs(a * b) / gcd(a, b)
+end
+
+-- Power (fast exponentiation)
+define fast_pow(base, exp)
+  if exp is 0 then
+    return 1
+  end
+  if exp < 0 then
+    return 1 / fast_pow(base, -1 * exp)
+  end
+  if exp % 2 is 0 then
+    let half be fast_pow(base, exp / 2)
+    return half * half
+  end
+  return base * fast_pow(base, exp - 1)
+end
+
+-- ── Functional Higher-Order ─────────────────────────────
+
+-- Compose two functions: compose(f, g)(x) = f(g(x))
+define compose(f, g)
+  return fn(x) -> f(g(x))
+end
+
+-- Apply function n times
+define apply_n(f, n, initial)
+  let result be initial
+  for i in range(n) do
+    set result to f(result)
+  end
+  return result
+end
+
+-- Memoize a single-arg function
+define memoize(f)
+  let cache be {}
+  return fn(x) -> cache[to_text(x)] ?? f(x)
+end
+
+-- Partition list into [matching, non_matching]
+define partition(lst, pred)
+  let yes be filter(lst, pred)
+  let no be filter(lst, fn(x) -> not pred(x))
+  return [yes, no]
+end
+
+-- Sliding window
+define sliding_window(lst, size)
+  let result be []
+  for i in range(len(lst) - size + 1) do
+    push(result, slice(lst, i, i + size))
+  end
+  return result
+end
+
+-- Frequencies (count occurrences)
+define frequencies(lst)
+  let counts be {}
+  for item in lst do
+    let key be to_text(item)
+    if counts[key] is not null then
+      set counts[key] to counts[key] + 1
+    else
+      set counts[key] to 1
+    end
+  end
+  return counts
+end
+
+-- Transpose a 2D list
+define transpose(matrix)
+  if len(matrix) is 0 then
+    return []
+  end
+  let rows be len(matrix)
+  let cols be len(matrix[0])
+  let result be []
+  for c in range(cols) do
+    let row be []
+    for r in range(rows) do
+      push(row, matrix[r][c])
+    end
+    push(result, row)
+  end
+  return result
+end
+
+export bubble_sort, insertion_sort, merge_sort, quick_sort,
+       linear_search, bin_search,
+       bfs, dfs,
+       fibonacci_seq, factorial, gcd, lcm, fast_pow,
+       compose, apply_n, memoize, partition, sliding_window,
+       frequencies, transpose

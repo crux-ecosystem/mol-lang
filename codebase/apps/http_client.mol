@@ -1,0 +1,59 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL CLI App — HTTP Client
+-- ══════════════════════════════════════════════════════════
+-- A simple HTTP client demonstrating MOL's fetch() function.
+-- ══════════════════════════════════════════════════════════
+
+-- ── HTTP helpers ────────────────────────────────────────
+
+define http_get(url)
+  let response be fetch(url)
+  return response
+end
+
+define http_post(url, body)
+  let response be fetch(url, {
+    "method": "POST",
+    "headers": {"Content-Type": "application/json"},
+    "body": json_stringify(body)
+  })
+  return response
+end
+
+define show_response(label, resp)
+  show("  " + label)
+  show("    Status: " + to_text(resp["status"]))
+  let body be resp["body"]
+  if len(to_text(body)) > 200 then
+    show("    Body:   " + slice(to_text(body), 0, 200) + "...")
+  else
+    show("    Body:   " + to_text(body))
+  end
+  show("")
+end
+
+-- ── Demo ────────────────────────────────────────────────
+show("═══════════════════════════════════════════════")
+show("       MOL HTTP Client Demo")
+show("═══════════════════════════════════════════════")
+show("")
+
+-- Fetch a public JSON API
+show("── GET Request ─────────────────────────────")
+let resp be http_get("https://httpbin.org/get")
+show_response("GET https://httpbin.org/get", resp)
+
+-- POST with JSON body
+show("── POST Request ────────────────────────────")
+let post_resp be http_post("https://httpbin.org/post", {"message": "Hello from MOL!", "version": "0.9.0"})
+show_response("POST https://httpbin.org/post", post_resp)
+
+-- Fetch and parse JSON
+show("── JSON Parsing ────────────────────────────")
+let json_resp be http_get("https://httpbin.org/json")
+let data be json_parse(json_resp["body"])
+show("  Parsed JSON successfully")
+show("  Type: " + type_of(data))
+show("")
+
+show("HTTP client demo complete!")

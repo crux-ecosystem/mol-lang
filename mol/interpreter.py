@@ -279,6 +279,29 @@ class Interpreter:
         env.update(node.name, value)
         return value
 
+    def _exec_AssignField(self, node: AssignField, env):
+        obj = self._eval(node.obj, env)
+        value = self._eval(node.value, env)
+        if isinstance(obj, MOLStructInstance):
+            obj.set_field(node.field_name, value)
+        elif isinstance(obj, dict):
+            obj[node.field_name] = value
+        else:
+            raise MOLRuntimeError(f"Cannot set field '{node.field_name}' on {type(obj).__name__}")
+        return value
+
+    def _exec_AssignIndex(self, node: AssignIndex, env):
+        obj = self._eval(node.obj, env)
+        idx = self._eval(node.index, env)
+        value = self._eval(node.value, env)
+        if isinstance(obj, list):
+            obj[int(idx)] = value
+        elif isinstance(obj, dict):
+            obj[idx] = value
+        else:
+            raise MOLRuntimeError(f"Cannot set index on {type(obj).__name__}")
+        return value
+
     # ── Control Flow ─────────────────────────────────────────
     def _exec_IfStmt(self, node: IfStmt, env):
         if self._truthy(self._eval(node.condition, env)):
@@ -511,6 +534,8 @@ class Interpreter:
         """try ... rescue [name] ... ensure ... end"""
         try:
             result = self._exec_block(node.body, Environment(env))
+        except (ReturnSignal, YieldSignal):
+            raise  # Don't catch control flow signals
         except (MOLRuntimeError, MOLGuardError, Exception) as e:
             rescue_env = Environment(env)
             if node.rescue_name:
@@ -1071,8 +1096,9 @@ class Interpreter:
                 func = obj._struct_def.methods[method_name]
                 call_env = Environment(func.closure_env)
                 call_env.set("self", obj)
-                # Bind function params
-                for i, param in enumerate(func.params):
+                # Bind function params, skipping 'self' (already bound)
+                param_list = [p for p in func.params if p[0] != "self"]
+                for i, param in enumerate(param_list):
                     param_name = param[0]
                     if i < len(args):
                         call_env.set(param_name, args[i])
@@ -1142,6 +1168,8 @@ class Interpreter:
         obj = self._eval(node.obj, env)
         idx = self._eval(node.index, env)
         try:
+            if isinstance(obj, dict):
+                return obj.get(idx)  # Returns None for missing keys
             return obj[idx] if isinstance(idx, str) else obj[int(idx)]
         except (IndexError, KeyError, TypeError) as e:
             raise MOLRuntimeError(f"Index error: {e}")

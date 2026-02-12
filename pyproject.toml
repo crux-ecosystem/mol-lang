@@ -1,6 +1,6 @@
 [project]
 name = "mol-lang"
-version = "0.8.0"
+version = "0.9.0"
 description = "MOL — The Cognitive Programming Language with auto-tracing pipelines"
 requires-python = ">=3.10"
 license = {text = "MIT"}

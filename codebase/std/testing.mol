@@ -1,0 +1,168 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL Standard Library — Testing Framework
+-- ══════════════════════════════════════════════════════════
+-- Lightweight test runner and assertion helpers
+-- for testing MOL code with MOL code.
+-- ══════════════════════════════════════════════════════════
+
+-- ── Test State ──────────────────────────────────────────
+
+struct TestSuite do
+  name,
+  tests,
+  passed,
+  failed,
+  errors
+end
+
+define new_suite(name)
+  return TestSuite {
+    name: name,
+    tests: [],
+    passed: 0,
+    failed: 0,
+    errors: []
+  }
+end
+
+-- ── Assertions ──────────────────────────────────────────
+
+define assert_eq(actual, expected, msg)
+  if actual is not expected then
+    return panic("ASSERT_EQ FAILED: " + msg + " | expected " + to_text(expected) + " but got " + to_text(actual))
+  end
+  return true
+end
+
+define assert_ne(actual, expected, msg)
+  if actual is expected then
+    return panic("ASSERT_NE FAILED: " + msg + " | expected != " + to_text(expected) + " but got same")
+  end
+  return true
+end
+
+define assert_true(val, msg)
+  if not val then
+    return panic("ASSERT_TRUE FAILED: " + msg)
+  end
+  return true
+end
+
+define assert_false(val, msg)
+  if val then
+    return panic("ASSERT_FALSE FAILED: " + msg)
+  end
+  return true
+end
+
+define assert_gt(a, b, msg)
+  if not (a > b) then
+    return panic("ASSERT_GT FAILED: " + msg + " | " + to_text(a) + " not > " + to_text(b))
+  end
+  return true
+end
+
+define assert_lt(a, b, msg)
+  if not (a < b) then
+    return panic("ASSERT_LT FAILED: " + msg + " | " + to_text(a) + " not < " + to_text(b))
+  end
+  return true
+end
+
+define assert_gte(a, b, msg)
+  if not (a >= b) then
+    return panic("ASSERT_GTE FAILED: " + msg + " | " + to_text(a) + " not >= " + to_text(b))
+  end
+  return true
+end
+
+define assert_contains(collection, item, msg)
+  if not contains(collection, item) then
+    return panic("ASSERT_CONTAINS FAILED: " + msg + " | " + to_text(item) + " not in collection")
+  end
+  return true
+end
+
+define assert_len(collection, expected, msg)
+  let actual be len(collection)
+  if actual is not expected then
+    return panic("ASSERT_LEN FAILED: " + msg + " | expected length " + to_text(expected) + " but got " + to_text(actual))
+  end
+  return true
+end
+
+define assert_null(val, msg)
+  if val is not null then
+    return panic("ASSERT_NULL FAILED: " + msg + " | expected null but got " + to_text(val))
+  end
+  return true
+end
+
+define assert_not_null(val, msg)
+  if val is null then
+    return panic("ASSERT_NOT_NULL FAILED: " + msg)
+  end
+  return true
+end
+
+-- ── Test Runner ─────────────────────────────────────────
+
+-- Run a single test function, return { passed, name, error }
+define run_test(name, test_fn)
+  try
+    test_fn()
+    return { "passed": true, "name": name, "error": null }
+  rescue e
+    return { "passed": false, "name": name, "error": to_text(e) }
+  end
+end
+
+-- Run a suite of tests: tests is a list of { name, fn }
+define run_suite(suite_name, tests)
+  show("╔══════════════════════════════════════════")
+  show("║ Test Suite: " + suite_name)
+  show("╠══════════════════════════════════════════")
+
+  let passed be 0
+  let failed be 0
+  let failures be []
+
+  for tc in tests do
+    let result be run_test(tc["name"], tc["fn"])
+    if result["passed"] then
+      show("║ ✓ " + tc["name"])
+      set passed to passed + 1
+    else
+      show("║ ✗ " + tc["name"])
+      show("║   → " + result["error"])
+      set failed to failed + 1
+      push(failures, result)
+    end
+  end
+
+  show("╠══════════════════════════════════════════")
+  show("║ Results: " + to_text(passed) + " passed, " + to_text(failed) + " failed")
+  show("╚══════════════════════════════════════════")
+
+  if failed > 0 then
+    show("")
+    show("FAILURES:")
+    for f in failures do
+      show("  • " + f["name"] + ": " + f["error"])
+    end
+  end
+
+  return { "passed": passed, "failed": failed, "total": passed + failed }
+end
+
+-- Shorthand: define test as { name, fn } pair
+define it(name, func)
+  return { "name": name, "fn": func }
+end
+
+export TestSuite, new_suite,
+       assert_eq, assert_ne, assert_true, assert_false,
+       assert_gt, assert_lt, assert_gte,
+       assert_contains, assert_len,
+       assert_null, assert_not_null,
+       run_test, run_suite, it

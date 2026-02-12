@@ -1,0 +1,209 @@
+-- ══════════════════════════════════════════════════════════
+-- IntraMind — Reasoning Engine
+-- ══════════════════════════════════════════════════════════
+-- Rule-based reasoning, inference, and decision making.
+-- ══════════════════════════════════════════════════════════
+
+-- ── Rule ────────────────────────────────────────────────
+struct Rule do
+  name, condition, action, priority
+end
+
+define new_rule(name, condition, action, priority)
+  return Rule {
+    name: name,
+    condition: condition,
+    action: action,
+    priority: priority
+  }
+end
+
+-- ── Fact ────────────────────────────────────────────────
+struct Fact do
+  subject, predicate, object
+end
+
+define fact(subject, predicate, object)
+  return Fact {
+    subject: subject,
+    predicate: predicate,
+    object: object
+  }
+end
+
+-- ── Inference Engine ────────────────────────────────────
+struct InferenceEngine do
+  rules, facts, derived
+end
+
+impl InferenceEngine do
+  define add_rule(self, rule)
+    push(self.rules, rule)
+    return self
+  end
+
+  define add_fact(self, f)
+    push(self.facts, f)
+    return self
+  end
+
+  define query_facts(self, predicate)
+    let all_facts be flatten([self.facts, self.derived])
+    return filter(all_facts, fn(f) -> f.predicate is predicate)
+  end
+
+  define query_subject(self, subject)
+    let all_facts be flatten([self.facts, self.derived])
+    return filter(all_facts, fn(f) -> f.subject is subject)
+  end
+
+  define has_fact(self, subject, predicate, object)
+    let all_facts be flatten([self.facts, self.derived])
+    for f in all_facts do
+      if f.subject is subject and f.predicate is predicate and f.object is object then
+        return true
+      end
+    end
+    return false
+  end
+
+  -- Forward chaining: apply rules to derive new facts
+  define infer(self)
+    let new_facts be []
+    -- Sort rules by priority (higher first)
+    let sorted_rules be self.rules
+    for rule in sorted_rules do
+      let cond_fn be rule.condition
+      let result be cond_fn(self)
+      if result is not null and result is not false then
+        let act_fn be rule.action
+        let derived be act_fn(self, result)
+        if derived is not null then
+          if type_of(derived) is "Fact" then
+            if not self.has_fact(derived.subject, derived.predicate, derived.object) then
+              push(self.derived, derived)
+              push(new_facts, derived)
+            end
+          end
+        end
+      end
+    end
+    return new_facts
+  end
+
+  -- Run inference until no new facts
+  define infer_all(self)
+    let total_derived be []
+    let max_rounds be 100
+    let round be 0
+    while round < max_rounds do
+      let new_facts be self.infer()
+      if len(new_facts) is 0 then
+        return total_derived
+      end
+      set total_derived to flatten([total_derived, new_facts])
+      set round to round + 1
+    end
+    return total_derived
+  end
+
+  define stats(self)
+    return {
+      "rules": len(self.rules),
+      "facts": len(self.facts),
+      "derived": len(self.derived)
+    }
+  end
+end
+
+define new_inference_engine()
+  return InferenceEngine {
+    rules: [],
+    facts: [],
+    derived: []
+  }
+end
+
+-- ── Decision Tree ───────────────────────────────────────
+struct Decision do
+  question, yes_branch, no_branch, result
+end
+
+define leaf(result)
+  return Decision {
+    question: null,
+    yes_branch: null,
+    no_branch: null,
+    result: result
+  }
+end
+
+define branch(question, yes_branch, no_branch)
+  return Decision {
+    question: question,
+    yes_branch: yes_branch,
+    no_branch: no_branch,
+    result: null
+  }
+end
+
+define evaluate_tree(tree, context)
+  if tree.question is null then
+    return tree.result
+  end
+  let q_fn be tree.question
+  let answer be q_fn(context)
+  if answer then
+    return evaluate_tree(tree.yes_branch, context)
+  end
+  return evaluate_tree(tree.no_branch, context)
+end
+
+-- ── Goal Stack ──────────────────────────────────────────
+struct GoalStack do
+  goals, completed
+end
+
+impl GoalStack do
+  define push_goal(self, goal)
+    push(self.goals, goal)
+    return self
+  end
+
+  define current_goal(self)
+    if len(self.goals) is 0 then
+      return null
+    end
+    return self.goals[len(self.goals) - 1]
+  end
+
+  define complete_goal(self)
+    if len(self.goals) > 0 then
+      let done be pop(self.goals)
+      push(self.completed, done)
+      return done
+    end
+    return null
+  end
+
+  define has_goals(self)
+    return len(self.goals) > 0
+  end
+
+  define progress(self)
+    let total be len(self.goals) + len(self.completed)
+    if total is 0 then
+      return 0
+    end
+    return len(self.completed) / total
+  end
+end
+
+define new_goal_stack()
+  return GoalStack { goals: [], completed: [] }
+end
+
+export Rule, Fact, InferenceEngine, Decision, GoalStack,
+       new_rule, fact, new_inference_engine,
+       leaf, branch, evaluate_tree,
+       new_goal_stack

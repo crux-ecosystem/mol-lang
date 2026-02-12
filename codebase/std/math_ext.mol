@@ -1,0 +1,291 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL Standard Library — Math Extensions
+-- ══════════════════════════════════════════════════════════
+-- Extended math utilities: vectors, statistics, number theory
+-- ══════════════════════════════════════════════════════════
+
+-- ── Statistics ───────────────────────────────────────────
+
+-- Mean (average)
+define mean(lst)
+  return sum(lst) / len(lst)
+end
+
+-- Median
+define median(lst)
+  let sorted be sort(lst)
+  let n be len(sorted)
+  if n % 2 is 1 then
+    return sorted[n / 2]
+  end
+  return (sorted[n / 2 - 1] + sorted[n / 2]) / 2
+end
+
+-- Mode (most frequent value)
+define mode(lst)
+  let counts be {}
+  for item in lst do
+    let k be to_text(item)
+    if counts[k] is not null then
+      set counts[k] to counts[k] + 1
+    else
+      set counts[k] to 1
+    end
+  end
+  let best_key be null
+  let best_count be 0
+  for k in keys(counts) do
+    if counts[k] > best_count then
+      set best_count to counts[k]
+      set best_key to k
+    end
+  end
+  -- Find original value
+  for item in lst do
+    if to_text(item) is best_key then
+      return item
+    end
+  end
+  return null
+end
+
+-- Variance
+define variance(lst)
+  let avg be mean(lst)
+  let diffs be map(lst, fn(x) -> (x - avg) * (x - avg))
+  return sum(diffs) / len(diffs)
+end
+
+-- Standard deviation
+define std_dev(lst)
+  return sqrt(variance(lst))
+end
+
+-- ── Vector Ops ──────────────────────────────────────────
+
+-- Vector addition
+define vec_add(a, b)
+  let result be []
+  for i in range(len(a)) do
+    push(result, a[i] + b[i])
+  end
+  return result
+end
+
+-- Vector subtraction
+define vec_sub(a, b)
+  let result be []
+  for i in range(len(a)) do
+    push(result, a[i] - b[i])
+  end
+  return result
+end
+
+-- Scalar multiply
+define vec_scale(v, scalar)
+  return map(v, fn(x) -> x * scalar)
+end
+
+-- Dot product
+define dot(a, b)
+  let total be 0
+  for i in range(len(a)) do
+    set total to total + a[i] * b[i]
+  end
+  return total
+end
+
+-- Vector magnitude
+define magnitude(v)
+  return sqrt(dot(v, v))
+end
+
+-- Normalize vector
+define normalize(v)
+  let mag be magnitude(v)
+  if mag is 0 then
+    return v
+  end
+  return vec_scale(v, 1 / mag)
+end
+
+-- Cross product (3D only)
+define cross(a, b)
+  return [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0]
+  ]
+end
+
+-- Distance between two points
+define distance(a, b)
+  return magnitude(vec_sub(a, b))
+end
+
+-- ── Matrix Ops ──────────────────────────────────────────
+
+-- Matrix multiply (2D lists)
+define mat_mul(a, b)
+  let rows_a be len(a)
+  let cols_a be len(a[0])
+  let cols_b be len(b[0])
+  let result be []
+  for i in range(rows_a) do
+    let row be []
+    for j in range(cols_b) do
+      let val be 0
+      for k in range(cols_a) do
+        set val to val + a[i][k] * b[k][j]
+      end
+      push(row, val)
+    end
+    push(result, row)
+  end
+  return result
+end
+
+-- Identity matrix
+define identity(n)
+  let result be []
+  for i in range(n) do
+    let row be []
+    for j in range(n) do
+      if i is j then
+        push(row, 1)
+      else
+        push(row, 0)
+      end
+    end
+    push(result, row)
+  end
+  return result
+end
+
+-- Matrix transpose
+define mat_transpose(m)
+  if len(m) is 0 then
+    return []
+  end
+  let rows be len(m)
+  let cols be len(m[0])
+  let result be []
+  for j in range(cols) do
+    let row be []
+    for i in range(rows) do
+      push(row, m[i][j])
+    end
+    push(result, row)
+  end
+  return result
+end
+
+-- ── Number Theory ───────────────────────────────────────
+
+-- Check if prime
+define is_prime(n)
+  if n < 2 then
+    return false
+  end
+  if n < 4 then
+    return true
+  end
+  if n % 2 is 0 or n % 3 is 0 then
+    return false
+  end
+  let i be 5
+  while i * i <= n do
+    if n % i is 0 or n % (i + 2) is 0 then
+      return false
+    end
+    set i to i + 6
+  end
+  return true
+end
+
+-- Primes up to n (Sieve of Eratosthenes)
+define primes_up_to(n)
+  let sieve be []
+  for i in range(n + 1) do
+    push(sieve, true)
+  end
+  set sieve[0] to false
+  if n >= 1 then
+    set sieve[1] to false
+  end
+  let i be 2
+  while i * i <= n do
+    if sieve[i] then
+      let j be i * i
+      while j <= n do
+        set sieve[j] to false
+        set j to j + i
+      end
+    end
+    set i to i + 1
+  end
+  let result be []
+  for i in range(2, n + 1) do
+    if sieve[i] then
+      push(result, i)
+    end
+  end
+  return result
+end
+
+-- Prime factorization
+define factorize(n)
+  let factors be []
+  let d be 2
+  while d * d <= n do
+    while n % d is 0 do
+      push(factors, d)
+      set n to n / d
+    end
+    set d to d + 1
+  end
+  if n > 1 then
+    push(factors, n)
+  end
+  return factors
+end
+
+-- ── Utility ─────────────────────────────────────────────
+
+-- Clamp a value between min and max
+define clamp(val, lo, hi)
+  if val < lo then
+    return lo
+  end
+  if val > hi then
+    return hi
+  end
+  return val
+end
+
+-- Linear interpolation
+define lerp(a, b, t)
+  return a + (b - a) * t
+end
+
+-- Map a value from one range to another
+define map_range(val, in_lo, in_hi, out_lo, out_hi)
+  let t be (val - in_lo) / (in_hi - in_lo)
+  return lerp(out_lo, out_hi, t)
+end
+
+-- Degrees to radians
+define deg_to_rad(d)
+  return d * 3.14159265358979 / 180
+end
+
+-- Radians to degrees
+define rad_to_deg(r)
+  return r * 180 / 3.14159265358979
+end
+
+export mean, median, mode, variance, std_dev,
+       vec_add, vec_sub, vec_scale, dot, magnitude, normalize, cross, distance,
+       mat_mul, identity, mat_transpose,
+       is_prime, primes_up_to, factorize,
+       clamp, lerp, map_range, deg_to_rad, rad_to_deg

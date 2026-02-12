@@ -1,0 +1,203 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL Standard Library — Result & Option Types
+-- ══════════════════════════════════════════════════════════
+-- Monadic error handling: Result (Ok/Err) and Option (Some/None)
+-- ══════════════════════════════════════════════════════════
+
+-- ── Result Type ─────────────────────────────────────────
+
+struct Ok do
+  value
+end
+
+struct Err do
+  error
+end
+
+-- Constructors
+define ok(value)
+  return Ok { value: value }
+end
+
+define err(error)
+  return Err { error: error }
+end
+
+-- Check type
+define is_ok(result)
+  return type_of(result) is "Ok"
+end
+
+define is_err(result)
+  return type_of(result) is "Err"
+end
+
+-- Unwrap (panics on Err)
+define unwrap(result)
+  if is_ok(result) then
+    return result.value
+  end
+  return panic("Tried to unwrap an Err: " + to_text(result.error))
+end
+
+-- Unwrap with default
+define unwrap_or(result, default)
+  if is_ok(result) then
+    return result.value
+  end
+  return default
+end
+
+-- Map over Ok value
+define result_map(result, f)
+  if is_ok(result) then
+    return ok(f(result.value))
+  end
+  return result
+end
+
+-- Flat map (chain results)
+define result_then(result, f)
+  if is_ok(result) then
+    return f(result.value)
+  end
+  return result
+end
+
+-- Map over Err
+define result_map_err(result, f)
+  if is_err(result) then
+    return err(f(result.error))
+  end
+  return result
+end
+
+-- Try: wrap a function call, return Ok or Err
+define result_try(f)
+  try
+    let val be f()
+    return ok(val)
+  rescue e
+    return err(e)
+  end
+end
+
+-- ── Option Type ─────────────────────────────────────────
+
+struct Some do
+  value
+end
+
+-- None is just null in MOL
+
+-- Constructors
+define some(value)
+  return Some { value: value }
+end
+
+define none()
+  return null
+end
+
+-- Check type
+define is_some(opt)
+  return opt is not null and type_of(opt) is "Some"
+end
+
+define is_none(opt)
+  return opt is null
+end
+
+-- Unwrap option (panics on None)
+define option_unwrap(opt)
+  if is_some(opt) then
+    return opt.value
+  end
+  return panic("Tried to unwrap None")
+end
+
+-- Unwrap with default
+define option_unwrap_or(opt, default)
+  if is_some(opt) then
+    return opt.value
+  end
+  return default
+end
+
+-- Map over Some value
+define option_map(opt, f)
+  if is_some(opt) then
+    return some(f(opt.value))
+  end
+  return null
+end
+
+-- Flat map
+define option_then(opt, f)
+  if is_some(opt) then
+    return f(opt.value)
+  end
+  return null
+end
+
+-- Convert Option to Result
+define option_to_result(opt, error_msg)
+  if is_some(opt) then
+    return ok(opt.value)
+  end
+  return err(error_msg)
+end
+
+-- Convert Result to Option
+define result_to_option(result)
+  if is_ok(result) then
+    return some(result.value)
+  end
+  return null
+end
+
+-- ── Pipeline Helpers ────────────────────────────────────
+
+-- Collect results: list of Results → Result of list
+define collect_results(results)
+  let values be []
+  for r in results do
+    if is_err(r) then
+      return r
+    end
+    push(values, r.value)
+  end
+  return ok(values)
+end
+
+-- Filter and collect only Ok values
+define filter_ok(results)
+  let values be []
+  for r in results do
+    if is_ok(r) then
+      push(values, r.value)
+    end
+  end
+  return values
+end
+
+-- Filter and collect only Err values
+define filter_err(results)
+  let errors be []
+  for r in results do
+    if is_err(r) then
+      push(errors, r.error)
+    end
+  end
+  return errors
+end
+
+export Ok, Err, Some,
+       ok, err, is_ok, is_err,
+       unwrap, unwrap_or,
+       result_map, result_then, result_map_err, result_try,
+       some, none, is_some, is_none,
+       option_unwrap, option_unwrap_or,
+       option_map, option_then,
+       option_to_result, result_to_option,
+       collect_results, filter_ok, filter_err

@@ -1418,6 +1418,390 @@ end
     assert "this.x" in js
 
 
+# ══════════════════════════════════════════════════════════════
+# v0.9.0 Tests — Field/Index Assignment, Lambdas, Try/Rescue,
+#                 New Stdlib, Type System Improvements
+# ══════════════════════════════════════════════════════════════
+
+# ── Field Assignment ─────────────────────────────────────────
+
+def test_assign_field_struct():
+    """set obj.field to val on structs"""
+    interp = run("""
+struct Point do
+  x, y
+end
+
+impl Point do
+  define move(self, dx, dy)
+    set self.x to self.x + dx
+    set self.y to self.y + dy
+  end
+end
+
+let p be Point(3, 4)
+p.move(10, 20)
+let rx be p.x
+let ry be p.y
+""")
+    assert interp.global_env.get("rx") == 13
+    assert interp.global_env.get("ry") == 24
+
+
+def test_assign_field_dict():
+    """set obj.field to val on dicts"""
+    interp = run("""
+let d be {"name": "Alice"}
+set d["name"] to "Bob"
+let result be d["name"]
+""")
+    assert interp.global_env.get("result") == "Bob"
+
+
+def test_assign_index_list():
+    """set list[i] to val"""
+    interp = run("""
+let items be [10, 20, 30]
+set items[1] to 99
+let result be items[1]
+""")
+    assert interp.global_env.get("result") == 99
+
+
+def test_assign_index_dict():
+    """set dict[key] to val"""
+    interp = run("""
+let m be {"a": 1}
+set m["b"] to 2
+let result be m["b"]
+""")
+    assert interp.global_env.get("result") == 2
+
+
+def test_assign_index_index():
+    """set list[i][key] to val — double index"""
+    interp = run("""
+let users be [{"name": "A", "active": false}, {"name": "B", "active": false}]
+set users[0]["active"] to true
+let result be users[0]["active"]
+""")
+    assert interp.global_env.get("result") == True
+
+
+def test_assign_field_index():
+    """set obj.field[i] to val"""
+    interp = run("""
+struct Bag do
+  items
+end
+
+let b be Bag([10, 20, 30])
+set b.items[1] to 99
+let result be b.items[1]
+""")
+    assert interp.global_env.get("result") == 99
+
+
+# ── Zero-arg Lambda ─────────────────────────────────────────
+
+def test_lambda_zero_args():
+    """fn() -> expr should work"""
+    interp = run("""
+let greet be fn() -> "hello"
+let result be greet()
+""")
+    assert interp.global_env.get("result") == "hello"
+
+
+def test_lambda_in_map():
+    """Lambda as callback in map"""
+    interp = run("""
+let nums be [1, 2, 3]
+let doubled be map(nums, fn(x) -> x * 2)
+let result be doubled
+""")
+    assert interp.global_env.get("result") == [2, 4, 6]
+
+
+# ── Try/Rescue with Return ──────────────────────────────────
+
+def test_try_rescue_return():
+    """return inside try should not be caught by rescue"""
+    interp = run("""
+define safe_div(a, b)
+  try
+    if b is 0 then
+      return "error: div by zero"
+    end
+    return a / b
+  rescue e
+    return "caught: " + to_text(e)
+  end
+end
+
+let r1 be safe_div(10, 2)
+let r2 be safe_div(10, 0)
+""")
+    assert interp.global_env.get("r1") == 5.0
+    assert interp.global_env.get("r2") == "error: div by zero"
+
+
+# ── Dict Missing Key Returns Null ────────────────────────────
+
+def test_dict_missing_key_null():
+    """Accessing missing dict key returns null"""
+    interp = run("""
+let m be {"a": 1}
+let result be m["b"]
+""")
+    assert interp.global_env.get("result") is None
+
+
+# ── New Stdlib Functions ─────────────────────────────────────
+
+def test_chars_function():
+    """chars() splits string into character list"""
+    interp = run("""
+let result be chars("hello")
+""")
+    assert interp.global_env.get("result") == ["h", "e", "l", "l", "o"]
+
+
+def test_chars_empty():
+    """chars("") returns empty list"""
+    interp = run("""
+let result be chars("")
+""")
+    assert interp.global_env.get("result") == []
+
+
+def test_panic_function():
+    """panic() raises a runtime error"""
+    import pytest
+    with pytest.raises(MOLRuntimeError, match=r"something went wrong"):
+        run("""
+panic("something went wrong")
+""")
+
+
+def test_json_parse_stringify():
+    """json_parse and json_stringify roundtrip"""
+    interp = run("""
+let data be {"name": "MOL", "version": 9}
+let text be json_stringify(data)
+let parsed be json_parse(text)
+let rname be parsed["name"]
+let rver be parsed["version"]
+""")
+    assert interp.global_env.get("rname") == "MOL"
+    assert interp.global_env.get("rver") == 9
+
+
+def test_json_parse_array():
+    """json_parse with array"""
+    interp = run("""
+let arr be json_parse("[1, 2, 3]")
+let result be len(arr)
+""")
+    assert interp.global_env.get("result") == 3
+
+
+def test_json_stringify_nested():
+    """json_stringify with nested structures"""
+    interp = run("""
+let data be {"users": [{"id": 1}, {"id": 2}]}
+let text be json_stringify(data)
+let has_users be contains(text, "users")
+""")
+    assert interp.global_env.get("has_users") == True
+
+
+# ── type_of for Structs ──────────────────────────────────────
+
+def test_type_of_struct():
+    """type_of returns struct name for struct instances"""
+    interp = run("""
+struct Animal do
+  name, sound
+end
+
+let a be Animal("Cat", "Meow")
+let result be type_of(a)
+""")
+    assert interp.global_env.get("result") == "Animal"
+
+
+def test_type_of_basics():
+    """type_of for primitive types"""
+    interp = run("""
+let t1 be type_of(42)
+let t2 be type_of("hi")
+let t3 be type_of(true)
+let t4 be type_of(null)
+let t5 be type_of([1, 2])
+let t6 be type_of({"a": 1})
+""")
+    assert interp.global_env.get("t1") == "Number"
+    assert interp.global_env.get("t2") == "Text"
+    assert interp.global_env.get("t3") == "Bool"
+    assert interp.global_env.get("t4") == "NoneType"
+    assert interp.global_env.get("t5") == "List"
+    assert interp.global_env.get("t6") == "Map"
+
+
+# ── Split Edge Cases ─────────────────────────────────────────
+
+def test_split_empty_separator():
+    """split(text, '') returns character list"""
+    interp = run("""
+let result be split("abc", "")
+""")
+    assert interp.global_env.get("result") == ["a", "b", "c"]
+
+
+# ── Multi-line Export ────────────────────────────────────────
+
+def test_export_multiline():
+    """export with newlines between names should parse"""
+    from mol.parser import parse
+    ast = parse("""
+define foo()
+  return 1
+end
+
+define bar()
+  return 2
+end
+
+export foo,
+  bar
+""")
+    assert ast is not None
+
+
+# ── Struct Self-binding in Methods ───────────────────────────
+
+def test_struct_method_self_mutation():
+    """Methods can mutate self fields"""
+    interp = run("""
+struct Counter do
+  count
+end
+
+impl Counter do
+  define increment(self)
+    set self.count to self.count + 1
+  end
+
+  define get_count(self)
+    return self.count
+  end
+end
+
+let c be Counter(0)
+c.increment()
+c.increment()
+c.increment()
+let result be c.get_count()
+""")
+    assert interp.global_env.get("result") == 3
+
+
+def test_struct_method_multiple_params():
+    """Methods with self + multiple params bind correctly"""
+    interp = run("""
+struct Vec2 do
+  x, y
+end
+
+impl Vec2 do
+  define add(self, other)
+    return Vec2(self.x + other.x, self.y + other.y)
+  end
+end
+
+let a be Vec2(1, 2)
+let b be Vec2(3, 4)
+let c be a.add(b)
+let rx be c.x
+let ry be c.y
+""")
+    assert interp.global_env.get("rx") == 4
+    assert interp.global_env.get("ry") == 6
+
+
+# ── Module System Use Statement ──────────────────────────────
+
+def test_use_statement_loads_exports():
+    """use statement should load and execute a module"""
+    import tempfile, os
+    mod_dir = tempfile.mkdtemp()
+    mod_file = os.path.join(mod_dir, "helper.mol")
+    with open(mod_file, "w") as f:
+        f.write("""
+define double(x)
+  return x * 2
+end
+
+export double
+""")
+    main_code = f"""
+use "{mod_file}"
+let result be double(21)
+"""
+    interp = run(main_code)
+    assert interp.global_env.get("result") == 42
+    os.unlink(mod_file)
+    os.rmdir(mod_dir)
+
+
+# ── Comprehensive Integration Test ──────────────────────────
+
+def test_v09_integration():
+    """Full integration test combining v0.9.0 features"""
+    interp = run("""
+struct Item do
+  name, price, qty
+end
+
+impl Item do
+  define total(self)
+    return self.price * self.qty
+  end
+
+  define apply_discount(self, pct)
+    set self.price to self.price * (1 - pct / 100)
+  end
+end
+
+-- Create items
+let items be [Item("A", 100, 5), Item("B", 200, 3)]
+
+-- Mutate via method
+items[0].apply_discount(10)
+
+-- Use lambdas and stdlib
+let totals be map(items, fn(i) -> i.total())
+let grand_total be reduce(totals, fn(a, b) -> a + b, 0)
+
+-- JSON roundtrip
+let data be {"items": len(items), "total": grand_total}
+let json_text be json_stringify(data)
+let parsed be json_parse(json_text)
+
+-- Type checks
+let item_type be type_of(items[0])
+
+-- Dict missing key
+let missing be parsed["nonexistent"]
+
+let final_total be parsed["total"]
+""")
+    assert interp.global_env.get("item_type") == "Item"
+    assert interp.global_env.get("missing") is None
+    assert interp.global_env.get("final_total") == 1050.0  # 90*5 + 200*3
+
+
 if __name__ == "__main__":
     tests = [v for k, v in globals().items() if k.startswith("test_")]
     passed = 0

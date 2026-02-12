@@ -6,6 +6,65 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [0.9.0] — 2025-06-13
+
+### Added — Self-Hosted Codebase, Web Server, AI Core
+
+- **Field & Index Mutation** (`set obj.field to val`, `set list[i] to val`):
+  - `set self.x to 10` — mutate struct fields inside methods
+  - `set arr[0] to 99` — assign to list/dict by index
+  - `set dict["key"] to val` — assign to dictionary entries
+  - `set obj.items[i] to val` — field+index combo
+  - `set list[i]["key"] to val` — double-index assignment
+
+- **New Stdlib Functions** (5 new, ~120 total):
+  - `chars(text)` — split string into character list
+  - `panic(msg)` — raise a runtime error
+  - `json_parse(text)` — parse JSON string to MOL value
+  - `json_stringify(value)` — convert MOL value to JSON string
+  - `serve(port, handler)` — full HTTP server with REST support
+
+- **Self-Hosted Standard Library** (6 modules in `codebase/std/`):
+  - `collections.mol` — Stack, Queue, MolSet, Pair, LinkedList, range_iter
+  - `algorithms.mol` — 22 sorting/searching/graph/functional algorithms
+  - `string_utils.mol` — 19 text processing functions
+  - `math_ext.mol` — 24 statistics/vector/matrix/number theory functions
+  - `result.mol` — Result/Option monadic types (Ok/Err, Some/None)
+  - `testing.mol` — test runner with assertions and suite management
+
+- **IntraMind AI Core** (4 modules in `codebase/intramind/`):
+  - `memory.mol` — ShortTermMemory, LongTermMemory, WorkingMemory
+  - `knowledge.mol` — KnowledgeGraph with BFS path finding
+  - `reasoning.mol` — InferenceEngine (forward chaining), Decision trees, GoalStack
+  - `agent.mol` — Agent with think-act-observe loop, tool registration
+
+- **CLI Applications** (3 apps in `codebase/apps/`):
+  - `todo.mol` — full todo manager with JSON file persistence
+  - `data_pipeline.mol` — functional data processing pipeline
+  - `http_client.mol` — HTTP client with GET/POST support
+
+- **Web API Server** (in `codebase/server/`):
+  - `router.mol` — route matching with `:param` patterns
+  - `middleware.mol` — CORS headers, request logging
+  - `main.mol` — full REST API with CRUD for users
+
+### Fixed
+
+- **Self binding in struct methods** — parameters no longer overwrite `self`
+- **ReturnSignal in try/rescue** — `return` inside `try` no longer caught by `rescue`
+- **Dict missing key** — returns `null` instead of throwing KeyError
+- **Zero-arg lambdas** — `fn() -> expr` now parses correctly
+- **Multi-line export** — newlines between exported names now allowed
+- **type_of for structs** — returns struct name instead of "MOLStructInstance"
+- **split("", "")** — empty separator splits into character list
+
+### Changed
+
+- Test suite: 123 → 147 tests (24 new v0.9.0 tests)
+- Stdlib: ~115 → ~120 built-in functions
+
+---
+
 ## [0.8.0] — 2025-02-12
 
 ### Added — Structs, Generators, File I/O, HTTP, Better Errors

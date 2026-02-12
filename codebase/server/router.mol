@@ -1,0 +1,158 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL Web Framework — Router
+-- ══════════════════════════════════════════════════════════
+-- A minimal web router for the MOL HTTP server.
+-- Supports GET, POST, PUT, DELETE with path matching.
+-- ══════════════════════════════════════════════════════════
+
+use "std/string_utils.mol"
+use "std/algorithms.mol"
+
+-- ── Route storage ───────────────────────────────────────
+let ROUTES be []
+
+-- ── Register routes ─────────────────────────────────────
+define route(method, path, handler)
+  push(ROUTES, {"method": method, "path": path, "handler": handler})
+end
+
+define get(path, handler)
+  route("GET", path, handler)
+end
+
+define post(path, handler)
+  route("POST", path, handler)
+end
+
+define put(path, handler)
+  route("PUT", path, handler)
+end
+
+define del(path, handler)
+  route("DELETE", path, handler)
+end
+
+-- ── Path matching ───────────────────────────────────────
+-- Supports exact match and :param patterns
+-- e.g., "/users/:id" matches "/users/42" with params {"id": "42"}
+define match_path(pattern, actual)
+  let pat_parts be split(pattern, "/")
+  let act_parts be split(actual, "/")
+
+  if len(pat_parts) is not len(act_parts) then
+    return null
+  end
+
+  let params be {}
+  for i in range(len(pat_parts)) do
+    let pp be pat_parts[i]
+    let ap be act_parts[i]
+    if starts_with(pp, ":") then
+      let param_name be slice(pp, 1, len(pp))
+      set params[param_name] to ap
+    else
+      if pp is not ap then
+        return null
+      end
+    end
+  end
+  return params
+end
+
+-- ── Find matching route ─────────────────────────────────
+define find_route(method, path)
+  for r in ROUTES do
+    if r["method"] is method then
+      let params be match_path(r["path"], path)
+      if params is not null then
+        return {"route": r, "params": params}
+      end
+    end
+  end
+  return null
+end
+
+-- ── Response helpers ────────────────────────────────────
+define json_response(data)
+  return {
+    "status": 200,
+    "headers": {"Content-Type": "application/json"},
+    "body": json_stringify(data)
+  }
+end
+
+define json_response_with_status(status_code, data)
+  return {
+    "status": status_code,
+    "headers": {"Content-Type": "application/json"},
+    "body": json_stringify(data)
+  }
+end
+
+define not_found()
+  return json_response_with_status(404, {"error": "Not found"})
+end
+
+define bad_request(msg)
+  return json_response_with_status(400, {"error": msg})
+end
+
+define created(data)
+  return json_response_with_status(201, data)
+end
+
+define no_content()
+  return {"status": 204, "headers": {}, "body": ""}
+end
+
+-- ── Main dispatcher ─────────────────────────────────────
+define dispatch(request)
+  let method be request["method"]
+  let path be request["path"]
+
+  -- Strip query string
+  let qmark be linear_search(chars(path), "?")
+  if qmark > -1 then
+    set path to slice(path, 0, qmark)
+  end
+
+  -- Strip trailing slash (except root)
+  if len(path) > 1 then
+    if ends_with(path, "/") then
+      set path to slice(path, 0, len(path) - 1)
+    end
+  end
+
+  let found be find_route(method, path)
+  if found is null then
+    return not_found()
+  end
+
+  -- Build context
+  let ctx be {
+    "params": found["params"],
+    "body": request["body"],
+    "headers": request["headers"],
+    "method": method,
+    "path": path
+  }
+
+  -- Parse JSON body if present
+  if ctx["body"] is not null then
+    if len(to_text(ctx["body"])) > 0 then
+      try
+        set ctx["json"] to json_parse(ctx["body"])
+      rescue e
+        set ctx["json"] to null
+      end
+    end
+  end
+
+  let handler_fn be found["route"]["handler"]
+  return handler_fn(ctx)
+end
+
+export route, get, post, put, del,
+  match_path, find_route, dispatch,
+  json_response, json_response_with_status,
+  not_found, bad_request, created, no_content

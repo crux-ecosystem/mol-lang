@@ -1,0 +1,111 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL CLI App — Todo Manager
+-- ══════════════════════════════════════════════════════════
+-- A full-featured todo list app with file persistence,
+-- written entirely in MOL.
+-- ══════════════════════════════════════════════════════════
+
+let TODOS_FILE be "todos.json"
+
+-- ── Load todos from file ────────────────────────────────
+define load_todos()
+  if file_exists(TODOS_FILE) then
+    let content be read_file(TODOS_FILE)
+    return json_parse(content)
+  end
+  return []
+end
+
+-- ── Save todos to file ─────────────────────────────────
+define save_todos(todos)
+  write_file(TODOS_FILE, json_stringify(todos))
+end
+
+-- ── Add a todo ──────────────────────────────────────────
+define add_todo(text)
+  let todos be load_todos()
+  let todo be {"id": len(todos) + 1, "text": text, "done": false, "created": clock()}
+  push(todos, todo)
+  save_todos(todos)
+  show("  + Added: " + text)
+  return todo
+end
+
+-- ── List todos ──────────────────────────────────────────
+define list_todos()
+  let todos be load_todos()
+  if len(todos) is 0 then
+    show("  No todos yet. Use add_todo(\"task\") to create one.")
+    return null
+  end
+  show("")
+  show("  ╔═══ Todo List ══════════════════════════")
+  for todo in todos do
+    let check be "✗"
+    if todo["done"] then
+      set check to "✓"
+    end
+    let line be "  ║ [" + check + "] " + to_text(todo["id"]) + ". " + todo["text"]
+    show(line)
+  end
+  let done_count be len(filter(todos, fn(t) -> t["done"]))
+  show("  ╠════════════════════════════════════════")
+  show("  ║ " + to_text(done_count) + "/" + to_text(len(todos)) + " completed")
+  show("  ╚════════════════════════════════════════")
+  show("")
+end
+
+-- ── Complete a todo ─────────────────────────────────────
+define complete_todo(id)
+  let todos be load_todos()
+  for i in range(len(todos)) do
+    if todos[i]["id"] is id then
+      set todos[i]["done"] to true
+      save_todos(todos)
+      show("  ✓ Completed: " + todos[i]["text"])
+      return true
+    end
+  end
+  show("  Todo #" + to_text(id) + " not found")
+  return false
+end
+
+-- ── Remove a todo ───────────────────────────────────────
+define remove_todo(id)
+  let todos be load_todos()
+  let filtered be filter(todos, fn(t) -> t["id"] is not id)
+  if len(filtered) is len(todos) then
+    show("  Todo #" + to_text(id) + " not found")
+    return false
+  end
+  save_todos(filtered)
+  show("  - Removed todo #" + to_text(id))
+  return true
+end
+
+-- ── Clear completed ─────────────────────────────────────
+define clear_completed()
+  let todos be load_todos()
+  let active be filter(todos, fn(t) -> not t["done"])
+  let removed be len(todos) - len(active)
+  save_todos(active)
+  show("  Cleared " + to_text(removed) + " completed todos")
+end
+
+-- ── Run demo ────────────────────────────────────────────
+show("═══ MOL Todo App ═══")
+show("")
+
+add_todo("Learn MOL language")
+add_todo("Build self-hosted stdlib")
+add_todo("Create IntraMind agent")
+add_todo("Ship v0.9.0")
+
+complete_todo(1)
+complete_todo(2)
+
+list_todos()
+
+-- Clean up
+delete_file(TODOS_FILE)
+show("Demo complete!")
