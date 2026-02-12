@@ -388,6 +388,13 @@ class MOLTransformer(Transformer):
         params = names if names else []
         return LambdaExpr(params=params, body=body)
 
+    # ── v0.7.0 — Spawn / Await (Concurrency) ────────────────
+    def spawn_expr(self, body):
+        return SpawnExpr(body=body)
+
+    def await_expr(self, expr):
+        return AwaitExpr(expr=expr)
+
     # ── v0.6.0 — Match Expression ───────────────────────────
     def match_expr(self, subject, *arms):
         return MatchExpr(subject=subject, arms=list(arms))

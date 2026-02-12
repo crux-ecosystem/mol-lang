@@ -11,7 +11,7 @@ Walks the AST and executes MOL programs. Features:
 
 from mol.ast_nodes import *
 from mol.types import Thought, Memory, Node, Stream, Document, Chunk, Embedding, VectorStore
-from mol.stdlib import STDLIB, SecurityContext, MOLSecurityError, MOLTypeError
+from mol.stdlib import STDLIB, SecurityContext, MOLSecurityError, MOLTypeError, MOLTask, _THREAD_POOL
 import time as _time
 
 
@@ -529,6 +529,27 @@ class Interpreter:
         lambda_fn = MOLLambda(params, node.body, env)
         lambda_fn._interpreter = self
         return lambda_fn
+
+    # ── v0.7.0 — Spawn / Await (Concurrency) ────────────────
+    def _eval_SpawnExpr(self, node, env):
+        """spawn do ... end — execute block in background thread, return Task."""
+        # Capture the environment snapshot for the spawned thread
+        spawn_env = Environment(env)
+
+        def _run_spawned():
+            result = self._exec_block(node.body, spawn_env)
+            return result
+
+        future = _THREAD_POOL.submit(_run_spawned)
+        return MOLTask(future)
+
+    def _eval_AwaitExpr(self, node, env):
+        """await task — block until the Task completes, return its result."""
+        task = self._eval(node.expr, env)
+        if isinstance(task, MOLTask):
+            return task.result()
+        # If it's not a task, just return the value (already resolved)
+        return task
 
     # ── v0.6.0 — Match Expression ───────────────────────────
     def _eval_MatchExpr(self, node, env):

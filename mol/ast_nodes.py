@@ -362,3 +362,16 @@ class ChainedComparison(ASTNode):
 # ── Default Parameters (v0.6.0) ─────────────────────────────
 # Handled through param tuple expansion: (name, type, default)
 
+
+# ── Concurrency (v0.7.0) ────────────────────────────────────
+@dataclass
+class SpawnExpr(ASTNode):
+    """spawn do ... end — run a block in a background task"""
+    body: list = field(default_factory=list)
+
+
+@dataclass
+class AwaitExpr(ASTNode):
+    """await expr — wait for a spawned task to complete"""
+    expr: object = None
+
