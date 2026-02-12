@@ -1,19 +1,27 @@
-# MOL — The IntraMind Programming Language
+<p align="center">
+  <img src="mol-banner.svg" alt="MOL Language" width="600">
+</p>
+
+<h1 align="center">MOL — The IntraMind Programming Language</h1>
 
 <p align="center">
   <img src="https://img.shields.io/pypi/v/mol-lang?label=PyPI&color=blue" alt="PyPI">
-  <img src="https://img.shields.io/badge/version-0.5.0-blue" alt="version">
+  <img src="https://img.shields.io/badge/version-0.9.1-blue" alt="version">
   <img src="https://img.shields.io/badge/license-Proprietary-red" alt="license">
   <img src="https://img.shields.io/badge/python-3.12%2B-green" alt="python">
-  <img src="https://img.shields.io/badge/tests-68%20passed-brightgreen" alt="tests">
-  <img src="https://img.shields.io/badge/stdlib-90%2B%20functions-orange" alt="stdlib">
-  <img src="https://img.shields.io/badge/packages-7%20built--in-yellow" alt="packages">
+  <img src="https://img.shields.io/badge/tests-147%20passed-brightgreen" alt="tests">
+  <img src="https://img.shields.io/badge/stdlib-120%2B%20functions-orange" alt="stdlib">
+  <img src="https://img.shields.io/badge/self--hosted-codebase-ff69b4" alt="self-hosted">
   <img src="https://img.shields.io/badge/docs-GitHub%20Pages-blueviolet" alt="docs">
   <img src="https://img.shields.io/badge/built%20for-IntraMind-purple" alt="intramind">
 </p>
 
 <p align="center">
   <strong>The first programming language with native pipeline operators and auto-tracing — built for AI/RAG pipelines.</strong>
+</p>
+
+<p align="center">
+  <img src="assets/demo.gif" alt="MOL Demo" width="700">
 </p>
 
 ---
@@ -656,7 +664,7 @@ source .venv/bin/activate
 python tests/test_mol.py
 ```
 
-102 tests covering: variables, arithmetic, control flow, functions, recursion, lists, maps, strings, domain types, typed declarations, access control, events, pipes, guards, pipelines, chunking, embedding, vector search, full RAG integration, functional programming (map/filter/reduce), math functions, statistics, string algorithms, hashing, sorting, type checks, lambdas, pattern matching, null coalescing, string interpolation, destructuring, error handling, default parameters, built-in testing, spawn/await, channels, parallel map, race, and concurrency patterns.
+147 tests covering: variables, arithmetic, control flow, functions, recursion, lists, maps, strings, domain types, typed declarations, access control, events, pipes, guards, pipelines, chunking, embedding, vector search, full RAG integration, functional programming (map/filter/reduce), math functions, statistics, string algorithms, hashing, sorting, type checks, lambdas, pattern matching, null coalescing, string interpolation, destructuring, error handling, default parameters, built-in testing, spawn/await, channels, parallel map, race, concurrency patterns, field/index mutation, zero-arg lambdas, try/rescue with return, JSON functions, struct methods, and module system.
 
 ---
 
@@ -664,7 +672,9 @@ python tests/test_mol.py
 
 | Version | Highlights |
 |---|---|
-| **v0.7.0** (current) | `spawn`/`await`, channels, `parallel()`, `race()`, `wait_all()`, `sleep()`, 102 tests |
+| **v0.9.0** (current) | Self-hosted codebase, web API server, IntraMind AI core, field/index mutation, `serve()`, `json_parse/stringify`, 147 tests |
+| **v0.8.0** | Structs with methods, generators/iterators, file I/O, HTTP fetch, modules (`use`/`export`), 123 tests |
+| **v0.7.0** | `spawn`/`await`, channels, `parallel()`, `race()`, `wait_all()`, `sleep()`, 102 tests |
 | **v0.6.0** | Pattern matching, lambdas, `??` null safety, `f""` interpolation, destructuring, `try/rescue/ensure`, default params, `mol test` |
 | **v0.5.0** | Package manager, `use` statement, browser/JS compilation, JS runtime |
 | **v0.4.0** | Docker support (144MB), LSP server, VS Code extension, 16 examples |
