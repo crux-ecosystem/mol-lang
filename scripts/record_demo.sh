@@ -24,7 +24,7 @@ clear
 echo ""
 echo "  ╔══════════════════════════════════════════════╗"
 echo "  ║  MOL — The Cognitive Programming Language    ║"
-echo "  ║  by CruxLabx / IntraMind                    ║"
+echo "  ║  by CruxLabx / IntraMind                     ║"
 echo "  ╚══════════════════════════════════════════════╝"
 echo ""
 pause 2

@@ -98,6 +98,22 @@ class MOLPipeline:
         return self._interpreter._invoke_callable(self, list(args), self.name)
 
 
+class MOLLambda:
+    """An anonymous lambda: fn(x) -> expr"""
+
+    def __init__(self, params, body_expr, closure_env):
+        self.name = "<lambda>"
+        self.params = params       # list of (name, type_or_None)
+        self.body_expr = body_expr # single expression AST node
+        self.closure_env = closure_env
+        self._interpreter = None
+
+    def __call__(self, *args):
+        if self._interpreter is None:
+            raise MOLRuntimeError("Lambda has no interpreter bound")
+        return self._interpreter._invoke_lambda(self, list(args))
+
+
 class Interpreter:
     """
     The MOL interpreter. Walks the AST and executes each node.
@@ -361,6 +377,59 @@ class Interpreter:
 
         return None
 
+    # ── v0.6.0 — Destructuring ──────────────────────────────
+    def _exec_DestructureList(self, node, env):
+        """let [a, b, c] be expr  or  let [head, ...tail] be expr"""
+        value = self._eval(node.value, env)
+        if not isinstance(value, list):
+            raise MOLRuntimeError(f"Cannot destructure {type(value).__name__} as list")
+        for i, name in enumerate(node.names):
+            if name != "_":
+                if i < len(value):
+                    env.set(name, value[i])
+                else:
+                    env.set(name, None)
+        if node.rest:
+            rest_start = len(node.names)
+            env.set(node.rest, value[rest_start:])
+        return None
+
+    def _exec_DestructureMap(self, node, env):
+        """let {x, y, z} be expr"""
+        value = self._eval(node.value, env)
+        if not isinstance(value, dict):
+            raise MOLRuntimeError(f"Cannot destructure {type(value).__name__} as map")
+        for key in node.keys:
+            if key in value:
+                env.set(key, value[key])
+            else:
+                env.set(key, None)
+        return None
+
+    # ── v0.6.0 — Try/Rescue/Ensure ──────────────────────────
+    def _exec_TryRescue(self, node, env):
+        """try ... rescue [name] ... ensure ... end"""
+        try:
+            result = self._exec_block(node.body, Environment(env))
+        except (MOLRuntimeError, MOLGuardError, Exception) as e:
+            rescue_env = Environment(env)
+            if node.rescue_name:
+                rescue_env.set(node.rescue_name, str(e))
+            result = self._exec_block(node.rescue_body, rescue_env)
+        finally:
+            if node.ensure_body:
+                self._exec_block(node.ensure_body, Environment(env))
+        return result
+
+    # ── v0.6.0 — Test Block ─────────────────────────────────
+    def _exec_TestBlock(self, node, env):
+        """test "description" do ... end — only runs in test mode."""
+        # Store test blocks for later execution by `mol test`
+        if not hasattr(self, '_test_blocks'):
+            self._test_blocks = []
+        self._test_blocks.append(node)
+        return None
+
     # ── Expression Evaluation ────────────────────────────────
     def _eval(self, node, env: Environment):
         if node is None:
@@ -444,6 +513,89 @@ class Interpreter:
     def _eval_NotOp(self, node, env):
         return not self._truthy(self._eval(node.operand, env))
 
+    # ── v0.6.0 — Null Coalescing ────────────────────────────
+    def _eval_NullCoalesce(self, node, env):
+        """expr ?? default — returns right if left is null."""
+        left = self._eval(node.left, env)
+        if left is None:
+            return self._eval(node.right, env)
+        return left
+
+    # ── v0.6.0 — Lambda Expression ──────────────────────────
+    def _eval_LambdaExpr(self, node, env):
+        """fn(x, y) -> expr — returns a callable closure."""
+        # Create a MOLFunction-like closure that evaluates a single expression
+        params = [(p, None) for p in node.params]
+        lambda_fn = MOLLambda(params, node.body, env)
+        lambda_fn._interpreter = self
+        return lambda_fn
+
+    # ── v0.6.0 — Match Expression ───────────────────────────
+    def _eval_MatchExpr(self, node, env):
+        """match expr with | pattern -> body end"""
+        subject = self._eval(node.subject, env)
+        for arm in node.arms:
+            match_env = Environment(env)
+            if self._match_pattern(arm.pattern, subject, match_env):
+                # Check guard if present
+                if arm.guard:
+                    if not self._truthy(self._eval(arm.guard, match_env)):
+                        continue
+                try:
+                    body = arm.body
+                    # Single inline expression — evaluate directly
+                    if len(body) == 1 and not hasattr(self, f"_exec_{type(body[0]).__name__}"):
+                        return self._eval(body[0], match_env)
+                    result = self._exec_block(body, match_env)
+                except ReturnSignal as ret:
+                    return ret.value
+                return result
+        return None  # no match
+
+    def _match_pattern(self, pattern, value, env) -> bool:
+        """Check if a value matches a pattern, binding variables."""
+        if pattern.kind == "wildcard":
+            return True
+        elif pattern.kind == "literal":
+            return value == pattern.value
+        elif pattern.kind == "binding":
+            env.set(pattern.value, value)
+            return True
+        elif pattern.kind == "list":
+            if not isinstance(value, list):
+                return False
+            if len(value) != len(pattern.children):
+                return False
+            for sub_pat, sub_val in zip(pattern.children, value):
+                if not self._match_pattern(sub_pat, sub_val, env):
+                    return False
+            return True
+        elif pattern.kind == "list_rest":
+            if not isinstance(value, list):
+                return False
+            if len(value) < len(pattern.children):
+                return False
+            for i, sub_pat in enumerate(pattern.children):
+                if not self._match_pattern(sub_pat, value[i], env):
+                    return False
+            # Bind rest
+            if pattern.value:
+                env.set(pattern.value, value[len(pattern.children):])
+            return True
+        return False
+
+    # ── v0.6.0 — String Interpolation ───────────────────────
+    def _eval_InterpolatedString(self, node, env):
+        """f"Hello {name}" — evaluate interpolated parts."""
+        parts = []
+        for p in node.parts:
+            if isinstance(p, str):
+                parts.append(p)
+            else:
+                val = self._eval(p, env)
+                parts.append(self._to_string(val))
+        return "".join(parts)
+
     # ── Pipe Chain (THE KILLER FEATURE) ─────────────────────
     def _eval_PipeChain(self, node, env):
         """Evaluate a |> pipe chain with automatic tracing."""
@@ -512,16 +664,37 @@ class Interpreter:
             )
 
     def _invoke_callable(self, func, args, name="<anon>"):
-        """Invoke a builtin, MOLFunction, or MOLPipeline with args."""
-        if callable(func) and not isinstance(func, (MOLFunction, MOLPipeline)):
+        """Invoke a builtin, MOLFunction, MOLPipeline, or MOLLambda with args."""
+        if callable(func) and not isinstance(func, (MOLFunction, MOLPipeline, MOLLambda)):
             return func(*args)
+        if isinstance(func, MOLLambda):
+            return self._invoke_lambda(func, args)
         if isinstance(func, (MOLFunction, MOLPipeline)):
-            if len(args) != len(func.params):
+            # Handle default parameters (v0.6.0)
+            required = 0
+            for p in func.params:
+                if len(p) < 3:  # no default
+                    required += 1
+            if len(args) < required:
                 raise MOLRuntimeError(
-                    f"'{func.name}' expects {len(func.params)} args, got {len(args)}"
+                    f"'{func.name}' expects at least {required} args, got {len(args)}"
+                )
+            if len(args) > len(func.params):
+                raise MOLRuntimeError(
+                    f"'{func.name}' expects at most {len(func.params)} args, got {len(args)}"
                 )
             call_env = Environment(func.closure_env)
-            for (param_name, param_type), arg_val in zip(func.params, args):
+            for i, param in enumerate(func.params):
+                param_name = param[0]
+                param_type = param[1] if len(param) > 1 else None
+                if i < len(args):
+                    arg_val = args[i]
+                else:
+                    # Use default value (3rd element of param tuple)
+                    if len(param) >= 3:
+                        arg_val = self._eval(param[2], call_env)
+                    else:
+                        arg_val = None
                 if param_type:
                     self._check_type(arg_val, param_type, param_name)
                 call_env.set(param_name, arg_val)
@@ -531,6 +704,17 @@ class Interpreter:
                 return ret.value
             return None
         raise MOLRuntimeError(f"'{name}' is not callable")
+
+    def _invoke_lambda(self, lam, args):
+        """Invoke a lambda expression: fn(x) -> expr"""
+        if len(args) != len(lam.params):
+            raise MOLRuntimeError(
+                f"Lambda expects {len(lam.params)} args, got {len(args)}"
+            )
+        call_env = Environment(lam.closure_env)
+        for (param_name, _), arg_val in zip(lam.params, args):
+            call_env.set(param_name, arg_val)
+        return self._eval(lam.body_expr, call_env)
 
     def _pipe_stage_name(self, stage) -> str:
         """Get a human-readable name for a pipe stage."""
