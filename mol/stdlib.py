@@ -523,6 +523,131 @@ def _create_chunk(content="", index=0, source=""):
     return Chunk(content=str(content), index=int(index), source=str(source))
 
 
+# ── Concurrency Primitives (v0.7.0) ─────────────────────────
+import threading
+import queue as _queue
+from concurrent.futures import ThreadPoolExecutor, Future, as_completed
+
+
+class MOLTask:
+    """Wraps a Future — the result of `spawn do ... end`."""
+    def __init__(self, future: Future):
+        self._future = future
+
+    def result(self, timeout=None):
+        return self._future.result(timeout=timeout)
+
+    def done(self):
+        return self._future.done()
+
+    def __repr__(self):
+        status = "done" if self.done() else "running"
+        return f"<Task({status})>"
+
+
+class MOLChannel:
+    """Thread-safe channel for inter-task communication."""
+    def __init__(self, capacity=0):
+        self._queue = _queue.Queue(maxsize=capacity)
+
+    def send(self, value):
+        self._queue.put(value)
+
+    def receive(self, timeout=None):
+        try:
+            return self._queue.get(timeout=timeout)
+        except _queue.Empty:
+            raise MOLRuntimeError("Channel receive timed out")
+
+    def try_receive(self):
+        """Non-blocking receive — returns null if empty."""
+        try:
+            return self._queue.get_nowait()
+        except _queue.Empty:
+            return None
+
+    def __repr__(self):
+        return f"<Channel(size={self._queue.qsize()})>"
+
+
+# Global thread pool shared by all spawn calls
+_THREAD_POOL = ThreadPoolExecutor(max_workers=32, thread_name_prefix="mol-spawn")
+
+
+def _builtin_channel(capacity=0):
+    """Create a new channel for inter-task communication."""
+    return MOLChannel(capacity=int(capacity))
+
+
+def _builtin_send(ch, value):
+    """Send a value to a channel."""
+    if not isinstance(ch, MOLChannel):
+        raise MOLTypeError("send() expects a Channel as first argument")
+    ch.send(value)
+    return value
+
+
+def _builtin_receive(ch, timeout=None):
+    """Receive a value from a channel (blocks until available)."""
+    if not isinstance(ch, MOLChannel):
+        raise MOLTypeError("receive() expects a Channel as first argument")
+    t = float(timeout) if timeout is not None else None
+    return ch.receive(timeout=t)
+
+
+def _builtin_sleep(ms):
+    """Sleep for the given number of milliseconds."""
+    import time
+    time.sleep(float(ms) / 1000.0)
+    return None
+
+
+def _builtin_parallel(items, func):
+    """Execute func on each item in parallel, return results in order."""
+    if not isinstance(items, list):
+        raise MOLTypeError("parallel() expects a list as first argument")
+    if not callable(func):
+        raise MOLTypeError("parallel() expects a function as second argument")
+    futures = [_THREAD_POOL.submit(func, item) for item in items]
+    return [f.result() for f in futures]
+
+
+def _builtin_race(*args):
+    """Return the result of whichever task finishes first."""
+    tasks = args if not (len(args) == 1 and isinstance(args[0], list)) else args[0]
+    if not tasks:
+        raise MOLRuntimeError("race() requires at least one task")
+    # Support both MOLTask objects and a list of tasks
+    futures = {}
+    for t in tasks:
+        if isinstance(t, MOLTask):
+            futures[t._future] = t
+        else:
+            raise MOLTypeError("race() expects Task objects")
+    done_iter = as_completed(futures.keys())
+    first = next(done_iter)
+    return first.result()
+
+
+def _builtin_wait_all(*args):
+    """Wait for all tasks to complete and return their results."""
+    tasks = args if not (len(args) == 1 and isinstance(args[0], list)) else args[0]
+    results = []
+    for t in tasks:
+        if isinstance(t, MOLTask):
+            results.append(t.result())
+        else:
+            raise MOLTypeError("wait_all() expects Task objects")
+    return results
+
+
+def _builtin_task_done(task):
+    """Check if a task has completed."""
+    if not isinstance(task, MOLTask):
+        raise MOLTypeError("task_done() expects a Task")
+    return task.done()
+
+
 # ── Algorithms & Functional Programming (v0.3.0) ─────────────
 
 def _builtin_map(lst, func):
@@ -1079,4 +1204,14 @@ STDLIB: dict[str, callable] = {
     "assert_ne": _builtin_assert_ne,
     "assert_true": _builtin_assert_true,
     "assert_false": _builtin_assert_false,
+
+    # Concurrency (v0.7.0)
+    "channel": _builtin_channel,
+    "send": _builtin_send,
+    "receive": _builtin_receive,
+    "sleep": _builtin_sleep,
+    "parallel": _builtin_parallel,
+    "race": _builtin_race,
+    "wait_all": _builtin_wait_all,
+    "task_done": _builtin_task_done,
 }

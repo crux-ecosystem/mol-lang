@@ -317,6 +317,26 @@ class PythonTranspiler:
                 parts.append(f"{{{self._emit_expr(p)}}}")
         return f'f"{"".join(parts)}"'
 
+    # ── v0.7.0 — Concurrency Transpilers ─────────────────────
+    def _expr_SpawnExpr(self, node):
+        self._out("import concurrent.futures as _cf")
+        self._out("_pool = _cf.ThreadPoolExecutor()")
+        body_lines = []
+        old_lines = self._lines
+        self._lines = body_lines
+        self._depth += 1
+        for stmt in node.body:
+            self._emit(stmt)
+        self._depth -= 1
+        self._lines = old_lines
+        func_name = f"_spawned_{id(node)}"
+        self._out(f"def {func_name}():")
+        self._lines.extend(body_lines)
+        return f"_pool.submit({func_name})"
+
+    def _expr_AwaitExpr(self, node):
+        inner = self._emit_expr(node.expr)
+        return f"{inner}.result()"
 
 class JavaScriptTranspiler:
     """Transpile MOL AST → JavaScript source code."""
@@ -622,3 +642,23 @@ class JavaScriptTranspiler:
             else:
                 parts.append(f"${{{self._emit_expr(p)}}}")
         return f'`{"".join(parts)}`'
+
+    # ── v0.7.0 — Concurrency Transpilers ─────────────────────
+    def _expr_SpawnExpr(self, node):
+        body_lines = []
+        old_lines = self._lines
+        self._lines = body_lines
+        self._depth += 1
+        for stmt in node.body:
+            self._emit(stmt)
+        self._depth -= 1
+        self._lines = old_lines
+        func_name = f"_spawned_{id(node)}"
+        self._out(f"async function {func_name}() {{")
+        self._lines.extend(body_lines)
+        self._out("}")
+        return f"{func_name}()"
+
+    def _expr_AwaitExpr(self, node):
+        inner = self._emit_expr(node.expr)
+        return f"await {inner}"

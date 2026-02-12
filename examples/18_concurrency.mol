@@ -1,0 +1,154 @@
+-- ══════════════════════════════════════════════════════════════
+-- MOL v0.7.0 — Concurrency Demo
+-- ══════════════════════════════════════════════════════════════
+-- spawn/await, channels, parallel map, race, wait_all
+
+show "═══ Spawn & Await ═══"
+
+-- spawn runs a block in a background thread
+let task be spawn do
+  sleep(100)
+  "hello from background"
+end
+
+show "main thread continues..."
+let result be await task
+show f"task returned: {result}"
+
+show ""
+show "═══ Multiple Tasks ═══"
+
+let t1 be spawn do
+  sleep(50)
+  "task A done"
+end
+
+let t2 be spawn do
+  sleep(30)
+  "task B done"
+end
+
+let t3 be spawn do
+  sleep(10)
+  "task C done"
+end
+
+-- Wait for all tasks
+let all_results be wait_all([t1, t2, t3])
+show f"all results: {all_results}"
+
+show ""
+show "═══ Race ═══"
+
+let fast be spawn do
+  sleep(10)
+  "fast wins!"
+end
+
+let slow be spawn do
+  sleep(200)
+  "slow loses"
+end
+
+let winner be race([fast, slow])
+show f"race winner: {winner}"
+
+show ""
+show "═══ Channels ═══"
+
+-- Channels enable communication between tasks
+let ch be channel()
+
+let producer be spawn do
+  for i in range(5) do
+    send(ch, f"message {i}")
+    sleep(10)
+  end
+end
+
+-- Receive all messages
+for i in range(5) do
+  let msg be receive(ch)
+  show f"  received: {msg}"
+end
+await producer
+
+show ""
+show "═══ Parallel Map ═══"
+
+-- Process items in parallel using a thread pool
+let items be [1, 2, 3, 4, 5, 6, 7, 8]
+let squares be parallel(items, fn(x) -> x * x)
+show f"parallel squares: {squares}"
+
+-- Parallel with heavier work
+let heavy be parallel([100, 200, 300], fn(ms) -> sleep(ms))
+show "all heavy work done"
+
+show ""
+show "═══ Producer-Consumer Pattern ═══"
+
+let work_ch be channel()
+let result_ch be channel()
+
+-- Producer: sends work items
+let prod be spawn do
+  for item in [10, 20, 30, 40, 50] do
+    send(work_ch, item)
+  end
+  send(work_ch, "DONE")
+end
+
+-- Consumer: processes work items
+let cons be spawn do
+  let total be 0
+  let running be true
+  while running do
+    let item be receive(work_ch)
+    if item is "DONE" then
+      set running to false
+    else
+      set total to total + item
+    end
+  end
+  send(result_ch, total)
+end
+
+let total be receive(result_ch)
+show f"sum of work: {total}"
+await prod
+await cons
+
+show ""
+show "═══ Task Status ═══"
+
+let check_task be spawn do
+  sleep(50)
+  "completed"
+end
+
+show f"task done? {task_done(check_task)}"
+await check_task
+show f"task done? {task_done(check_task)}"
+
+show ""
+show "═══ Combined: Parallel Pipeline ═══"
+
+-- Real-world pattern: parallel data processing pipeline
+let data be [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+-- Step 1: parallel compute
+let computed be parallel(data, fn(x) -> x * x + 1)
+
+-- Step 2: filter using pipes
+let filtered be computed |> filter(fn(x) -> x > 10)
+
+-- Step 3: reduce
+let total_sum be filtered |> reduce(fn(acc, x) -> acc + x, 0)
+
+show f"pipeline result: {total_sum}"
+show f"  computed: {computed}"
+show f"  filtered: {filtered}"
+
+show ""
+show "✨ MOL v0.7.0 Concurrency — All demonstrated!"

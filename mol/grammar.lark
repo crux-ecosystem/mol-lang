@@ -151,6 +151,7 @@ mul_op: "*" -> op_mul
       | "%" -> op_mod
 
 ?unary: "-" unary                                -> neg
+      | "await" atom                              -> await_expr
       | atom
 
 ?atom: NUMBER                                    -> number
@@ -169,6 +170,7 @@ mul_op: "*" -> op_mul
      | "(" expr ")"                              -> group
      | lambda_expr
      | match_expr
+     | spawn_expr
 
 expr_list: expr ("," _NL? expr)*
 pair_list: pair ("," _NL? pair)*
@@ -177,6 +179,9 @@ arg_list: expr ("," expr)*
 
 // ── Lambda Expression ───────────────────────────────────────
 lambda_expr: "fn" "(" name_list? ")" "->" expr   -> lambda_expr
+
+// ── Spawn Expression (concurrency) ──────────────────────────
+spawn_expr: "spawn" "do" _NL block "end"          -> spawn_expr
 
 // ── Match Expression ────────────────────────────────────────
 match_expr: "match" expr "with" _NL match_arm+ "end"  -> match_expr
@@ -198,7 +203,7 @@ match_pattern_list: match_pattern ("," match_pattern)*
 
 // ── Terminals ───────────────────────────────────────────────
 // NAME must exclude all keywords to avoid ambiguity
-NAME: /(?!(?:if|then|elif|else|end|while|for|in|do|define|return|begin|let|be|set|to|show|and|or|not|is|true|false|null|trigger|link|process|access|sync|evolve|emit|listen|with|pipeline|guard|use|as|try|rescue|ensure|test|match|when|fn)\b)[a-zA-Z_][a-zA-Z0-9_]*/
+NAME: /(?!(?:if|then|elif|else|end|while|for|in|do|define|return|begin|let|be|set|to|show|and|or|not|is|true|false|null|trigger|link|process|access|sync|evolve|emit|listen|with|pipeline|guard|use|as|try|rescue|ensure|test|match|when|fn|spawn|await)\b)[a-zA-Z_][a-zA-Z0-9_]*/
 
 // Spread operator for destructuring
 SPREAD: "..."

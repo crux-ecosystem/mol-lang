@@ -949,6 +949,160 @@ show msg
     assert "first doubled > 4 is 6" in interp.output
 
 
+# ══════════════════════════════════════════════════════════════
+# v0.7.0 — Concurrency
+# ══════════════════════════════════════════════════════════════
+
+def test_spawn_await_basic():
+    interp = run("""
+let task be spawn do
+  42
+end
+let result be await task
+show to_text(result)
+""")
+    assert "42" in interp.output
+
+def test_spawn_with_sleep():
+    interp = run("""
+let task be spawn do
+  sleep(10)
+  "done"
+end
+let result be await task
+show result
+""")
+    assert interp.output == ["done"]
+
+def test_spawn_ordering():
+    """Main thread continues while spawn runs."""
+    interp = run("""
+let task be spawn do
+  sleep(50)
+  show "spawned"
+end
+show "main"
+await task
+""")
+    # "main" should appear first since spawn sleeps
+    assert interp.output[0] == "main"
+
+def test_channel_basic():
+    interp = run("""
+let ch be channel()
+let t be spawn do
+  send(ch, 100)
+end
+let val be receive(ch)
+show to_text(val)
+await t
+""")
+    assert "100" in interp.output
+
+def test_channel_multiple():
+    interp = run("""
+let ch be channel()
+let t be spawn do
+  send(ch, "a")
+  send(ch, "b")
+  send(ch, "c")
+end
+let x be receive(ch)
+let y be receive(ch)
+let z be receive(ch)
+show f"{x}{y}{z}"
+await t
+""")
+    assert interp.output == ["abc"]
+
+def test_parallel_map():
+    interp = run("""
+let nums be [1, 2, 3, 4]
+let results be parallel(nums, fn(x) -> x * x)
+show to_text(results)
+""")
+    assert "1" in interp.output[0]
+    assert "4" in interp.output[0]
+    assert "9" in interp.output[0]
+    assert "16" in interp.output[0]
+
+def test_race():
+    interp = run("""
+let fast be spawn do
+  sleep(10)
+  "fast"
+end
+let slow be spawn do
+  sleep(200)
+  "slow"
+end
+let winner be race([fast, slow])
+show winner
+""")
+    assert interp.output == ["fast"]
+
+def test_wait_all():
+    interp = run("""
+let t1 be spawn do
+  "a"
+end
+let t2 be spawn do
+  "b"
+end
+let results be wait_all([t1, t2])
+show to_text(results)
+""")
+    assert "a" in interp.output[0]
+    assert "b" in interp.output[0]
+
+def test_task_done():
+    interp = run("""
+let t be spawn do
+  sleep(10)
+  42
+end
+sleep(50)
+show to_text(task_done(t))
+""")
+    assert "true" in interp.output[0].lower() or "True" in interp.output[0]
+
+def test_sleep():
+    """sleep() should not crash and should allow execution to continue."""
+    interp = run("""
+sleep(10)
+show "awake"
+""")
+    assert interp.output == ["awake"]
+
+def test_spawn_with_closure():
+    """Spawned blocks should capture variables from enclosing scope."""
+    interp = run("""
+let x be 10
+let task be spawn do
+  x * 5
+end
+let result be await task
+show to_text(result)
+""")
+    assert "50" in interp.output
+
+def test_concurrency_combined():
+    """Combine spawn, channels, and parallel in one program."""
+    interp = run("""
+let ch be channel()
+let worker be spawn do
+  let doubled be parallel([1, 2, 3], fn(x) -> x * 2)
+  send(ch, doubled)
+end
+let result be receive(ch)
+show to_text(result)
+await worker
+""")
+    assert "2" in interp.output[0]
+    assert "4" in interp.output[0]
+    assert "6" in interp.output[0]
+
+
 if __name__ == "__main__":
     tests = [v for k, v in globals().items() if k.startswith("test_")]
     passed = 0
