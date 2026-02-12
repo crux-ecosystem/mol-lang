@@ -1,0 +1,129 @@
+{
+  "Show": {
+    "prefix": "show",
+    "body": ["show \"${1:message}\""],
+    "description": "Print a value to output"
+  },
+  "Let Variable": {
+    "prefix": "let",
+    "body": ["let ${1:name} be ${2:value}"],
+    "description": "Declare a variable"
+  },
+  "Let Typed": {
+    "prefix": "lett",
+    "body": ["let ${1:name} : ${2|Number,Text,Bool,List,Thought,Memory,Node,Stream|} be ${3:value}"],
+    "description": "Declare a typed variable"
+  },
+  "Set Variable": {
+    "prefix": "set",
+    "body": ["set ${1:name} to ${2:value}"],
+    "description": "Assign to an existing variable"
+  },
+  "If Statement": {
+    "prefix": "if",
+    "body": [
+      "if ${1:condition} then",
+      "  ${2:-- body}",
+      "end"
+    ],
+    "description": "If-then block"
+  },
+  "If-Else": {
+    "prefix": "ife",
+    "body": [
+      "if ${1:condition} then",
+      "  ${2:-- then body}",
+      "else",
+      "  ${3:-- else body}",
+      "end"
+    ],
+    "description": "If-else block"
+  },
+  "While Loop": {
+    "prefix": "while",
+    "body": [
+      "while ${1:condition} do",
+      "  ${2:-- body}",
+      "end"
+    ],
+    "description": "While loop"
+  },
+  "For Loop": {
+    "prefix": "for",
+    "body": [
+      "for ${1:item} in ${2:collection} do",
+      "  ${3:-- body}",
+      "end"
+    ],
+    "description": "For-in loop"
+  },
+  "Function": {
+    "prefix": "define",
+    "body": [
+      "define ${1:name}(${2:params})",
+      "  ${3:-- body}",
+      "  return ${4:result}",
+      "end"
+    ],
+    "description": "Define a function"
+  },
+  "Create Thought": {
+    "prefix": "thought",
+    "body": ["let ${1:name} be Thought(\"${2:content}\", ${3:0.9})"],
+    "description": "Create a Thought object"
+  },
+  "Create Memory": {
+    "prefix": "memory",
+    "body": ["let ${1:name} be Memory(\"${2:key}\", ${3:value})"],
+    "description": "Create a Memory object"
+  },
+  "Create Node": {
+    "prefix": "node",
+    "body": ["let ${1:name} be Node(\"${2:label}\", ${3:0.5})"],
+    "description": "Create a Node object"
+  },
+  "Create Stream": {
+    "prefix": "stream",
+    "body": ["let ${1:name} be Stream(\"${2:name}\")"],
+    "description": "Create a Stream object"
+  },
+  "Trigger Event": {
+    "prefix": "trigger",
+    "body": ["trigger \"${1:event_name}\""],
+    "description": "Trigger an event"
+  },
+  "Link Nodes": {
+    "prefix": "link",
+    "body": ["link ${1:source} to ${2:target}"],
+    "description": "Link two nodes"
+  },
+  "Process": {
+    "prefix": "process",
+    "body": ["process ${1:target} with ${2:data}"],
+    "description": "Process a node or data"
+  },
+  "Listen for Event": {
+    "prefix": "listen",
+    "body": [
+      "listen \"${1:event}\" do",
+      "  ${2:-- handler}",
+      "end"
+    ],
+    "description": "Listen for an event"
+  },
+  "Access Resource": {
+    "prefix": "access",
+    "body": ["access \"${1:resource}\""],
+    "description": "Request access to a resource"
+  },
+  "Sync Stream": {
+    "prefix": "sync",
+    "body": ["sync ${1:stream}"],
+    "description": "Synchronize a data stream"
+  },
+  "Evolve Node": {
+    "prefix": "evolve",
+    "body": ["evolve ${1:node}"],
+    "description": "Evolve a node to next generation"
+  }
+}

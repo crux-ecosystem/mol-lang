@@ -1,0 +1,35 @@
+-- Example 15: Package Manager & Imports
+-- Demonstrates the MOL module/import system
+
+-- Import specific functions from built-in packages
+use "math" : sin, cos, pi, sqrt
+use "text" : upper, trim, pad_right
+use "collections" : sort, reverse, unique, map
+
+-- Use imported math functions
+let angle be pi() / 4
+show "sin(pi/4) = " + to_text(sin(angle))
+show "cos(pi/4) = " + to_text(cos(angle))
+show "sqrt(2) = " + to_text(sqrt(2))
+
+-- Use imported text functions
+let message be "   hello from mol packages   "
+let clean be trim(message)
+let loud be upper(clean)
+show loud
+
+-- Use imported collection functions
+let data be [5, 3, 8, 1, 3, 8, 2]
+let processed be unique(sort(data))
+show "Sorted unique: " + to_text(processed)
+
+let reversed be reverse(processed)
+show "Reversed: " + to_text(reversed)
+
+-- Formatted output table
+show ""
+show pad_right("Function", 15) + pad_right("Result", 15)
+show pad_right("--------", 15) + pad_right("------", 15)
+show pad_right("sin(pi/4)", 15) + pad_right(to_text(sin(angle)), 15)
+show pad_right("cos(pi/4)", 15) + pad_right(to_text(cos(angle)), 15)
+show pad_right("sqrt(2)", 15) + pad_right(to_text(sqrt(2)), 15)

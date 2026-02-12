@@ -1,0 +1,85 @@
+-- ============================================================
+-- MOL TUTORIAL: Functions & Standard Library
+-- ============================================================
+-- Run this file: mol run tutorial/03_functions.mol
+-- ============================================================
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 10: define...end                │
+-- └─────────────────────────────────────────┘
+-- Functions use `define name(params)...end`
+-- Use `return` to send back a value
+
+define greet(name)
+  show "Hello, " + name + "!"
+  return "greeted " + name
+end
+
+let result be greet("Mounesh")
+show "Result: " + result
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 11: Typed Parameters            │
+-- └─────────────────────────────────────────┘
+-- You can enforce types on function parameters too!
+
+define add_numbers(a : Number, b : Number)
+  return a + b
+end
+
+show "3 + 7 = " + to_text(add_numbers(3, 7))
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 12: Recursion                   │
+-- └─────────────────────────────────────────┘
+define factorial(n)
+  if n <= 1 then
+    return 1
+  end
+  return n * factorial(n - 1)
+end
+
+show "5! = " + to_text(factorial(5))
+show "10! = " + to_text(factorial(10))
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 13: Standard Library            │
+-- └─────────────────────────────────────────┘
+-- MOL comes with 30+ built-in functions
+
+show ""
+show "=== String Functions ==="
+let text be "  hello, mol world  "
+show "trim:    '" + trim(text) + "'"
+show "upper:   '" + upper("hello") + "'"
+show "lower:   '" + lower("HELLO") + "'"
+show "replace: '" + replace("hello world", "world", "MOL") + "'"
+show "split:   " + to_text(split("a,b,c", ","))
+show "join:    " + join(["x", "y", "z"], "-")
+
+show ""
+show "=== List Functions ==="
+let nums be [5, 2, 8, 1, 9]
+show "list:    " + to_text(nums)
+show "sort:    " + to_text(sort(nums))
+show "reverse: " + to_text(reverse(nums))
+show "sum:     " + to_text(sum(nums))
+show "max:     " + to_text(max(nums))
+show "min:     " + to_text(min(nums))
+show "len:     " + to_text(len(nums))
+
+show ""
+show "=== Math Functions ==="
+show "sqrt(144): " + to_text(sqrt(144))
+show "abs(-42):  " + to_text(abs(-42))
+show "round(3.7): " + to_text(round(3.7))
+
+show ""
+show "=== Type Checking ==="
+show "type_of(42):      " + type_of(42)
+show "type_of(\"hi\"):    " + type_of("hi")
+show "type_of(true):    " + type_of(true)
+show "type_of([1,2]):   " + type_of([1, 2])
+
+show ""
+show "--- Functions complete! Run tutorial/04_intramind.mol next ---"

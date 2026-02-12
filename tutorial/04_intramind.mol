@@ -1,0 +1,157 @@
+-- ============================================================
+-- MOL TUTORIAL: IntraMind Domain Features
+-- ============================================================
+-- Run this file: mol run tutorial/04_intramind.mol
+-- ============================================================
+-- THIS is what makes MOL different from Python/JS/C++.
+-- These features are BUILT INTO the language.
+
+show "╔══════════════════════════════════════════╗"
+show "║  IntraMind Domain Features               ║"
+show "╚══════════════════════════════════════════╝"
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 14: Thought Type                │
+-- └─────────────────────────────────────────┘
+-- A Thought holds an idea + confidence score (0.0 to 1.0)
+-- In Python you'd need a class. In MOL, it's native.
+
+let idea be Thought("User needs faster search", 0.92)
+show idea
+show "Content: " + idea.content
+show "Confidence: " + to_text(idea.confidence)
+
+-- Create another thought
+let insight be Thought("Cache frequently accessed data", 0.78)
+show insight
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 15: Memory Type                 │
+-- └─────────────────────────────────────────┘
+-- Memory = persistent key-value storage with "strength"
+-- Memories can decay or be reinforced through recall
+
+let config_mem be Memory("db_connection", "postgres://localhost:5432")
+show config_mem
+
+-- Recalling makes memory stronger
+let db_url be config_mem.recall()
+show "DB URL: " + to_text(db_url)
+show "Strength after recall: " + to_text(config_mem.strength)
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 16: Node Type                   │
+-- └─────────────────────────────────────────┘
+-- Nodes are processing units in a neural graph
+-- They have weights, can connect, activate, evolve
+
+let retriever be Node("retriever", 0.8)
+let ranker be Node("ranker", 0.6)
+let generator be Node("generator", 0.9)
+
+show ""
+show "=== Building RAG Pipeline as Nodes ==="
+show retriever
+show ranker
+show generator
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 17: link — Connect Nodes        │
+-- └─────────────────────────────────────────┘
+-- `link A to B` wires nodes together (like a pipeline!)
+
+link retriever to ranker
+link ranker to generator
+show "Pipeline linked: retriever → ranker → generator"
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 18: process — Activate Nodes    │
+-- └─────────────────────────────────────────┘
+-- `process X with Y` activates a node and adjusts weight
+
+process retriever with 0.1
+process ranker with 0.2
+process generator with 0.0
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 19: evolve — Upgrade Nodes      │
+-- └─────────────────────────────────────────┘
+-- `evolve X` improves a node (weight * 1.1, generation++)
+-- Think of it as training or fine-tuning
+
+show ""
+show "=== Evolving the Pipeline ==="
+for gen in range(3) do
+  evolve retriever
+  evolve ranker
+  evolve generator
+  show "Gen " + to_text(gen + 1) + ": R=" + to_text(retriever.weight) + " K=" + to_text(ranker.weight) + " G=" + to_text(generator.weight)
+end
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 20: Stream Type                 │
+-- └─────────────────────────────────────────┘
+-- Streams handle real-time data flow
+
+let query_stream be Stream("user_queries")
+sync query_stream
+emit "What is sovereign AI?"
+show query_stream
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 21: access — Security Rails     │
+-- └─────────────────────────────────────────┘
+-- This is a KEY differentiator!
+-- MOL checks permissions AT THE LANGUAGE LEVEL.
+-- Unauthorized access = instant error. No workarounds.
+
+show ""
+show "=== Security System ==="
+access "mind_core"
+access "memory_bank"
+access "node_graph"
+access "data_stream"
+access "thought_pool"
+show "All authorized resources accessed."
+
+-- Uncomment to see security denial:
+-- access "secret_government_data"  -- BLOCKED!
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 22: trigger/listen — Events     │
+-- └─────────────────────────────────────────┘
+-- Event-driven programming built into the language
+
+show ""
+show "=== Event System ==="
+
+listen "query_received" do
+  show "  [Handler] Processing incoming query..."
+end
+
+listen "response_ready" do
+  show "  [Handler] Sending response to user!"
+end
+
+trigger "query_received"
+trigger "response_ready"
+
+-- ┌─────────────────────────────────────────┐
+-- │  LESSON 23: JSON — Data Exchange        │
+-- └─────────────────────────────────────────┘
+show ""
+show "=== JSON Serialization ==="
+let thought_data be to_json(idea)
+show thought_data
+
+let node_data be to_json(generator)
+show node_data
+
+show ""
+show "╔══════════════════════════════════════════╗"
+show "║  Tutorial Complete!                      ║"
+show "║  You now know all of MOL.                ║"
+show "║                                          ║"
+show "║  Next: Run tutorial/05_rag_pipeline.mol  ║"
+show "║  to see MOL building a RAG pipeline!     ║"
+show "╚══════════════════════════════════════════╝"

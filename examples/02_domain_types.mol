@@ -1,0 +1,67 @@
+-- ============================================================
+-- MOL Example: IntraMind Domain Types
+-- ============================================================
+-- Showcasing Thought, Memory, Node, and Stream — MOL's
+-- first-class cognitive computing types.
+
+show "═══ IntraMind Domain Types Demo ═══"
+
+-- ── Thoughts ────────────────────────────────────────────────
+-- A Thought is a cognitive unit with content and confidence
+let idea be Thought("The system needs optimization", 0.85)
+show idea
+show "Confidence: " + to_text(idea.confidence)
+
+let hypothesis be Thought("Neural pathways can be remapped", 0.72)
+show hypothesis
+
+-- ── Memory ──────────────────────────────────────────────────
+-- Memory is persistent storage with strength that can decay
+let core_mem be Memory("init_sequence", "bootstrap_v3")
+show core_mem
+
+-- Recall strengthens memory
+let recalled be core_mem.recall()
+show "Recalled value: " + to_text(recalled)
+show "Memory strength: " + to_text(core_mem.strength)
+
+-- ── Nodes ───────────────────────────────────────────────────
+-- Nodes are computational units in the neural graph
+let alpha be Node("alpha_processor", 0.5)
+let beta be Node("beta_analyzer", 0.8)
+show alpha
+show beta
+
+-- Connect and activate nodes
+link alpha to beta
+process alpha with 0.3
+evolve beta
+
+show "After evolution:"
+show alpha
+show beta
+
+-- ── Streams ─────────────────────────────────────────────────
+-- Streams handle real-time data flow
+let data_feed be Stream("sensor_input")
+show data_feed
+
+emit "temperature: 36.6"
+sync data_feed
+show "Stream synced: " + to_text(data_feed)
+
+-- ── Access Control (Safety Rail) ────────────────────────────
+show ""
+show "═══ Security System ═══"
+access "mind_core"
+access "memory_bank"
+access "node_graph"
+
+-- ── Event System ────────────────────────────────────────────
+show ""
+show "═══ Event System ═══"
+listen "boot_complete" do
+  show "  → Boot handler fired!"
+end
+
+trigger "boot_complete"

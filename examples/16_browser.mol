@@ -1,0 +1,68 @@
+-- Example 16: Browser/WASM Ready Program
+-- Compile with: mol build examples/16_browser.mol --target browser
+
+-- This program compiles to standalone HTML+JS
+-- that runs natively in any browser!
+
+show "=== MOL Browser Demo ==="
+show ""
+
+-- Math operations
+let golden_ratio be (1 + sqrt(5)) / 2
+show "Golden Ratio: " + to_text(golden_ratio)
+
+-- Factorial with recursion
+define factorial(n)
+  if n <= 1 then
+    return 1
+  end
+  return n * factorial(n - 1)
+end
+
+for i in range(1, 11) do
+  show to_text(i) + "! = " + to_text(factorial(i))
+end
+
+-- Pipeline processing
+show ""
+show "=== Pipeline Demo ==="
+let words be "the quick brown fox jumps"
+let result be words |> split(" ") |> sort |> join(" → ")
+show result
+
+-- Fibonacci
+define fib(n)
+  if n <= 1 then
+    return n
+  end
+  return fib(n - 1) + fib(n - 2)
+end
+
+show ""
+show "=== Fibonacci ==="
+let fibs be []
+for i in range(0, 15) do
+  set fibs to push(fibs, fib(i))
+end
+show join(fibs, ", ")
+
+-- Map/filter
+show ""
+show "=== Functional ==="
+let nums be range(1, 21)
+
+define is_even(x)
+  return x % 2 is 0
+end
+
+define square(x)
+  return x * x
+end
+
+let evens be filter(nums, is_even)
+let squares be map(evens, square)
+show "Even squares: " + to_text(squares)
+
+show ""
+show "=== Done ==="
+show "Generated UUID: " + uuid()

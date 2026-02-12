@@ -1,0 +1,82 @@
+-- ═══════════════════════════════════════════════════════════
+-- MOL v0.2.0 — Pipeline Operator Demo
+-- THE killer feature: |> with auto-tracing
+-- ═══════════════════════════════════════════════════════════
+
+show "═══ MOL Pipe Operator |> ═══"
+show ""
+
+-- ── 1. Basic Pipe: data flows left to right ────────────────
+show "--- Basic Pipes ---"
+
+let result be "hello world" |> upper
+show result
+
+let words be "one,two,three" |> split(",")
+show words
+
+-- ── 2. Pipe Chains: multiple stages ────────────────────────
+show ""
+show "--- Pipe Chains (auto-traced!) ---"
+
+let processed be "  Hello, IntraMind!  " |> trim |> lower |> split(" ")
+show processed
+
+-- ── 3. Pipe with functions ─────────────────────────────────
+show ""
+show "--- Pipe with Custom Functions ---"
+
+define double(x)
+  return x * 2
+end
+
+define add_ten(x)
+  return x + 10
+end
+
+let math_result be 5 |> double |> add_ten |> double
+show to_text(math_result)
+
+-- ── 4. Cognitive pipeline: Thought processing ──────────────
+show ""
+show "--- Cognitive Pipeline ---"
+
+let idea be "Artificial intelligence will transform healthcare" |>
+  think("analyze") |>
+  tap("after-think")
+
+show to_text(idea.confidence)
+
+-- ── 5. Pipeline with guard ─────────────────────────────────
+show ""
+show "--- Guard Assertions ---"
+
+let confidence be 0.85
+guard confidence > 0.5 : "Confidence too low"
+show "Guard passed! Confidence is good."
+
+-- ── 6. Domain types in pipes ───────────────────────────────
+show ""
+show "--- Domain Types in Pipes ---"
+
+let doc be Document("demo.txt", "MOL is the language for IntraMind. It supports pipelines natively.")
+let chunks be doc |> chunk(30)
+show to_text(len(chunks))
+
+for c in chunks do
+  show c.content
+end
+
+-- ── 7. User-defined pipeline ───────────────────────────────
+show ""
+show "--- Named Pipeline ---"
+
+pipeline preprocess(data)
+  return data |> trim |> lower
+end
+
+let clean be preprocess("  HELLO FROM PIPELINE  ")
+show clean
+
+show ""
+show "═══ Pipeline Demo Complete ═══"

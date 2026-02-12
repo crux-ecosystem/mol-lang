@@ -1,0 +1,96 @@
+-- ═══════════════════════════════════════════════════════
+--  MOL Example: Functional Programming Patterns
+--  map, filter, reduce, zip, compose, and more
+-- ═══════════════════════════════════════════════════════
+
+show "=== Functional Programming in MOL ==="
+show ""
+
+-- Define reusable functions
+define square(x)
+  return x * x
+end
+
+define double(x)
+  return x * 2
+end
+
+define is_even(n)
+  return n % 2 is 0
+end
+
+define add(a, b)
+  return a + b
+end
+
+-- Map: transform every element
+let numbers be [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+show "Numbers: " + to_text(numbers)
+
+let squares be map(numbers, square)
+show "Squares: " + to_text(squares)
+
+let doubled be map(numbers, double)
+show "Doubled: " + to_text(doubled)
+
+-- Filter: select matching elements
+let evens be filter(numbers, is_even)
+show "Evens: " + to_text(evens)
+
+-- Reduce: combine into single value
+let total be reduce(numbers, add, 0)
+show "Sum: " + to_text(total)
+
+-- Zip: pair up two lists
+let names be ["Alice", "Bob", "Charlie", "Diana", "Eve"]
+let scores be [92, 67, 88, 45, 95]
+let pairs be zip(names, scores)
+show ""
+show "--- Zipped Pairs ---"
+for pair in pairs do
+  show to_text(pair)
+end
+
+-- Chaining: functional pipeline
+show ""
+show "--- Chained Operations ---"
+let result be reduce(map(filter(numbers, is_even), square), add, 0)
+show "Sum of squares of evens: " + to_text(result)
+
+-- Same thing with pipes (cleaner)
+show ""
+show "--- Pipeline Version ---"
+let data be [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+let filtered be filter(data, is_even)
+let mapped be map(filtered, square)
+let reduced be reduce(mapped, add, 0)
+show "Sum of squares of evens: " + to_text(reduced)
+
+-- String processing with functional patterns
+show ""
+show "--- String Processing ---"
+let words be ["hello", "world", "from", "mol"]
+let upper_words be map(words, upper)
+show "Uppercase: " + to_text(upper_words)
+
+let lengths be map(words, len)
+show "Lengths: " + to_text(lengths)
+
+-- Fibonacci sequence
+show ""
+show "--- Fibonacci ---"
+define fib(n)
+  if n <= 1 then
+    return n
+  end
+  return fib(n - 1) + fib(n - 2)
+end
+
+let fibs be []
+for i in range(15) do
+  push(fibs, fib(i))
+end
+show "Fibonacci: " + to_text(fibs)
+
+show ""
+show "=== Functional patterns complete ==="

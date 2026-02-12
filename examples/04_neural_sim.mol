@@ -1,0 +1,64 @@
+-- ============================================================
+-- MOL Example: Neural Network Simulation
+-- ============================================================
+-- A mini neural graph built entirely in MOL, demonstrating
+-- domain-specific capabilities of the language.
+
+show "═══ IntraMind Neural Graph Simulation ═══"
+show ""
+
+-- ── Create a network of Nodes ───────────────────────────────
+let input_node be Node("input_sensor", 1.0)
+let hidden1 be Node("hidden_layer_1", 0.5)
+let hidden2 be Node("hidden_layer_2", 0.3)
+let output_node be Node("output_decision", 0.0)
+
+-- ── Wire the network ───────────────────────────────────────
+link input_node to hidden1
+link input_node to hidden2
+link hidden1 to output_node
+link hidden2 to output_node
+
+-- ── Process through layers ──────────────────────────────────
+show ""
+show "── Processing Neural Graph ──"
+
+access "node_graph"
+
+process input_node with 1.0
+process hidden1 with 0.5
+process hidden2 with 0.7
+process output_node with 0.0
+
+-- ── Evolve the network over generations ─────────────────────
+show ""
+show "── Evolving Network (5 generations) ──"
+
+for gen in range(5) do
+  evolve hidden1
+  evolve hidden2
+  show "Gen " + to_text(gen + 1) + ": h1=" + to_text(hidden1.weight) + " h2=" + to_text(hidden2.weight)
+end
+
+-- ── Create Thoughts from results ────────────────────────────
+show ""
+show "── Generating Insights ──"
+
+let insight be Thought("Network converged after 5 generations", 0.92)
+show insight
+
+let recommendation be Thought("Increase hidden layer count for better accuracy", 0.78)
+show recommendation
+
+-- ── Store in Memory ─────────────────────────────────────────
+let training_log be Memory("training_run_001", to_json(insight))
+show ""
+show "Training log stored: " + to_text(training_log)
+
+-- ── Create data stream for monitoring ───────────────────────
+let monitor be Stream("network_monitor")
+sync monitor
+emit "training_complete"
+
+show ""
+show "═══ Simulation Complete ═══"

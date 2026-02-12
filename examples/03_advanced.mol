@@ -1,0 +1,86 @@
+-- ============================================================
+-- MOL Example: Advanced Features
+-- ============================================================
+-- Higher-order thinking: maps, functions, recursion, stdlib
+
+show "═══ Advanced MOL Features ═══"
+
+-- ── Maps (Dictionaries) ────────────────────────────────────
+let config be {
+  name: "IntraMind",
+  version: 2,
+  active: true
+}
+show "Config: " + to_text(config)
+show "Name: " + config.name
+
+-- ── Higher-Order Functions ──────────────────────────────────
+define factorial(n)
+  if n <= 1 then
+    return 1
+  end
+  return n * factorial(n - 1)
+end
+
+show "5! = " + to_text(factorial(5))
+show "10! = " + to_text(factorial(10))
+
+-- ── Fibonacci ───────────────────────────────────────────────
+define fib(n)
+  if n <= 0 then
+    return 0
+  elif n is 1 then
+    return 1
+  end
+  return fib(n - 1) + fib(n - 2)
+end
+
+show "Fibonacci sequence:"
+for i in range(10) do
+  show "  fib(" + to_text(i) + ") = " + to_text(fib(i))
+end
+
+-- ── String Operations ───────────────────────────────────────
+let msg be "  hello, mol world  "
+show "Original:  '" + msg + "'"
+show "Trimmed:   '" + trim(msg) + "'"
+show "Upper:     '" + upper(trim(msg)) + "'"
+show "Replaced:  '" + replace(trim(msg), "mol", "MOL") + "'"
+
+-- ── List Operations ────────────────────────────────────────
+let numbers be [5, 2, 8, 1, 9, 3]
+show "Numbers:  " + to_text(numbers)
+show "Sorted:   " + to_text(sort(numbers))
+show "Reversed: " + to_text(reverse(numbers))
+show "Sum:      " + to_text(sum(numbers))
+show "Max:      " + to_text(max(numbers))
+show "Min:      " + to_text(min(numbers))
+
+-- ── Type Checking ───────────────────────────────────────────
+show ""
+show "═══ Type System ═══"
+show "42 is a " + type_of(42)
+show "\"hello\" is a " + type_of("hello")
+show "true is a " + type_of(true)
+
+let t be Thought("test", 0.9)
+show "Thought is a " + type_of(t)
+
+let n be Node("test_node", 1.0)
+show "Node is a " + type_of(n)
+
+-- ── JSON Serialization ──────────────────────────────────────
+show ""
+show "═══ JSON Export ═══"
+let thought_json be to_json(t)
+show thought_json
+
+let node_json be to_json(n)
+show node_json
+
+-- ── Math ────────────────────────────────────────────────────
+show ""
+show "═══ Math ═══"
+show "sqrt(144) = " + to_text(sqrt(144))
+show "abs(-42) = " + to_text(abs(-42))
+show "round(3.7) = " + to_text(round(3.7))

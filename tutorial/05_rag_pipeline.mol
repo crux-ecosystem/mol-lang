@@ -1,0 +1,179 @@
+-- ============================================================
+-- MOL TUTORIAL: RAG Pipeline in MOL
+-- ============================================================
+-- Run this file: mol run tutorial/05_rag_pipeline.mol
+-- ============================================================
+-- This is WHERE MOL shines over Python/JS for IntraMind.
+-- A full RAG pipeline described in domain-specific language.
+
+show "╔══════════════════════════════════════════╗"
+show "║  IntraMind RAG Pipeline — Built in MOL   ║"
+show "║  Sovereign AI • No External Dependencies ║"
+show "╚══════════════════════════════════════════╝"
+
+-- ════════════════════════════════════════════
+-- STEP 1: Define the Pipeline Architecture
+-- ════════════════════════════════════════════
+
+show ""
+show "━━━ Step 1: Building Pipeline Nodes ━━━"
+
+let embedder be Node("embedder", 0.85)
+let vector_store be Node("vector_store", 0.90)
+let retriever be Node("retriever", 0.80)
+let reranker be Node("reranker", 0.75)
+let context_builder be Node("context_builder", 0.70)
+let llm_engine be Node("llm_engine", 0.95)
+let response_filter be Node("response_filter", 0.88)
+
+show embedder
+show vector_store
+show retriever
+show reranker
+show context_builder
+show llm_engine
+show response_filter
+
+-- ════════════════════════════════════════════
+-- STEP 2: Wire the Pipeline
+-- ════════════════════════════════════════════
+
+show ""
+show "━━━ Step 2: Wiring Pipeline ━━━"
+
+link embedder to vector_store
+link vector_store to retriever
+link retriever to reranker
+link reranker to context_builder
+link context_builder to llm_engine
+link llm_engine to response_filter
+
+show "Pipeline: embedder → vector_store → retriever → reranker → context_builder → llm_engine → response_filter"
+
+-- ════════════════════════════════════════════
+-- STEP 3: Security — Lock Down Access
+-- ════════════════════════════════════════════
+
+show ""
+show "━━━ Step 3: Security Check ━━━"
+
+access "mind_core"
+access "memory_bank"
+access "data_stream"
+show "All pipeline resources authorized."
+
+-- ════════════════════════════════════════════
+-- STEP 4: Process a Query
+-- ════════════════════════════════════════════
+
+show ""
+show "━━━ Step 4: Processing Query ━━━"
+
+let user_query be "What is sovereign AI and why does IntraMind need it?"
+show "User Query: " + user_query
+
+-- Simulate the RAG pipeline stages
+let query_thought be Thought(user_query, 1.0)
+
+-- Stage 1: Embed the query
+process embedder with 0.1
+let embedding be Memory("query_embedding", "vec[0.23, 0.87, -0.45, 0.12, ...]")
+show "  [1/6] Embedded: " + to_text(embedding)
+
+-- Stage 2: Retrieve from vector store
+process retriever with 0.2
+let doc1 be Thought("Sovereign AI means full control over AI systems without external dependencies.", 0.94)
+let doc2 be Thought("IntraMind is built on sovereign principles — data stays on-premise.", 0.89)
+let doc3 be Thought("RAG pipelines enhance LLM responses with retrieved context.", 0.82)
+show "  [2/6] Retrieved 3 documents"
+
+-- Stage 3: Rerank by relevance
+process reranker with 0.15
+let ranked be [doc1, doc2, doc3]
+show "  [3/6] Reranked: top doc confidence = " + to_text(doc1.confidence)
+
+-- Stage 4: Build context
+process context_builder with 0.1
+let context be doc1.content + " " + doc2.content
+show "  [4/6] Context built: " + to_text(len(context)) + " chars"
+
+-- Stage 5: Generate response
+process llm_engine with 0.0
+let response be Thought("Sovereign AI refers to AI systems that operate with full autonomy and data sovereignty. IntraMind implements this by keeping all data and processing on-premise, using custom RAG pipelines built in MOL to ensure no external dependencies.", 0.96)
+show "  [5/6] Response generated"
+
+-- Stage 6: Safety filter
+process response_filter with 0.0
+show "  [6/6] Response passed safety check"
+
+-- ════════════════════════════════════════════
+-- STEP 5: Output the Result
+-- ════════════════════════════════════════════
+
+show ""
+show "━━━ Step 5: Final Response ━━━"
+show ""
+show response.content
+show ""
+show "Confidence: " + to_text(response.confidence)
+
+-- ════════════════════════════════════════════
+-- STEP 6: Evolve the Pipeline (Learning!)
+-- ════════════════════════════════════════════
+
+show ""
+show "━━━ Step 6: Pipeline Evolution ━━━"
+
+-- After each query, the pipeline improves
+evolve embedder
+evolve retriever
+evolve reranker
+evolve llm_engine
+
+show "Pipeline evolved. Weights updated:"
+show "  Embedder:  " + to_text(embedder.weight) + " (gen " + to_text(embedder.generation) + ")"
+show "  Retriever: " + to_text(retriever.weight) + " (gen " + to_text(retriever.generation) + ")"
+show "  Reranker:  " + to_text(reranker.weight) + " (gen " + to_text(reranker.generation) + ")"
+show "  LLM:       " + to_text(llm_engine.weight) + " (gen " + to_text(llm_engine.generation) + ")"
+
+-- ════════════════════════════════════════════
+-- STEP 7: Store in Memory
+-- ════════════════════════════════════════════
+
+show ""
+show "━━━ Step 7: Storing Results ━━━"
+
+let query_log be Memory("query_001", to_json(response))
+show "Query logged: " + to_text(query_log)
+
+-- ════════════════════════════════════════════
+-- STEP 8: Event-Driven Pipeline
+-- ════════════════════════════════════════════
+
+show ""
+show "━━━ Step 8: Event System ━━━"
+
+listen "new_query" do
+  show "  [Event] New query received — pipeline triggered!"
+end
+
+listen "pipeline_complete" do
+  show "  [Event] Pipeline finished — response sent!"
+end
+
+trigger "new_query"
+trigger "pipeline_complete"
+
+-- ════════════════════════════════════════════
+-- DONE
+-- ════════════════════════════════════════════
+
+show ""
+show "╔══════════════════════════════════════════╗"
+show "║  RAG Pipeline Demo Complete!             ║"
+show "║                                          ║"
+show "║  This entire pipeline was built using    ║"
+show "║  ONLY MOL — no Python, no JavaScript.    ║"
+show "║                                          ║"
+show "║  IntraMind | CruxLabx                    ║"
+show "╚══════════════════════════════════════════╝"

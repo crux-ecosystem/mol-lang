@@ -1,0 +1,92 @@
+-- ═══════════════════════════════════════════════════════
+--  MOL Example: Math, Statistics & Hashing
+--  Comprehensive demo of computational stdlib
+-- ═══════════════════════════════════════════════════════
+
+show "=== Math, Statistics & Hashing ==="
+show ""
+
+-- Basic math
+show "--- Basic Math ---"
+show "abs(-42): " + to_text(abs(-42))
+show "sqrt(144): " + to_text(sqrt(144))
+show "pow(2, 10): " + to_text(pow(2, 10))
+show "ceil(3.2): " + to_text(ceil(3.2))
+show "floor(3.8): " + to_text(floor(3.8))
+show "round(3.14159, 2): " + to_text(round(3.14159, 2))
+show "clamp(15, 0, 10): " + to_text(clamp(15, 0, 10))
+show "min(3, 7): " + to_text(min([3, 7]))
+show "max(3, 7): " + to_text(max([3, 7]))
+
+-- Statistics
+show ""
+show "--- Statistics ---"
+let data be [2, 4, 4, 4, 5, 5, 7, 9]
+show "Data: " + to_text(data)
+show "Mean: " + to_text(mean(data))
+show "Median: " + to_text(median(data))
+show "Stdev: " + to_text(stdev(data))
+show "Variance: " + to_text(variance(data))
+show "Sum: " + to_text(sum(data))
+show "Min: " + to_text(min(data))
+show "Max: " + to_text(max(data))
+
+-- Sorting
+show ""
+show "--- Sorting ---"
+let unsorted be [5, 3, 8, 1, 9, 2, 7, 4, 6, 10]
+show "Original: " + to_text(unsorted)
+show "Ascending: " + to_text(sort(unsorted))
+show "Descending: " + to_text(sort_desc(unsorted))
+show "Unique of [1,2,2,3,3,3]: " + to_text(unique([1, 2, 2, 3, 3, 3]))
+show "Reversed: " + to_text(reverse(unsorted))
+
+-- Random
+show ""
+show "--- Random ---"
+show "Random int (1-100): " + to_text(random_int(1, 100))
+show "Random float: " + to_text(random())
+let items be ["apple", "banana", "cherry", "date"]
+show "Random choice: " + choice(items)
+show "Shuffled: " + to_text(shuffle(items))
+
+-- Hashing & Encoding
+show ""
+show "--- Hashing ---"
+let message be "Hello, MOL!"
+show "Text: " + message
+show "MD5: " + hash(message, "md5")
+show "SHA256: " + hash(message, "sha256")
+
+show ""
+show "--- Base64 ---"
+let encoded be base64_encode(message)
+show "Encoded: " + encoded
+show "Decoded: " + base64_decode(encoded)
+
+-- String operations
+show ""
+show "--- String Operations ---"
+let text be "  Hello, MOL World!  "
+show "Original: '" + text + "'"
+show "Trimmed: '" + trim(text) + "'"
+show "Upper: " + upper(text)
+show "Lower: " + lower(text)
+show "Starts with '  He': " + to_text(starts_with(text, "  He"))
+show "Ends with '!  ': " + to_text(ends_with(text, "!  "))
+show "Contains 'MOL': " + to_text(contains(text, "MOL"))
+show "Replace: " + replace(text, "MOL", "UNIVERSE")
+show "Length: " + to_text(len(text))
+
+-- Type checking
+show ""
+show "--- Type Checks ---"
+show "is_number(42): " + to_text(is_number(42))
+show "is_text('hi'): " + to_text(is_text("hi"))
+show "is_list([1,2]): " + to_text(is_list([1, 2]))
+show "is_map({}): " + to_text(is_map({}))
+show "is_null(null): " + to_text(is_null(null))
+show "is_number('hi'): " + to_text(is_number("hi"))
+
+show ""
+show "=== Complete ==="

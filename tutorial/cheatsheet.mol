@@ -1,0 +1,55 @@
+-- ============================================================
+-- MOL Cheat Sheet — Quick Reference
+-- ============================================================
+
+-- ══ VARIABLES ══
+-- let name be value        → declare
+-- let name : Type be value → declare with type
+-- set name to value        → reassign
+
+-- ══ TYPES ══
+-- Number, Text, Bool, List → basic types
+-- Thought, Memory, Node, Stream → domain types
+
+-- ══ SHOW (print) ══
+-- show "hello"
+-- show 42
+-- show my_variable
+
+-- ══ IF / ELIF / ELSE ══
+-- if condition then
+--   ...
+-- elif condition then
+--   ...
+-- else
+--   ...
+-- end
+
+-- ══ LOOPS ══
+-- for item in collection do ... end
+-- while condition do ... end
+
+-- ══ FUNCTIONS ══
+-- define name(params) ... return value ... end
+
+-- ══ OPERATORS ══
+-- Math:    + - * / %
+-- Compare: is, is not, >, <, >=, <=
+-- Logic:   and, or, not
+
+-- ══ DOMAIN COMMANDS ══
+-- trigger "event"           → fire event
+-- link A to B               → connect nodes
+-- process X with Y          → activate node
+-- access "resource"         → security check
+-- sync stream               → synchronize
+-- evolve node               → upgrade
+-- emit data                 → emit to stream
+-- listen "event" do...end   → event handler
+
+-- ══ STDLIB ══
+-- len, type_of, to_text, to_number, range
+-- abs, round, sqrt, max, min, sum
+-- sort, reverse, push, pop, contains
+-- join, split, upper, lower, trim, replace, slice
+-- to_json, from_json, inspect, clock, wait

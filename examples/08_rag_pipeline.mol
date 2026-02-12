@@ -1,0 +1,68 @@
+-- ═══════════════════════════════════════════════════════════
+-- MOL v0.2.0 — Full RAG Pipeline for IntraMind
+-- This is what NO other language can do this cleanly.
+-- ═══════════════════════════════════════════════════════════
+
+show "═══ IntraMind RAG Pipeline ═══"
+show ""
+
+-- ── Step 1: Create a document (simulating load) ────────────
+let doc be Document("knowledge.txt", "Machine learning is a subset of artificial intelligence. It enables computers to learn from data without explicit programming. Deep learning uses neural networks with many layers. Natural language processing helps machines understand human language. Retrieval augmented generation combines search with language models for accurate answers.")
+
+show "Document created:"
+show doc
+
+-- ── Step 2: The RAG pipeline in ONE expression ─────────────
+show ""
+show "--- Running RAG Pipeline ---"
+
+-- Chunk → Embed → Store (the ingestion pipeline)
+let index be doc |> chunk(80) |> embed("mol-sim-v1") |> store("knowledge_base")
+
+show ""
+show "Stored in vector index:"
+show index
+
+-- ── Step 3: Query the knowledge base ───────────────────────
+show ""
+show "--- Querying ---"
+
+let query be "What is deep learning?"
+let results be retrieve(query, "knowledge_base", 3)
+
+show "Top results for: " + query
+for r in results do
+  show "  Score: " + to_text(r.score) + " — " + to_text(r.text)
+end
+
+-- ── Step 4: Generate answer from retrieved context ─────────
+show ""
+show "--- Generating Answer ---"
+
+let answer be results |> think("answer the query")
+
+show "Answer:"
+show answer.content
+show "Confidence: " + to_text(answer.confidence)
+
+-- ── Step 5: Guard the quality ──────────────────────────────
+guard answer.confidence > 0.5 : "Answer confidence too low"
+show "✓ Answer quality verified"
+
+-- ── Step 6: Full pipeline as a reusable function ───────────
+show ""
+show "--- Reusable RAG Pipeline ---"
+
+pipeline rag_query(question)
+  let hits be retrieve(question, "knowledge_base", 3)
+  let response be hits |> think(question)
+  guard response.confidence > 0.4 : "Low confidence response"
+  return response
+end
+
+let q2 be rag_query("How do machines understand language?")
+show "Q: How do machines understand language?"
+show "A: " + q2.content
+
+show ""
+show "═══ RAG Pipeline Complete ═══"
