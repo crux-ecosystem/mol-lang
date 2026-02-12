@@ -23,8 +23,10 @@ if PROJECT_ROOT not in sys.path:
 from mol import __version__
 from mol.parser import parse
 from mol.interpreter import Interpreter, MOLRuntimeError, MOLGuardError
-from mol.stdlib import MOLSecurityError, MOLTypeError
+from mol.stdlib import MOLSecurityError, MOLTypeError, MOLAssertionError
 from mol.transpiler import PythonTranspiler, JavaScriptTranspiler
+import glob
+import time
 
 
 # ── ANSI Colors ──────────────────────────────────────────────
@@ -41,15 +43,15 @@ class C:
 
 BANNER = f"""{C.CYAN}{C.BOLD}
   ╔══════════════════════════════════════════╗
-  ║   ███╗   ███╗  ██████╗  ██╗             ║
-  ║   ████╗ ████║ ██╔═══██╗ ██║             ║
-  ║   ██╔████╔██║ ██║   ██║ ██║             ║
-  ║   ██║╚██╔╝██║ ██║   ██║ ██║             ║
-  ║   ██║ ╚═╝ ██║ ╚██████╔╝ ███████╗       ║
-  ║   ╚═╝     ╚═╝  ╚═════╝  ╚══════╝       ║
+  ║    ███╗   ███╗  ██████╗  ██╗             ║
+  ║    ████╗ ████║ ██╔═══██╗ ██║             ║
+  ║    ██╔████╔██║ ██║   ██║ ██║             ║
+  ║    ██║╚██╔╝██║ ██║   ██║ ██║             ║
+  ║    ██║ ╚═╝ ██║ ╚██████╔╝ ███████╗        ║
+  ║    ╚═╝     ╚═╝  ╚═════╝  ╚══════╝        ║
   ║                                          ║
   ║   The IntraMind Programming Language     ║
-  ║   v{__version__:<37s}║
+  ║   v{__version__:<37s}                    ║
   ╚══════════════════════════════════════════╝
 {C.RESET}"""
 
@@ -209,6 +211,98 @@ def repl():
             break
 
 
+def run_tests(path: str = ".", verbose: bool = False):
+    """Discover and run test blocks from .mol files."""
+    # Collect .mol files
+    if os.path.isfile(path):
+        files = [path]
+    elif os.path.isdir(path):
+        files = sorted(glob.glob(os.path.join(path, "**", "*.mol"), recursive=True))
+    else:
+        print(f"{C.RED}Error: {path} is not a file or directory{C.RESET}")
+        sys.exit(1)
+
+    if not files:
+        print(f"{C.YELLOW}No .mol files found in {path}{C.RESET}")
+        sys.exit(0)
+
+    total = 0
+    passed = 0
+    failed = 0
+    errors = []
+    t0 = time.time()
+
+    for filepath in files:
+        with open(filepath, "r") as f:
+            source = f.read()
+
+        # Quick check — skip files without test blocks
+        if "test " not in source:
+            continue
+
+        try:
+            ast = parse(source)
+        except Exception as e:
+            print(f"{C.RED}  ✗ Parse error in {filepath}: {e}{C.RESET}")
+            errors.append((filepath, "parse", str(e)))
+            continue
+
+        # Run the file to register test blocks
+        interp = Interpreter(trace=False)
+        try:
+            interp.run(ast)
+        except Exception as e:
+            print(f"{C.RED}  ✗ Runtime error in {filepath}: {e}{C.RESET}")
+            errors.append((filepath, "runtime", str(e)))
+            continue
+
+        test_blocks = getattr(interp, '_test_blocks', [])
+        if not test_blocks:
+            continue
+
+        rel = os.path.relpath(filepath)
+        print(f"\n{C.BOLD}{C.CYAN}● {rel}{C.RESET}")
+
+        for tb in test_blocks:
+            total += 1
+            desc = tb.description
+            try:
+                interp._exec_block(tb.body, interp.global_env)
+                passed += 1
+                print(f"  {C.GREEN}✓{C.RESET} {desc}")
+            except MOLAssertionError as e:
+                failed += 1
+                print(f"  {C.RED}✗{C.RESET} {desc}")
+                print(f"    {C.DIM}{e}{C.RESET}")
+                errors.append((filepath, desc, str(e)))
+            except Exception as e:
+                failed += 1
+                print(f"  {C.RED}✗{C.RESET} {desc}")
+                print(f"    {C.DIM}{type(e).__name__}: {e}{C.RESET}")
+                errors.append((filepath, desc, str(e)))
+
+    elapsed = time.time() - t0
+
+    # Summary
+    print(f"\n{C.BOLD}{'─' * 44}{C.RESET}")
+    parts = []
+    if passed:
+        parts.append(f"{C.GREEN}{passed} passed{C.RESET}")
+    if failed:
+        parts.append(f"{C.RED}{failed} failed{C.RESET}")
+    parts.append(f"{total} total")
+    print(f"  Tests: {', '.join(parts)}")
+    print(f"  Time:  {elapsed:.3f}s")
+
+    if failed:
+        print(f"\n{C.RED}{C.BOLD}FAIL{C.RESET}")
+        sys.exit(1)
+    elif total == 0:
+        print(f"\n{C.YELLOW}No test blocks found.{C.RESET}")
+    else:
+        print(f"\n{C.GREEN}{C.BOLD}ALL TESTS PASSED{C.RESET}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="mol",
@@ -292,6 +386,17 @@ def main():
         help="Minify the output",
     )
 
+    # mol test
+    test_p = sub.add_parser("test", help="Run test blocks from .mol files")
+    test_p.add_argument(
+        "path", nargs="?", default=".",
+        help="File or directory to test (default: current directory)",
+    )
+    test_p.add_argument(
+        "--verbose", "-v", action="store_true",
+        help="Verbose output",
+    )
+
     args = parser.parse_args()
 
     if args.command == "run":
@@ -328,6 +433,8 @@ def main():
     elif args.command == "build":
         from mol.wasm_builder import cmd_build
         cmd_build(args)
+    elif args.command == "test":
+        run_tests(args.path, verbose=args.verbose)
     else:
         print(BANNER)
         parser.print_help()

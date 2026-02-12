@@ -721,6 +721,234 @@ show result
     assert "3" in interp.output[0]
 
 
+# ══════════════════════════════════════════════════════════════
+# v0.6.0 — Power Features
+# ══════════════════════════════════════════════════════════════
+
+def test_lambda_basic():
+    interp = run("""
+let double be fn(x) -> x * 2
+show to_text(double(5))
+""")
+    assert "10" in interp.output
+
+def test_lambda_in_pipe():
+    interp = run("""
+let result be [1, 2, 3] |> map(fn(x) -> x + 10)
+show to_text(result)
+""")
+    assert "11" in interp.output[0]
+    assert "12" in interp.output[0]
+    assert "13" in interp.output[0]
+
+def test_null_coalesce():
+    interp = run("""
+let a be null
+let b be a ?? "fallback"
+show b
+""")
+    assert interp.output == ["fallback"]
+
+def test_null_coalesce_non_null():
+    interp = run("""
+let a be 42
+let b be a ?? 0
+show to_text(b)
+""")
+    assert "42" in interp.output
+
+def test_string_interpolation():
+    interp = run("""
+let name be "MOL"
+let ver be 6
+let msg be f"Hello {name} v{ver}"
+show msg
+""")
+    assert interp.output == ["Hello MOL v6"]
+
+def test_string_interpolation_expr():
+    interp = run("""
+let x be 3
+show f"{x + 1} items"
+""")
+    assert interp.output == ["4 items"]
+
+def test_destructure_list():
+    interp = run("""
+let [a, b, c] be [10, 20, 30]
+show to_text(a)
+show to_text(b)
+show to_text(c)
+""")
+    assert interp.output == ["10", "20", "30"]
+
+def test_destructure_list_rest():
+    interp = run("""
+let [head, ...tail] be [1, 2, 3, 4, 5]
+show to_text(head)
+show to_text(len(tail))
+""")
+    assert interp.output == ["1", "4"]
+
+def test_destructure_map():
+    interp = run("""
+let {x, y} be {"x": 10, "y": 20, "z": 30}
+show to_text(x)
+show to_text(y)
+""")
+    assert interp.output == ["10", "20"]
+
+def test_match_literal():
+    interp = run("""
+let val be 42
+let result be match val with
+  | 1 -> "one"
+  | 42 -> "answer"
+  | _ -> "other"
+end
+show result
+""")
+    assert interp.output == ["answer"]
+
+def test_match_binding():
+    interp = run("""
+let val be 99
+let result be match val with
+  | x -> f"got {x}"
+end
+show result
+""")
+    assert interp.output == ["got 99"]
+
+def test_match_guard():
+    interp = run("""
+let score be 85
+let grade be match score with
+  | s when s >= 90 -> "A"
+  | s when s >= 80 -> "B"
+  | s when s >= 70 -> "C"
+  | _ -> "F"
+end
+show grade
+""")
+    assert interp.output == ["B"]
+
+def test_match_list_pattern():
+    interp = run("""
+let data be [1, 2, 3]
+let result be match data with
+  | [] -> "empty"
+  | [x] -> "one"
+  | [x, y, z] -> f"three: {x},{y},{z}"
+  | _ -> "many"
+end
+show result
+""")
+    assert interp.output == ["three: 1,2,3"]
+
+def test_match_block_body():
+    interp = run("""
+let x be 10
+let result be match x with
+  | 10 ->
+    let doubled be x * 2
+    show f"doubled: {doubled}"
+    doubled
+end
+show to_text(result)
+""")
+    assert "doubled: 20" in interp.output
+    assert "20" in interp.output
+
+def test_try_rescue():
+    interp = run("""
+try
+  let x be 1 / 0
+rescue e
+  show f"caught: {e}"
+end
+""")
+    assert "caught:" in interp.output[0]
+
+def test_try_ensure():
+    interp = run("""
+try
+  show "body"
+rescue e
+  show "error"
+ensure
+  show "cleanup"
+end
+""")
+    assert "body" in interp.output
+    assert "cleanup" in interp.output
+
+def test_default_params():
+    interp = run("""
+define greet(name, greeting be "Hello")
+  show f"{greeting}, {name}!"
+end
+greet("MOL")
+greet("World", "Hi")
+""")
+    assert "Hello, MOL!" in interp.output
+    assert "Hi, World!" in interp.output
+
+def test_test_block():
+    """Test that test blocks are registered but not immediately executed."""
+    interp = run("""
+test "my test" do
+  assert_eq(1 + 1, 2)
+end
+""")
+    assert hasattr(interp, '_test_blocks')
+    assert len(interp._test_blocks) == 1
+    assert interp._test_blocks[0].description == "my test"
+
+def test_test_block_execution():
+    """Test that test block bodies can be executed by the interpreter."""
+    from mol.stdlib import MOLAssertionError
+    interp = run("""
+let x be 42
+test "check x" do
+  assert_eq(x, 42)
+end
+""")
+    tb = interp._test_blocks[0]
+    # Execute the test block body — should not raise
+    interp._exec_block(tb.body, interp.global_env)
+
+def test_assert_functions():
+    from mol.stdlib import MOLAssertionError
+    interp = run("""
+assert_eq(1, 1)
+assert_ne(1, 2)
+assert_true(1 > 0)
+assert_false(1 > 10)
+""")
+    # Should not raise — all assertions pass
+
+def test_assert_eq_fails():
+    from mol.stdlib import MOLAssertionError
+    import pytest
+    with pytest.raises(MOLAssertionError):
+        run("assert_eq(1, 2)")
+
+def test_multiple_features_combined():
+    """Test combining lambdas, pipes, destructuring, match, and interpolation."""
+    interp = run("""
+let data be [1, 2, 3, 4, 5]
+let result be data |> map(fn(x) -> x * 2) |> filter(fn(x) -> x > 4)
+let [first, ...rest] be result
+let msg be match first with
+  | 6 -> f"first doubled > 4 is {first}"
+  | _ -> "unexpected"
+end
+show msg
+""")
+    assert "first doubled > 4 is 6" in interp.output
+
+
 if __name__ == "__main__":
     tests = [v for k, v in globals().items() if k.startswith("test_")]
     passed = 0

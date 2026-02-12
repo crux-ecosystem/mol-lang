@@ -51,3 +51,4 @@ site/
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+output.js

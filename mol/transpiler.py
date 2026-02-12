@@ -101,7 +101,14 @@ class PythonTranspiler:
         self._indent -= 1
 
     def _emit_FuncDef(self, node):
-        params = ", ".join(p[0] for p in node.params)
+        parts = []
+        for p in node.params:
+            if len(p) >= 3:
+                # Default parameter: (name, type, default_expr)
+                parts.append(f"{p[0]}={self._emit_expr(p[2])}")
+            else:
+                parts.append(p[0])
+        params = ", ".join(parts)
         self._line(f"def {node.name}({params}):")
         self._indent += 1
         for s in node.body:
@@ -149,7 +156,13 @@ class PythonTranspiler:
         self._line(f"assert {cond}, {msg}")
 
     def _emit_PipelineDef(self, node):
-        params = ", ".join(p[0] for p in node.params)
+        parts = []
+        for p in node.params:
+            if len(p) >= 3:
+                parts.append(f"{p[0]}={self._emit_expr(p[2])}")
+            else:
+                parts.append(p[0])
+        params = ", ".join(parts)
         self._line(f"def {node.name}({params}):  # pipeline")
         self._indent += 1
         for s in node.body:
@@ -168,6 +181,59 @@ class PythonTranspiler:
         else:
             self._line(f"from mol_packages.{node.module} import *  # use \"{node.module}\"")
 
+    # ── v0.6.0 — Power Features ─────────────────────────────
+    def _emit_TryRescue(self, node):
+        self._line("try:")
+        self._indent += 1
+        for s in node.body:
+            self._emit_stmt(s)
+        if not node.body:
+            self._line("pass")
+        self._indent -= 1
+        name = node.rescue_name or "_err"
+        self._line(f"except Exception as {name}:")
+        self._indent += 1
+        if node.rescue_name:
+            self._line(f"{node.rescue_name} = str({node.rescue_name})")
+        for s in node.rescue_body:
+            self._emit_stmt(s)
+        if not node.rescue_body:
+            self._line("pass")
+        self._indent -= 1
+        if node.ensure_body:
+            self._line("finally:")
+            self._indent += 1
+            for s in node.ensure_body:
+                self._emit_stmt(s)
+            self._indent -= 1
+
+    def _emit_TestBlock(self, node):
+        fn_name = "test_" + node.description.replace(" ", "_").replace("-", "_")
+        self._line(f"def {fn_name}():  # test \"{node.description}\"")
+        self._indent += 1
+        for s in node.body:
+            self._emit_stmt(s)
+        if not node.body:
+            self._line("pass")
+        self._indent -= 1
+        self._line("")
+
+    def _emit_DestructureList(self, node):
+        val = self._emit_expr(node.value)
+        if node.rest:
+            n = len(node.names)
+            for i, name in enumerate(node.names):
+                if name != "_":
+                    self._line(f"{name} = {val}[{i}]")
+            self._line(f"{node.rest} = {val}[{n}:]")
+        else:
+            names = ", ".join(node.names)
+            self._line(f"{names} = {val}")
+
+    def _emit_DestructureMap(self, node):
+        val = self._emit_expr(node.value)
+        for key in node.keys:
+            self._line(f"{key} = {val}.get({repr(key)})")
     # ── Expressions ──────────────────────────────────────────
     def _expr_NumberLiteral(self, node): return str(node.value)
     def _expr_StringLiteral(self, node): return repr(node.value)
@@ -226,6 +292,30 @@ class PythonTranspiler:
             else:
                 result = f"({self._emit_expr(stage)})({result})"
         return result
+
+    # ── v0.6.0 Expression Transpilers ────────────────────────
+    def _expr_NullCoalesce(self, node):
+        left = self._emit_expr(node.left)
+        right = self._emit_expr(node.right)
+        return f"({left} if {left} is not None else {right})"
+
+    def _expr_LambdaExpr(self, node):
+        params = ", ".join(node.params)
+        body = self._emit_expr(node.body)
+        return f"(lambda {params}: {body})"
+
+    def _expr_MatchExpr(self, node):
+        # Python 3.10+ match statement — we use a helper function
+        return f"/* match expression — use Python 3.10+ match-case */"
+
+    def _expr_InterpolatedString(self, node):
+        parts = []
+        for p in node.parts:
+            if isinstance(p, str):
+                parts.append(p.replace("{", "{{").replace("}", "}}"))
+            else:
+                parts.append(f"{{{self._emit_expr(p)}}}")
+        return f'f"{"".join(parts)}"'
 
 
 class JavaScriptTranspiler:
@@ -310,7 +400,13 @@ class JavaScriptTranspiler:
         self._line("}")
 
     def _emit_FuncDef(self, node):
-        params = ", ".join(p[0] for p in node.params)
+        parts = []
+        for p in node.params:
+            if len(p) >= 3:
+                parts.append(f"{p[0]} = {self._emit_expr(p[2])}")
+            else:
+                parts.append(p[0])
+        params = ", ".join(parts)
         self._line(f"function {node.name}({params}) {{")
         self._indent += 1
         for s in node.body:
@@ -337,7 +433,13 @@ class JavaScriptTranspiler:
         self._line(f"if (!({cond})) throw new Error({msg});")
 
     def _emit_PipelineDef(self, node):
-        params = ", ".join(p[0] for p in node.params)
+        parts = []
+        for p in node.params:
+            if len(p) >= 3:
+                parts.append(f"{p[0]} = {self._emit_expr(p[2])}")
+            else:
+                parts.append(p[0])
+        params = ", ".join(parts)
         self._line(f"function {node.name}({params}) {{  // pipeline")
         self._indent += 1
         for s in node.body:
@@ -355,6 +457,52 @@ class JavaScriptTranspiler:
         else:
             self._line(f"Object.assign(globalThis, __mol_require__(\"{node.module}\"));  // use \"{node.module}\"")
 
+    # ── v0.6.0 — Power Features ─────────────────────────────
+    def _emit_TryRescue(self, node):
+        self._line("try {")
+        self._indent += 1
+        for s in node.body:
+            self._emit_stmt(s)
+        self._indent -= 1
+        name = node.rescue_name or "_err"
+        self._line(f"}} catch ({name}) {{")
+        self._indent += 1
+        if node.rescue_name:
+            self._line(f"{node.rescue_name} = String({node.rescue_name});")
+        for s in node.rescue_body:
+            self._emit_stmt(s)
+        self._indent -= 1
+        if node.ensure_body:
+            self._line("} finally {")
+            self._indent += 1
+            for s in node.ensure_body:
+                self._emit_stmt(s)
+            self._indent -= 1
+        self._line("}")
+
+    def _emit_TestBlock(self, node):
+        fn_name = "test_" + node.description.replace(" ", "_").replace("-", "_")
+        self._line(f"function {fn_name}() {{  // test \"{node.description}\"")
+        self._indent += 1
+        for s in node.body:
+            self._emit_stmt(s)
+        self._indent -= 1
+        self._line("}")
+        self._line("")
+
+    def _emit_DestructureList(self, node):
+        val = self._emit_expr(node.value)
+        if node.rest:
+            names = ", ".join(node.names)
+            self._line(f"const [{names}, ...{node.rest}] = {val};")
+        else:
+            names = ", ".join(node.names)
+            self._line(f"const [{names}] = {val};")
+
+    def _emit_DestructureMap(self, node):
+        keys = ", ".join(node.keys)
+        val = self._emit_expr(node.value)
+        self._line(f"const {{ {keys} }} = {val};")
     # ── Missing statements for WASM target ───────────────────
     def _emit_LinkStmt(self, node):
         src = self._emit_expr(node.source)
@@ -451,3 +599,26 @@ class JavaScriptTranspiler:
             else:
                 result = f"({self._emit_expr(stage)})({result})"
         return result
+
+    # ── v0.6.0 Expression Transpilers ────────────────────────
+    def _expr_NullCoalesce(self, node):
+        left = self._emit_expr(node.left)
+        right = self._emit_expr(node.right)
+        return f"({left} ?? {right})"
+
+    def _expr_LambdaExpr(self, node):
+        params = ", ".join(node.params)
+        body = self._emit_expr(node.body)
+        return f"(({params}) => {body})"
+
+    def _expr_MatchExpr(self, node):
+        return "/* match expression */"
+
+    def _expr_InterpolatedString(self, node):
+        parts = []
+        for p in node.parts:
+            if isinstance(p, str):
+                parts.append(p.replace("`", "\\`"))
+            else:
+                parts.append(f"${{{self._emit_expr(p)}}}")
+        return f'`{"".join(parts)}`'

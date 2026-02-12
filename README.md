@@ -470,6 +470,80 @@ use text as T
 
 ---
 
+## Power Features (v0.6.0)
+
+### Lambda Expressions
+
+```mol
+let double be fn(x) -> x * 2
+let result be [1, 2, 3] |> map(fn(x) -> x * x)
+```
+
+### Pattern Matching
+
+```mol
+let grade be match score with
+  | s when s >= 90 -> "A"
+  | s when s >= 80 -> "B"
+  | [x, y] -> f"pair({x}, {y})"
+  | _ -> "default"
+end
+```
+
+### Null Safety
+
+```mol
+let timeout be config ?? 30         -- fallback if null
+```
+
+### String Interpolation
+
+```mol
+let msg be f"Hello {name}, you have {count} items"
+```
+
+### Destructuring
+
+```mol
+let [first, ...rest] be [1, 2, 3, 4]
+let {x, y} be {"x": 10, "y": 20}
+```
+
+### Error Handling
+
+```mol
+try
+  let data be risky_operation()
+rescue e
+  show f"Error: {e}"
+ensure
+  cleanup()
+end
+```
+
+### Default Parameters
+
+```mol
+define greet(name, greeting be "Hello")
+  show f"{greeting}, {name}!"
+end
+greet("World")          -- Hello, World!
+greet("MOL", "Welcome") -- Welcome, MOL!
+```
+
+### Built-in Testing
+
+```mol
+test "arithmetic" do
+  assert_eq(2 + 2, 4)
+  assert_true(10 > 5)
+end
+```
+
+Run tests with: `mol test` (discovers all `.mol` files) or `mol test myfile.mol`.
+
+---
+
 ## Browser/JS Compilation (v0.5.0)
 
 Compile MOL programs to standalone HTML or JavaScript:
@@ -492,7 +566,7 @@ MOL/
 │   ├── __init__.py             # Package metadata (v0.5.0)
 │   ├── grammar.lark            # Lark EBNF grammar specification
 │   ├── parser.py               # LALR parser + AST transformer
-│   ├── ast_nodes.py            # 35+ AST node dataclasses
+│   ├── ast_nodes.py            # 45+ AST node dataclasses
 │   ├── interpreter.py          # Visitor-pattern interpreter with auto-tracing
 │   ├── types.py                # Domain types (8 types)
 │   ├── stdlib.py               # 90+ built-in functions
@@ -544,7 +618,7 @@ source .venv/bin/activate
 python tests/test_mol.py
 ```
 
-68 tests covering: variables, arithmetic, control flow, functions, recursion, lists, maps, strings, domain types, typed declarations, access control, events, pipes, guards, pipelines, chunking, embedding, vector search, full RAG integration, functional programming (map/filter/reduce), math functions, statistics, string algorithms, hashing, sorting, and type checks.
+90 tests covering: variables, arithmetic, control flow, functions, recursion, lists, maps, strings, domain types, typed declarations, access control, events, pipes, guards, pipelines, chunking, embedding, vector search, full RAG integration, functional programming (map/filter/reduce), math functions, statistics, string algorithms, hashing, sorting, type checks, lambdas, pattern matching, null coalescing, string interpolation, destructuring, error handling, default parameters, and built-in testing.
 
 ---
 
@@ -552,7 +626,8 @@ python tests/test_mol.py
 
 | Version | Highlights |
 |---|---|
-| **v0.5.0** (current) | Package manager, `use` statement, browser/JS compilation, JS runtime |
+| **v0.6.0** (current) | Pattern matching, lambdas, `??` null safety, `f""` interpolation, destructuring, `try/rescue/ensure`, default params, `mol test`, 90 tests |
+| **v0.5.0** | Package manager, `use` statement, browser/JS compilation, JS runtime |
 | **v0.4.0** | Docker support (144MB), LSP server, VS Code extension, 16 examples |
 | **v0.3.0** | 90+ stdlib functions, MkDocs docs, online playground |
 | **v0.2.0** | RAG types (`Document`, `Chunk`, `Embedding`, `VectorStore`), full RAG pipeline |
