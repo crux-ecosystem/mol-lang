@@ -470,6 +470,44 @@ use text as T
 
 ---
 
+## Concurrency (v0.7.0)
+
+### Spawn & Await
+
+```mol
+let task be spawn do
+  sleep(1000)
+  "result"
+end
+show "main continues..."
+let result be await task
+```
+
+### Parallel Map
+
+```mol
+let results be parallel(items, fn(x) -> process(x))
+```
+
+### Channels
+
+```mol
+let ch be channel()
+spawn do
+  send(ch, "hello")
+end
+let msg be receive(ch)
+```
+
+### Race & Wait All
+
+```mol
+let winner be race([task1, task2])    -- first to finish
+let all be wait_all([task1, task2])   -- wait for all
+```
+
+---
+
 ## Power Features (v0.6.0)
 
 ### Lambda Expressions
@@ -618,7 +656,7 @@ source .venv/bin/activate
 python tests/test_mol.py
 ```
 
-90 tests covering: variables, arithmetic, control flow, functions, recursion, lists, maps, strings, domain types, typed declarations, access control, events, pipes, guards, pipelines, chunking, embedding, vector search, full RAG integration, functional programming (map/filter/reduce), math functions, statistics, string algorithms, hashing, sorting, type checks, lambdas, pattern matching, null coalescing, string interpolation, destructuring, error handling, default parameters, and built-in testing.
+102 tests covering: variables, arithmetic, control flow, functions, recursion, lists, maps, strings, domain types, typed declarations, access control, events, pipes, guards, pipelines, chunking, embedding, vector search, full RAG integration, functional programming (map/filter/reduce), math functions, statistics, string algorithms, hashing, sorting, type checks, lambdas, pattern matching, null coalescing, string interpolation, destructuring, error handling, default parameters, built-in testing, spawn/await, channels, parallel map, race, and concurrency patterns.
 
 ---
 
@@ -626,7 +664,8 @@ python tests/test_mol.py
 
 | Version | Highlights |
 |---|---|
-| **v0.6.0** (current) | Pattern matching, lambdas, `??` null safety, `f""` interpolation, destructuring, `try/rescue/ensure`, default params, `mol test`, 90 tests |
+| **v0.7.0** (current) | `spawn`/`await`, channels, `parallel()`, `race()`, `wait_all()`, `sleep()`, 102 tests |
+| **v0.6.0** | Pattern matching, lambdas, `??` null safety, `f""` interpolation, destructuring, `try/rescue/ensure`, default params, `mol test` |
 | **v0.5.0** | Package manager, `use` statement, browser/JS compilation, JS runtime |
 | **v0.4.0** | Docker support (144MB), LSP server, VS Code extension, 16 examples |
 | **v0.3.0** | 90+ stdlib functions, MkDocs docs, online playground |
