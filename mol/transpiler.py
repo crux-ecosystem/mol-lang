@@ -338,6 +338,50 @@ class PythonTranspiler:
         inner = self._emit_expr(node.expr)
         return f"{inner}.result()"
 
+    # ── v0.8.0 — Struct/Generator/Module Transpilers ─────────
+    def _emit_StructDef(self, node):
+        fields = [f[0] for f in node.fields]
+        self._line(f"class {node.name}:")
+        self._indent += 1
+        params = ", ".join(fields)
+        self._line(f"def __init__(self, {params}):")
+        self._indent += 1
+        for f in fields:
+            self._line(f"self.{f} = {f}")
+        self._indent -= 1
+        self._line("")
+        self._line("def __repr__(self):")
+        self._indent += 1
+        parts = ", ".join(f'{f}={{self.{f}!r}}' for f in fields)
+        self._line(f'return f"{node.name}({parts})"')
+        self._indent -= 1
+        self._indent -= 1
+        self._line("")
+
+    def _emit_ImplBlock(self, node):
+        for method_node in node.methods:
+            parts = ["self"]
+            for p in method_node.params:
+                if len(p) >= 3:
+                    parts.append(f"{p[0]}={self._emit_expr(p[2])}")
+                else:
+                    parts.append(p[0])
+            params = ", ".join(parts)
+            self._line(f"# impl {node.struct_name}")
+            self._line(f"{node.struct_name}.{method_node.name} = lambda {params}: None  # method stub")
+
+    def _emit_YieldStmt(self, node):
+        self._line(f"yield {self._emit_expr(node.value)}")
+
+    def _emit_ExportStmt(self, node):
+        names = ", ".join(node.names)
+        self._line(f"# export {names}")
+        self._line(f"__all__ = [{', '.join(repr(n) for n in node.names)}]")
+
+    def _expr_StructLiteral(self, node):
+        args = ", ".join(f"{k}={self._emit_expr(v)}" for k, v in node.fields)
+        return f"{node.struct_name}({args})"
+
 class JavaScriptTranspiler:
     """Transpile MOL AST → JavaScript source code."""
 
@@ -662,3 +706,41 @@ class JavaScriptTranspiler:
     def _expr_AwaitExpr(self, node):
         inner = self._emit_expr(node.expr)
         return f"await {inner}"
+
+    # ── v0.8.0 — Struct/Generator/Module Transpilers ─────────
+    def _emit_StructDef(self, node):
+        fields = [f[0] for f in node.fields]
+        self._line(f"class {node.name} {{")
+        self._indent += 1
+        params = ", ".join(fields)
+        self._line(f"constructor({params}) {{")
+        self._indent += 1
+        for f in fields:
+            self._line(f"this.{f} = {f};")
+        self._indent -= 1
+        self._line("}")
+        self._indent -= 1
+        self._line("}")
+        self._line("")
+
+    def _emit_ImplBlock(self, node):
+        for method_node in node.methods:
+            params = ", ".join(p[0] for p in method_node.params)
+            self._line(f"// impl {node.struct_name}.{method_node.name}")
+            self._line(f"{node.struct_name}.prototype.{method_node.name} = function({params}) {{")
+            self._indent += 1
+            for s in method_node.body:
+                self._emit_stmt(s)
+            self._indent -= 1
+            self._line("};")
+
+    def _emit_YieldStmt(self, node):
+        self._line(f"yield {self._emit_expr(node.value)};")
+
+    def _emit_ExportStmt(self, node):
+        names = ", ".join(node.names)
+        self._line(f"export {{ {names} }};")
+
+    def _expr_StructLiteral(self, node):
+        args = ", ".join(self._emit_expr(v) for _, v in node.fields)
+        return f"new {node.struct_name}({args})"

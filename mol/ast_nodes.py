@@ -375,3 +375,39 @@ class AwaitExpr(ASTNode):
     """await expr — wait for a spawned task to complete"""
     expr: object = None
 
+
+# ── Structs (v0.8.0) ────────────────────────────────────────
+@dataclass
+class StructDef(ASTNode):
+    """struct Name do field1, field2 end"""
+    name: str = ""
+    fields: list = field(default_factory=list)  # list of (name, type_name|None)
+
+
+@dataclass
+class ImplBlock(ASTNode):
+    """impl Name do define method(...) ... end end"""
+    struct_name: str = ""
+    methods: list = field(default_factory=list)  # list of FuncDef nodes
+
+
+@dataclass
+class StructLiteral(ASTNode):
+    """Name { field1: val1, field2: val2 }"""
+    struct_name: str = ""
+    fields: list = field(default_factory=list)  # list of (key, value_expr)
+
+
+# ── Generators (v0.8.0) ─────────────────────────────────────
+@dataclass
+class YieldStmt(ASTNode):
+    """yield expr — produce a value from a generator"""
+    value: Any = None
+
+
+# ── Module System (v0.8.0) ──────────────────────────────────
+@dataclass
+class ExportStmt(ASTNode):
+    """export name — mark a symbol for module export"""
+    names: list = field(default_factory=list)  # list of str
+

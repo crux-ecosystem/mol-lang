@@ -1,0 +1,117 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL v0.8.0 — Structs, Generators, File I/O, HTTP
+-- ══════════════════════════════════════════════════════════
+
+-- ── Struct Definitions ──────────────────────────────────
+struct Point do
+  x,
+  y
+end
+
+struct Color do
+  r,
+  g,
+  b
+end
+
+-- ── Struct Literals ─────────────────────────────────────
+let origin be Point { x: 0, y: 0 }
+let red be Color { r: 255, g: 0, b: 0 }
+
+show origin
+show red
+
+-- ── Constructor-Style Creation ──────────────────────────
+let target be Point(10, 20)
+show target
+show f"Target x={target.x}, y={target.y}"
+
+-- ── Impl Methods ────────────────────────────────────────
+impl Point do
+  define distance(other)
+    let dx be self.x - other.x
+    let dy be self.y - other.y
+    return sqrt(dx * dx + dy * dy)
+  end
+
+  define translate(dx, dy)
+    return Point(self.x + dx, self.y + dy)
+  end
+
+  define to_text()
+    return f"({self.x}, {self.y})"
+  end
+end
+
+impl Color do
+  define hex()
+    -- Simple hex representation
+    return f"rgb({self.r}, {self.g}, {self.b})"
+  end
+end
+
+show origin.distance(target)
+let moved be origin.translate(5, 5)
+show moved.to_text()
+show red.hex()
+
+-- ── Generators ──────────────────────────────────────────
+define fibonacci(n)
+  let a be 0
+  let b be 1
+  for i in range(n) do
+    yield a
+    let temp be a + b
+    set a to b
+    set b to temp
+  end
+end
+
+show "Fibonacci:"
+let fibs be fibonacci(10).to_list()
+show fibs
+
+-- Generator with filtering
+define even_squares(limit)
+  for i in range(limit) do
+    let sq be i * i
+    if sq % 2 is 0 then
+      yield sq
+    end
+  end
+end
+
+show "Even squares:"
+show even_squares(10).to_list()
+
+-- ── File I/O ────────────────────────────────────────────
+show "--- File I/O ---"
+let tmpfile be "/tmp/mol_demo.txt"
+write_file(tmpfile, "Hello from MOL v0.8.0!")
+let content be read_file(tmpfile)
+show f"Read: {content}"
+let exists be file_exists(tmpfile)
+show f"Exists: {exists}"
+let sz be file_size(tmpfile)
+show f"Size: {sz} bytes"
+
+-- Path utilities
+let joined be path_join("src", "main.mol")
+show f"Join: {joined}"
+let base be path_base("/home/user/app/main.mol")
+show f"Base: {base}"
+let ext be path_ext("hello.mol")
+show f"Ext: {ext}"
+
+-- Cleanup
+delete_file(tmpfile)
+
+-- ── HTTP Fetch ──────────────────────────────────────────
+show "--- HTTP Fetch ---"
+let resp be fetch("https://httpbin.org/get")
+show f"Status: {resp.status}"
+show f"OK: {resp.ok}"
+
+-- ── Export (for modules) ────────────────────────────────
+-- When this file is imported with `use`, only these are exported
+export Point, Color, fibonacci

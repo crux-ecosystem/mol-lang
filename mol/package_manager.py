@@ -365,9 +365,17 @@ def load_mol_file(filepath: str, project_root: Path = None) -> dict:
 
     # Collect user-defined exports
     exports = {}
-    for key, val in interp.global_env._store.items():
-        if key not in STDLIB:
-            exports[key] = val
+
+    # If the module uses explicit 'export' statements, only export those
+    if hasattr(interp, '_exports') and interp._exports:
+        for name in interp._exports:
+            if name in interp.global_env._store:
+                exports[name] = interp.global_env._store[name]
+    else:
+        # No explicit exports — export everything non-stdlib
+        for key, val in interp.global_env._store.items():
+            if key not in STDLIB:
+                exports[key] = val
 
     return exports
 

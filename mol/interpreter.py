@@ -12,6 +12,7 @@ Walks the AST and executes MOL programs. Features:
 from mol.ast_nodes import *
 from mol.types import Thought, Memory, Node, Stream, Document, Chunk, Embedding, VectorStore
 from mol.stdlib import STDLIB, SecurityContext, MOLSecurityError, MOLTypeError, MOLTask, _THREAD_POOL
+from mol.stdlib import MOLAssertionError
 import time as _time
 
 
@@ -27,6 +28,12 @@ class MOLGuardError(Exception):
 
 class ReturnSignal(Exception):
     """Used internally to unwind the stack on `return`."""
+    def __init__(self, value=None):
+        self.value = value
+
+
+class YieldSignal(Exception):
+    """Used internally to collect yield values from generators."""
     def __init__(self, value=None):
         self.value = value
 
@@ -114,6 +121,79 @@ class MOLLambda:
         return self._interpreter._invoke_lambda(self, list(args))
 
 
+class MOLStructDef:
+    """Metadata for a user-defined struct type."""
+
+    def __init__(self, name, field_names, field_types=None):
+        self.name = name
+        self.field_names = field_names    # list of str
+        self.field_types = field_types or {}  # name → type_name
+        self.methods = {}                 # name → MOLFunction
+
+    def __repr__(self):
+        return f"<struct {self.name}>"
+
+
+class MOLStructInstance:
+    """An instance of a user-defined struct."""
+
+    def __init__(self, struct_def, field_values):
+        self._struct_def = struct_def
+        self._fields = dict(field_values)
+
+    def get_field(self, name):
+        if name in self._fields:
+            return self._fields[name]
+        if name in self._struct_def.methods:
+            return self._struct_def.methods[name]
+        raise MOLRuntimeError(f"Struct '{self._struct_def.name}' has no field '{name}'")
+
+    def set_field(self, name, value):
+        if name not in self._fields:
+            raise MOLRuntimeError(f"Struct '{self._struct_def.name}' has no field '{name}'")
+        self._fields[name] = value
+
+    def __repr__(self):
+        pairs = ", ".join(f"{k}: {_repr_val(v)}" for k, v in self._fields.items())
+        return f"{self._struct_def.name} {{ {pairs} }}"
+
+
+def _repr_val(v):
+    if isinstance(v, str):
+        return f'"{v}"'
+    if v is None:
+        return "null"
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, float) and v == int(v):
+        return str(int(v))
+    return repr(v)
+
+
+class MOLGenerator:
+    """A lazy generator produced by functions that use yield."""
+
+    def __init__(self, gen_iter):
+        self._iter = gen_iter
+        self._exhausted = False
+
+    def __iter__(self):
+        return self._iter
+
+    def __next__(self):
+        try:
+            return next(self._iter)
+        except StopIteration:
+            self._exhausted = True
+            raise
+
+    def to_list(self):
+        return list(self._iter)
+
+    def __repr__(self):
+        return "<Generator>"
+
+
 class Interpreter:
     """
     The MOL interpreter. Walks the AST and executes each node.
@@ -133,6 +213,9 @@ class Interpreter:
         self.output: list[str] = []           # captured output
         self._event_listeners: dict = {}      # event → [callbacks]
         self._trace_enabled = trace           # auto-trace pipe chains
+        self._current_line = 0                # v0.8.0: line tracking for errors
+        self._current_col = 0                 # v0.8.0: column tracking
+        self._source_file = "<stdin>"         # v0.8.0: current file name
 
         # Load standard library into global scope
         for name, fn in STDLIB.items():
@@ -152,11 +235,28 @@ class Interpreter:
 
     def _exec(self, node, env: Environment):
         """Dispatch execution to the appropriate handler."""
+        # Track line info for error messages (v0.8.0)
+        if hasattr(node, 'line') and node.line > 0:
+            self._current_line = node.line
+            self._current_col = node.column
         method_name = f"_exec_{type(node).__name__}"
         method = getattr(self, method_name, None)
         if method is None:
             raise MOLRuntimeError(f"Unknown AST node: {type(node).__name__}")
-        return method(node, env)
+        try:
+            return method(node, env)
+        except MOLRuntimeError:
+            raise  # Already has context
+        except (ReturnSignal, YieldSignal):
+            raise  # Control flow, not errors
+        except (MOLSecurityError, MOLTypeError, MOLGuardError, MOLAssertionError):
+            raise  # Domain-specific errors, don't wrap
+        except Exception as e:
+            if self._current_line > 0:
+                raise MOLRuntimeError(
+                    f"[{self._source_file}:{self._current_line}] {e}"
+                ) from e
+            raise
 
     # ── Show ─────────────────────────────────────────────────
     def _exec_ShowStmt(self, node: ShowStmt, env):
@@ -430,10 +530,49 @@ class Interpreter:
         self._test_blocks.append(node)
         return None
 
+    # ── v0.8.0 — Structs ────────────────────────────────────
+    def _exec_StructDef(self, node, env):
+        """struct Name do field1, field2 end — register struct type."""
+        field_names = [f[0] for f in node.fields]
+        field_types = {f[0]: f[1] for f in node.fields if f[1]}
+        sdef = MOLStructDef(node.name, field_names, field_types)
+        env.set(node.name, sdef)
+        return None
+
+    def _exec_ImplBlock(self, node, env):
+        """impl Name do ... end — attach methods to a struct."""
+        sdef = env.get(node.struct_name)
+        if not isinstance(sdef, MOLStructDef):
+            raise MOLRuntimeError(f"impl: '{node.struct_name}' is not a struct")
+        for method_node in node.methods:
+            func = MOLFunction(method_node.name, method_node.params, method_node.body, env)
+            func._interpreter = self
+            sdef.methods[method_node.name] = func
+        return None
+
+    # ── v0.8.0 — Yield ──────────────────────────────────────
+    def _exec_YieldStmt(self, node, env):
+        """yield expr — throw a YieldSignal."""
+        value = self._eval(node.value, env)
+        raise YieldSignal(value)
+
+    # ── v0.8.0 — Export ─────────────────────────────────────
+    def _exec_ExportStmt(self, node, env):
+        """export name1, name2 — mark symbols for module export."""
+        if not hasattr(self, '_exports'):
+            self._exports = set()
+        for name in node.names:
+            self._exports.add(name)
+        return None
+
     # ── Expression Evaluation ────────────────────────────────
     def _eval(self, node, env: Environment):
         if node is None:
             return None
+        # Track line info for error messages
+        if hasattr(node, 'line') and node.line > 0:
+            self._current_line = node.line
+            self._current_col = node.column
         method_name = f"_eval_{type(node).__name__}"
         method = getattr(self, method_name, None)
         if method is None:
@@ -686,7 +825,7 @@ class Interpreter:
 
     def _invoke_callable(self, func, args, name="<anon>"):
         """Invoke a builtin, MOLFunction, MOLPipeline, or MOLLambda with args."""
-        if callable(func) and not isinstance(func, (MOLFunction, MOLPipeline, MOLLambda)):
+        if callable(func) and not isinstance(func, (MOLFunction, MOLPipeline, MOLLambda, MOLStructDef)):
             return func(*args)
         if isinstance(func, MOLLambda):
             return self._invoke_lambda(func, args)
@@ -719,12 +858,90 @@ class Interpreter:
                 if param_type:
                     self._check_type(arg_val, param_type, param_name)
                 call_env.set(param_name, arg_val)
+
+            # Check if function is a generator (contains yield)
+            if self._body_has_yield(func.body):
+                return self._invoke_generator(func.body, call_env)
+
             try:
                 self._exec_block(func.body, call_env)
             except ReturnSignal as ret:
                 return ret.value
             return None
         raise MOLRuntimeError(f"'{name}' is not callable")
+
+    def _body_has_yield(self, body):
+        """Check if a function body contains any yield statement."""
+        for stmt in body:
+            if isinstance(stmt, YieldStmt):
+                return True
+            # Check nested blocks (if/while/for etc)
+            if hasattr(stmt, 'body') and isinstance(stmt.body, list):
+                if self._body_has_yield(stmt.body):
+                    return True
+            if hasattr(stmt, 'else_body') and isinstance(stmt.else_body, list):
+                if self._body_has_yield(stmt.else_body):
+                    return True
+        return False
+
+    def _invoke_generator(self, body, call_env):
+        """Execute a generator function, collecting yields into a MOLGenerator."""
+        def gen_iter():
+            try:
+                self._exec_block(body, call_env)
+            except YieldSignal as ys:
+                yield ys.value
+                # Continue executing — we need a more sophisticated approach
+                # Use a step-by-step generator
+            except ReturnSignal:
+                return
+
+        # Build a proper step-by-step generator
+        def step_gen():
+            for stmt in body:
+                yield from self._gen_exec_stmt(stmt, call_env)
+
+        return MOLGenerator(step_gen())
+
+    def _gen_exec_stmt(self, node, env):
+        """Execute a statement inside a generator, yielding on YieldStmt."""
+        if isinstance(node, YieldStmt):
+            yield self._eval(node.value, env)
+            return
+        if isinstance(node, ForStmt):
+            iterable = self._eval(node.iterable, env)
+            for item in iterable:
+                loop_env = Environment(env)
+                loop_env.set(node.var_name, item)
+                for s in node.body:
+                    yield from self._gen_exec_stmt(s, loop_env)
+            return
+        if isinstance(node, WhileStmt):
+            while self._truthy(self._eval(node.condition, env)):
+                for s in node.body:
+                    yield from self._gen_exec_stmt(s, env)
+            return
+        if isinstance(node, IfStmt):
+            if self._truthy(self._eval(node.condition, env)):
+                for s in node.body:
+                    yield from self._gen_exec_stmt(s, env)
+            else:
+                matched = False
+                for cond, body in node.elif_clauses:
+                    if self._truthy(self._eval(cond, env)):
+                        for s in body:
+                            yield from self._gen_exec_stmt(s, env)
+                        matched = True
+                        break
+                if not matched and node.else_body:
+                    for s in node.else_body:
+                        yield from self._gen_exec_stmt(s, env)
+            return
+        if isinstance(node, ReturnStmt):
+            return  # Stop generator
+        # For all other statements, just execute normally
+        self._exec(node, env)
+
 
     def _invoke_lambda(self, lam, args):
         """Invoke a lambda expression: fn(x) -> expr"""
@@ -812,12 +1029,75 @@ class Interpreter:
     # ── Call / Access Evaluation ─────────────────────────────
     def _eval_FuncCall(self, node: FuncCall, env):
         func = env.get(node.name)
+        # Struct constructor call: Point(10, 20)
+        if isinstance(func, MOLStructDef):
+            args = [self._eval(a, env) for a in node.args]
+            if len(args) != len(func.field_names):
+                raise MOLRuntimeError(
+                    f"Struct '{func.name}' expects {len(func.field_names)} fields, got {len(args)}"
+                )
+            field_values = list(zip(func.field_names, args))
+            return MOLStructInstance(func, field_values)
         args = [self._eval(a, env) for a in node.args]
         return self._invoke_callable(func, args, node.name)
+
+    def _eval_StructLiteral(self, node: StructLiteral, env):
+        """Name { field: value, ... } — create struct instance."""
+        sdef = env.get(node.struct_name)
+        if not isinstance(sdef, MOLStructDef):
+            raise MOLRuntimeError(f"'{node.struct_name}' is not a struct")
+        field_values = []
+        for key, val_expr in node.fields:
+            if key not in sdef.field_names:
+                raise MOLRuntimeError(
+                    f"Struct '{sdef.name}' has no field '{key}'"
+                )
+            field_values.append((key, self._eval(val_expr, env)))
+        # Fill missing fields with null
+        provided = {k for k, _ in field_values}
+        for fname in sdef.field_names:
+            if fname not in provided:
+                field_values.append((fname, None))
+        return MOLStructInstance(sdef, field_values)
 
     def _eval_MethodCall(self, node: MethodCall, env):
         obj = self._eval(node.obj, env)
         args = [self._eval(a, env) for a in node.args]
+
+        # Struct method call — bind self
+        if isinstance(obj, MOLStructInstance):
+            method_name = node.method
+            if method_name in obj._struct_def.methods:
+                func = obj._struct_def.methods[method_name]
+                call_env = Environment(func.closure_env)
+                call_env.set("self", obj)
+                # Bind function params
+                for i, param in enumerate(func.params):
+                    param_name = param[0]
+                    if i < len(args):
+                        call_env.set(param_name, args[i])
+                    elif len(param) >= 3:
+                        call_env.set(param_name, self._eval(param[2], call_env))
+                    else:
+                        call_env.set(param_name, None)
+                try:
+                    self._exec_block(func.body, call_env)
+                except ReturnSignal as ret:
+                    return ret.value
+                return None
+            raise MOLRuntimeError(
+                f"Struct '{obj._struct_def.name}' has no method '{method_name}'"
+            )
+
+        # Generator methods
+        if isinstance(obj, MOLGenerator):
+            if node.method == "to_list":
+                return obj.to_list()
+            if node.method == "next":
+                try:
+                    return next(obj)
+                except StopIteration:
+                    return None
 
         # Try native Python method
         method = getattr(obj, node.method, None)
@@ -843,6 +1123,10 @@ class Interpreter:
 
     def _eval_FieldAccess(self, node: FieldAccess, env):
         obj = self._eval(node.obj, env)
+
+        # Struct field access
+        if isinstance(obj, MOLStructInstance):
+            return obj.get_field(node.field_name)
 
         # Dict field access
         if isinstance(obj, dict) and node.field_name in obj:

@@ -68,6 +68,7 @@ def run_file(filepath: str, show_output=True, trace=True):
     try:
         ast = parse(source)
         interp = Interpreter(trace=trace)
+        interp._source_file = os.path.basename(filepath)
         interp.run(ast)
     except MOLGuardError as e:
         print(f"\n{C.RED}\U0001f6e1 Guard Error:{C.RESET} {e}")
