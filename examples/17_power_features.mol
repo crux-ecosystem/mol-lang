@@ -1,0 +1,204 @@
+-- ══════════════════════════════════════════════════════════════
+-- MOL v0.6.0 — Power Features Demo
+-- ══════════════════════════════════════════════════════════════
+-- Lambda expressions, pattern matching, null safety,
+-- string interpolation, destructuring, error handling,
+-- default params, and built-in testing.
+
+show "═══ Lambda Expressions ═══"
+
+let double be fn(x) -> x * 2
+let add be fn(a, b) -> a + b
+show f"double(7) = {double(7)}"
+show f"add(3, 4) = {add(3, 4)}"
+
+-- Lambdas work great with pipes
+let nums be [1, 2, 3, 4, 5]
+let squared be nums |> map(fn(x) -> x * x)
+show f"Squared: {squared}"
+
+let evens be nums |> filter(fn(x) -> x % 2 is 0)
+show f"Evens: {evens}"
+
+show ""
+show "═══ Null Safety (Coalescing) ═══"
+
+let config be null
+let timeout be config ?? 30
+show f"Timeout: {timeout}"
+
+let name be "MOL"
+let greeting be name ?? "World"
+show f"Greeting: {greeting}"
+
+show ""
+show "═══ String Interpolation ═══"
+
+let lang be "MOL"
+let version be "0.6.0"
+show f"Welcome to {lang} v{version}!"
+show f"2 + 2 = {2 + 2}"
+show f"squared list has {len(squared)} items"
+
+show ""
+show "═══ Destructuring ═══"
+
+-- List destructuring
+let [first, second, third] be ["alpha", "beta", "gamma"]
+show f"First: {first}, Second: {second}, Third: {third}"
+
+-- Rest pattern
+let [head, ...tail] be [10, 20, 30, 40, 50]
+show f"Head: {head}, Tail: {tail}"
+
+-- Map destructuring
+let {x, y} be {"x": 100, "y": 200, "z": 300}
+show f"x={x}, y={y}"
+
+show ""
+show "═══ Pattern Matching ═══"
+
+-- Simple literal matching
+let status_code be 404
+let message be match status_code with
+  | 200 -> "OK"
+  | 301 -> "Moved"
+  | 404 -> "Not Found"
+  | 500 -> "Server Error"
+  | _ -> "Unknown"
+end
+show f"HTTP {status_code}: {message}"
+
+-- Match with guards
+let score be 87
+let grade be match score with
+  | s when s >= 90 -> "A"
+  | s when s >= 80 -> "B"
+  | s when s >= 70 -> "C"
+  | s when s >= 60 -> "D"
+  | _ -> "F"
+end
+show f"Score {score} → Grade {grade}"
+
+-- Match with list patterns
+let point be [3, 4]
+let description be match point with
+  | [] -> "origin"
+  | [0, 0] -> "origin"
+  | [x, 0] -> f"on x-axis at {x}"
+  | [0, y] -> f"on y-axis at {y}"
+  | [x, y] -> f"point({x}, {y})"
+  | _ -> "unknown"
+end
+show f"Point: {description}"
+
+-- Match with block body
+let value be 42
+let analysis be match value with
+  | v when v > 100 -> "large"
+  | v when v > 0 ->
+    let label be "positive"
+    f"{label}: {v}"
+  | 0 -> "zero"
+  | _ -> "negative"
+end
+show f"Analysis: {analysis}"
+
+show ""
+show "═══ Error Handling ═══"
+
+try
+  let result be 10 / 0
+  show f"Result: {result}"
+rescue e
+  show f"Caught error: {e}"
+ensure
+  show "Cleanup complete"
+end
+
+try
+  show "This works fine"
+rescue e
+  show "No error"
+ensure
+  show "Always runs"
+end
+
+show ""
+show "═══ Default Parameters ═══"
+
+define greet(name, greeting be "Hello", punctuation be "!")
+  show f"{greeting}, {name}{punctuation}"
+end
+
+greet("World")
+greet("MOL", "Welcome")
+greet("Developer", "Hey", ".")
+
+show ""
+show "═══ Combined Power ═══"
+
+-- Chain everything together
+let data be [5, 12, 3, 8, 15, 1, 9]
+
+let processed be data |>
+  filter(fn(x) -> x > 5) |>
+  map(fn(x) -> x * 10) |>
+  sort()
+
+let [top, ...others] be processed
+
+let summary be match top with
+  | t when t >= 100 -> f"Top value: {t} (strong)"
+  | t when t >= 50 -> f"Top value: {t} (moderate)"
+  | _ -> "Top value: low"
+end
+
+show summary
+show f"Others: {others}"
+
+show ""
+show "═══ Built-in Testing ═══"
+
+-- Tests are registered but not run during normal execution
+-- Use `mol test` to discover and run them
+
+test "arithmetic basics" do
+  assert_eq(2 + 2, 4)
+  assert_eq(10 - 3, 7)
+  assert_eq(6 * 7, 42)
+  assert_true(10 > 5)
+  assert_false(3 > 10)
+end
+
+test "lambda and pipes" do
+  let result be [1, 2, 3] |> map(fn(x) -> x * 2)
+  assert_eq(result, [2, 4, 6])
+end
+
+test "null coalescing" do
+  assert_eq(null ?? "default", "default")
+  assert_eq(42 ?? 0, 42)
+end
+
+test "string interpolation" do
+  let x be "test"
+  assert_eq(f"a {x} b", "a test b")
+end
+
+test "destructuring" do
+  let [a, b] be [10, 20]
+  assert_eq(a, 10)
+  assert_eq(b, 20)
+end
+
+test "pattern matching" do
+  let r be match 42 with
+    | 42 -> "found"
+    | _ -> "not found"
+  end
+  assert_eq(r, "found")
+end
+
+show ""
+show "✨ MOL v0.6.0 Power Features — All demonstrated!"

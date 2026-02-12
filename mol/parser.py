@@ -323,6 +323,143 @@ class MOLTransformer(Transformer):
     def use_alias(self, module, alias):
         return UseStmt(module=str(module)[1:-1], alias=str(alias))
 
+    # ── v0.6.0 — Destructuring ──────────────────────────────
+    def name_list(self, *names):
+        return [str(n) for n in names]
+
+    def destruct_names(self, *args):
+        """Parse destructure names, optionally with ...rest at end."""
+        names = []
+        rest = None
+        skip_next = False
+        for i, a in enumerate(args):
+            s = str(a)
+            if s == '...':
+                skip_next = True
+                continue
+            if skip_next:
+                rest = s
+                skip_next = False
+                continue
+            names.append(s)
+        return (names, rest)
+
+    def destructure_list(self, names_info, value):
+        names, rest = names_info
+        return DestructureList(names=names, rest=rest, value=value)
+
+    def destructure_map(self, names, value):
+        return DestructureMap(keys=names, value=value)
+
+    # ── v0.6.0 — Default Parameters ─────────────────────────
+    def param_default(self, name, default):
+        return (str(name), None, default)     # (name, type, default_expr)
+
+    # ── v0.6.0 — Null Coalescing ────────────────────────────
+    def null_coalesce(self, *args):
+        args = list(args)
+        if len(args) == 1:
+            return args[0]
+        result = args[0]
+        for i in range(1, len(args)):
+            result = NullCoalesce(left=result, right=args[i])
+        return result
+
+    # ── v0.6.0 — Try/Rescue/Ensure ──────────────────────────
+    def try_rescue(self, body, rescue, ensure=None):
+        r_name, r_body = rescue
+        e_body = ensure if ensure else []
+        return TryRescue(body=body, rescue_name=r_name, rescue_body=r_body, ensure_body=e_body)
+
+    def rescue_clause(self, *args):
+        if len(args) == 2:
+            return (str(args[0]), args[1])   # (name, body)
+        return (None, args[0])               # (None, body)
+
+    def ensure_clause(self, body):
+        return body
+
+    # ── v0.6.0 — Test Block ─────────────────────────────────
+    def test_block(self, desc, body):
+        return TestBlock(description=str(desc)[1:-1], body=body)
+
+    # ── v0.6.0 — Lambda Expression ──────────────────────────
+    def lambda_expr(self, names, body):
+        params = names if names else []
+        return LambdaExpr(params=params, body=body)
+
+    # ── v0.6.0 — Match Expression ───────────────────────────
+    def match_expr(self, subject, *arms):
+        return MatchExpr(subject=subject, arms=list(arms))
+
+    def match_arm(self, pattern, body):
+        # body may be an inline expr (single node) or a block (list of stmts)
+        if not isinstance(body, list):
+            body = [body]
+        return MatchArm(pattern=pattern, body=body)
+
+    def match_arm_guard(self, pattern, guard_expr, body):
+        if not isinstance(body, list):
+            body = [body]
+        return MatchArm(pattern=pattern, guard=guard_expr, body=body)
+
+    def pattern_wildcard(self):
+        return MatchPattern(kind="wildcard")
+
+    def pattern_number(self, tok):
+        v = float(tok)
+        if v == int(v):
+            v = int(v)
+        return MatchPattern(kind="literal", value=v)
+
+    def pattern_string(self, tok):
+        return MatchPattern(kind="literal", value=str(tok)[1:-1])
+
+    def pattern_true(self):
+        return MatchPattern(kind="literal", value=True)
+
+    def pattern_false(self):
+        return MatchPattern(kind="literal", value=False)
+
+    def pattern_null(self):
+        return MatchPattern(kind="literal", value=None)
+
+    def pattern_binding(self, name):
+        return MatchPattern(kind="binding", value=str(name))
+
+    def pattern_list(self, items=None):
+        return MatchPattern(kind="list", children=items if items else [])
+
+    def pattern_list_rest(self, items, rest):
+        return MatchPattern(kind="list_rest", value=str(rest), children=items if items else [])
+
+    def match_pattern_list(self, *items):
+        return list(items)
+
+    # ── v0.6.0 — String Interpolation ───────────────────────
+    def interp_string(self, tok):
+        raw = str(tok)           # f"Hello {name}, {age}"
+        inner = raw[2:-1]        # strip f" and "
+        parts = []
+        i = 0
+        while i < len(inner):
+            if inner[i] == '{':
+                end = inner.index('}', i)
+                expr_src = inner[i+1:end]
+                # Parse the expression
+                from mol.parser import parse as _parse_mol
+                mini_ast = _parse_mol(f"show {expr_src}")
+                parts.append(mini_ast.statements[0].value)
+                i = end + 1
+            else:
+                # Collect literal text
+                j = i
+                while j < len(inner) and inner[j] != '{':
+                    j += 1
+                parts.append(inner[i:j])
+                i = j
+        return InterpolatedString(parts=parts)
+
 
 # ── Public API ───────────────────────────────────────────────
 def parse(source: str) -> Program:

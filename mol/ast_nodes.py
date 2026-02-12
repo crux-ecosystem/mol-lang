@@ -270,3 +270,95 @@ class UseStmt(ASTNode):
     symbols: list = field(default_factory=list)   # empty = import all
     alias: Optional[str] = None                    # 'as' alias
 
+
+# ── v0.6.0 Power Features ───────────────────────────────────
+
+# ── Pattern Matching ─────────────────────────────────────────
+@dataclass
+class MatchExpr(ASTNode):
+    """Pattern matching: match expr with | pattern -> body end"""
+    subject: Any = None
+    arms: list = field(default_factory=list)  # list of MatchArm
+
+@dataclass
+class MatchArm(ASTNode):
+    """A single arm:  | pattern -> body"""
+    pattern: Any = None    # MatchPattern node
+    guard: Any = None      # optional 'when' guard expression
+    body: list = field(default_factory=list)
+
+@dataclass
+class MatchPattern(ASTNode):
+    """Pattern node — literal, binding, wildcard, list, map, or type."""
+    kind: str = ""         # "literal", "binding", "wildcard", "list", "map", "type", "or"
+    value: Any = None      # literal value, binding name, type name, etc.
+    children: list = field(default_factory=list)  # sub-patterns for list/map/or
+
+
+# ── Error Handling ───────────────────────────────────────────
+@dataclass
+class TryRescue(ASTNode):
+    """try ... rescue [name] ... ensure ... end"""
+    body: list = field(default_factory=list)
+    rescue_name: Optional[str] = None      # variable name for error
+    rescue_body: list = field(default_factory=list)
+    ensure_body: list = field(default_factory=list)
+
+
+# ── Lambda Expression ────────────────────────────────────────
+@dataclass
+class LambdaExpr(ASTNode):
+    """fn(x, y) -> expr   (anonymous function)"""
+    params: list = field(default_factory=list)  # list of param names (strings)
+    body: Any = None  # single expression
+
+
+# ── String Interpolation ────────────────────────────────────
+@dataclass
+class InterpolatedString(ASTNode):
+    """f"Hello {name}, you have {count} items" """
+    parts: list = field(default_factory=list)  # list of str | ASTNode
+
+
+# ── Destructuring Assignment ────────────────────────────────
+@dataclass
+class DestructureList(ASTNode):
+    """let [a, b, c] be expr"""
+    names: list = field(default_factory=list)  # list of str (or "_" for skip)
+    rest: Optional[str] = None                  # ...rest capture
+    value: Any = None
+
+@dataclass
+class DestructureMap(ASTNode):
+    """let {x, y, z} be expr"""
+    keys: list = field(default_factory=list)    # list of str
+    value: Any = None
+
+
+# ── Null Coalescing Operator ────────────────────────────────
+@dataclass
+class NullCoalesce(ASTNode):
+    """expr ?? default — returns default if expr is null"""
+    left: Any = None
+    right: Any = None
+
+
+# ── Built-in Test Block ─────────────────────────────────────
+@dataclass
+class TestBlock(ASTNode):
+    """test "description" do ... end"""
+    description: str = ""
+    body: list = field(default_factory=list)
+
+
+# ── Chained Comparison (v0.6.0) ─────────────────────────────
+@dataclass
+class ChainedComparison(ASTNode):
+    """0 < x < 100 — chained comparison without repeating x"""
+    operands: list = field(default_factory=list)  # [expr, expr, expr, ...]
+    ops: list = field(default_factory=list)        # ["<", "<", ...]
+
+
+# ── Default Parameters (v0.6.0) ─────────────────────────────
+# Handled through param tuple expansion: (name, type, default)
+

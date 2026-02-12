@@ -477,6 +477,40 @@ def _builtin_assert_not_null(value):
     return value
 
 
+# ── Testing Assertions (v0.6.0) ─────────────────────────────
+class MOLAssertionError(Exception):
+    """Raised when a test assertion fails."""
+    pass
+
+
+def _builtin_assert_eq(actual, expected):
+    """Assert two values are equal."""
+    if actual != expected:
+        raise MOLAssertionError(f"assert_eq failed: {actual!r} != {expected!r}")
+    return True
+
+
+def _builtin_assert_ne(actual, expected):
+    """Assert two values are NOT equal."""
+    if actual == expected:
+        raise MOLAssertionError(f"assert_ne failed: {actual!r} == {expected!r}")
+    return True
+
+
+def _builtin_assert_true(value):
+    """Assert value is truthy."""
+    if not value:
+        raise MOLAssertionError(f"assert_true failed: {value!r}")
+    return True
+
+
+def _builtin_assert_false(value):
+    """Assert value is falsy."""
+    if value:
+        raise MOLAssertionError(f"assert_false failed: {value!r}")
+    return True
+
+
 def _create_document(source="", content=""):
     return Document(source=str(source), content=str(content))
 
@@ -1039,4 +1073,10 @@ STDLIB: dict[str, callable] = {
     "is_text": _builtin_is_text,
     "is_list": _builtin_is_list,
     "is_map": _builtin_is_map,
+
+    # Testing assertions (v0.6.0)
+    "assert_eq": _builtin_assert_eq,
+    "assert_ne": _builtin_assert_ne,
+    "assert_true": _builtin_assert_true,
+    "assert_false": _builtin_assert_false,
 }
