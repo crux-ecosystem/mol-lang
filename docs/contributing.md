@@ -9,7 +9,7 @@ git clone https://github.com/crux-ecosystem/mol-lang.git
 cd mol-lang
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
-python tests/test_mol.py   # 68 tests should pass
+python tests/test_mol.py   # 147 tests should pass
 ```
 
 ## Project Structure
