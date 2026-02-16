@@ -697,7 +697,8 @@ python tests/test_mol.py
 
 | Version | Highlights |
 |---|---|
-| **v0.10.0** (current) | **Security hardening**: sandboxed playground, 26 dangerous functions blocked, execution timeout, rate limiting, code size limits, CORS restrictions, `/api/security` endpoint, 181 tests |
+| **v1.0.0** (current) | **First stable release**: 143 stdlib functions, structs, pattern matching, generators, concurrency, modules, WASM, LSP, sandboxed playground, 181 tests, community infrastructure |
+| **v0.10.0** | **Security hardening**: sandboxed playground, 26 dangerous functions blocked, execution timeout, rate limiting, code size limits, CORS restrictions, `/api/security` endpoint, 181 tests |
 | **v0.9.0** | Self-hosted codebase, web API server, IntraMind AI core, field/index mutation, `serve()`, `json_parse/stringify`, 147 tests |
 | **v0.8.0** | Structs with methods, generators/iterators, file I/O, HTTP fetch, modules (`use`/`export`), 123 tests |
 | **v0.7.0** | `spawn`/`await`, channels, `parallel()`, `race()`, `wait_all()`, `sleep()`, 102 tests |
@@ -717,6 +718,16 @@ See [ROADMAP.md](ROADMAP.md) for the full plan.
 ### Documentation
 
 Full documentation available at: **[https://crux-ecosystem.github.io/MOL/](https://crux-ecosystem.github.io/MOL/)**
+
+---
+
+## Community
+
+- **GitHub Discussions**: [Ask questions, share ideas](https://github.com/crux-ecosystem/mol-lang/discussions)
+- **Issue Tracker**: [Report bugs, request features](https://github.com/crux-ecosystem/mol-lang/issues)
+- **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
+- **Code of Conduct**: See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- **Security**: See [SECURITY.md](SECURITY.md) for vulnerability reporting
 
 ---
 
