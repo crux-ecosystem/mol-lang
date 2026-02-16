@@ -18,7 +18,7 @@ hide:
 </div>
 
 [Get Started](getting-started/installation.md){ .md-button .md-button--primary }
-[View on GitHub](https://github.com/crux-ecosystem/MOL){ .md-button }
+[View on GitHub](https://github.com/crux-ecosystem/mol-lang){ .md-button }
 
 </div>
 
