@@ -1,6 +1,6 @@
 [project]
 name = "mol-lang"
-version = "1.0.0"
+version = "1.0.1"
 description = "MOL — The Cognitive Programming Language with auto-tracing pipelines"
 requires-python = ">=3.10"
 license = {text = "MIT"}
@@ -27,8 +27,9 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/crux-ecosystem/mol-lang"
 Repository = "https://github.com/crux-ecosystem/mol-lang"
+Documentation = "https://crux-ecosystem.github.io/mol-lang/"
 Playground = "https://mol.cruxlabx.in"
-Changelog = "https://github.com/crux-ecosystem/MOL/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/crux-ecosystem/mol-lang/blob/main/CHANGELOG.md"
 
 [project.readme]
 file = "README.md"
