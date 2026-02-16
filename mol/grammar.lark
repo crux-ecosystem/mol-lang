@@ -159,6 +159,8 @@ type_name: "Thought" -> type_thought
 ?comparison: addition (comp_op addition)*        -> comparison
 comp_op: "is" -> comp_eq
        | "is" "not" -> comp_neq
+       | "==" -> comp_eq
+       | "!=" -> comp_neq
        | ">" -> comp_gt
        | "<" -> comp_lt
        | ">=" -> comp_gte

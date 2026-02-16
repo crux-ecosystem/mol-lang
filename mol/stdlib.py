@@ -712,23 +712,45 @@ def _builtin_task_done(task):
 # ── Algorithms & Functional Programming (v0.3.0) ─────────────
 
 def _builtin_map(lst, func):
-    """Apply function to each element: map([1,2,3], double) → [2,4,6]"""
+    """Apply function to each element: map([1,2,3], double) → [2,4,6]
+    Smart mode: map(users, "name") → extracts the 'name' field from each dict/struct."""
     if callable(func):
         return [func(item) for item in lst]
-    raise MOLTypeError("map requires a function as second argument")
+    # Smart mode: string → property extraction
+    if isinstance(func, str):
+        key = func
+        return [item.get(key, None) if isinstance(item, dict) else getattr(item, key, None) for item in lst]
+    raise MOLTypeError(
+        f"map requires a function or property name, got {type(func).__name__}.\n"
+        f"  Hint: use a lambda → map(fn(x) -> x * 2)\n"
+        f"  Or extract a field  → map(\"name\")"
+    )
 
 
 def _builtin_filter(lst, func):
-    """Keep elements where function returns true: filter([1,2,3,4], is_even) → [2,4]"""
+    """Keep elements where function returns true: filter([1,2,3,4], is_even) → [2,4]
+    Smart modes:
+      filter([1,2,3], fn(x) -> x > 2) → [3]       -- lambda
+      filter([1,2,3,2], 2)            → [2, 2]     -- equality match
+      filter(users, "active")          → active users -- truthy property"""
     if callable(func):
         return [item for item in lst if func(item)]
-    raise MOLTypeError("filter requires a function as second argument")
+    # Smart mode: non-callable → equality matching
+    if isinstance(func, str) and lst and isinstance(lst[0], dict):
+        # String on list of dicts → filter where property is truthy
+        key = func
+        return [item for item in lst if item.get(key)]
+    # Value → equality match
+    return [item for item in lst if item == func]
 
 
 def _builtin_reduce(lst, func, initial=None):
     """Reduce list to single value: reduce([1,2,3], add, 0) → 6"""
     if not callable(func):
-        raise MOLTypeError("reduce requires a function as second argument")
+        raise MOLTypeError(
+            f"reduce requires a function, got {type(func).__name__}.\n"
+            f"  Hint: reduce(fn(acc, x) -> acc + x)"
+        )
     if initial is not None:
         acc = initial
         for item in lst:
@@ -783,13 +805,18 @@ def _builtin_count(lst, item):
 
 
 def _builtin_find(lst, func):
-    """Find first matching element: find([1,2,3,4], is_even) → 2"""
+    """Find first matching element: find([1,2,3,4], is_even) → 2
+    Smart mode: find([1,2,3], 2) → 2 (equality match)"""
     if callable(func):
         for item in lst:
             if func(item):
                 return item
         return None
-    raise MOLTypeError("find requires a function as second argument")
+    # Smart mode: value → equality match
+    for item in lst:
+        if item == func:
+            return item
+    return None
 
 
 def _builtin_find_index(lst, item):
@@ -811,9 +838,22 @@ def _builtin_drop(lst, n):
 
 
 def _builtin_group_by(lst, func):
-    """Group elements by function result: group_by([1,2,3,4], is_even) → {true:[2,4], false:[1,3]}"""
+    """Group elements by function result: group_by([1,2,3,4], is_even) → {true:[2,4], false:[1,3]}
+    Smart mode: group_by(users, "role") → groups by the 'role' property."""
+    if isinstance(func, str):
+        key = func
+        groups = {}
+        for item in lst:
+            val = str(item.get(key, None) if isinstance(item, dict) else getattr(item, key, None))
+            if val not in groups:
+                groups[val] = []
+            groups[val].append(item)
+        return groups
     if not callable(func):
-        raise MOLTypeError("group_by requires a function as second argument")
+        raise MOLTypeError(
+            f"group_by requires a function or property name, got {type(func).__name__}.\n"
+            f"  Hint: group_by(fn(x) -> x > 10) or group_by(\"category\")"
+        )
     groups = {}
     for item in lst:
         key = str(func(item))
@@ -833,14 +873,102 @@ def _builtin_every(lst, func):
     """Check if all elements match: every([2,4,6], is_even) → true"""
     if callable(func):
         return all(func(item) for item in lst)
-    raise MOLTypeError("every requires a function as second argument")
+    # Smart mode: value → check all equal
+    return all(item == func for item in lst)
 
 
 def _builtin_some(lst, func):
     """Check if any element matches: some([1,2,3], is_even) → true"""
     if callable(func):
         return any(func(item) for item in lst)
-    raise MOLTypeError("some requires a function as second argument")
+    # Smart mode: value → check any equal
+    return any(item == func for item in lst)
+
+
+# ── Convenience Aliases & Extras (v1.1.0) ─────────────────────
+
+def _builtin_where(lst, func):
+    """Alias for filter — more readable in pipes: data |> where(fn(x) -> x > 5)
+    Smart modes: where(30) → equality match, where("active") → truthy property."""
+    return _builtin_filter(lst, func)
+
+
+def _builtin_select(lst, func):
+    """Alias for map — more readable for projections: users |> select("name")
+    Smart modes: select(fn(x) -> x.name) or select("name")."""
+    return _builtin_map(lst, func)
+
+
+def _builtin_reject(lst, func):
+    """Opposite of filter — keep elements where function returns false:
+    reject([1,2,3,4,5], fn(x) -> x > 3) → [1,2,3]
+    Smart mode: reject(3) → remove all 3s."""
+    if callable(func):
+        return [item for item in lst if not func(item)]
+    # Smart mode: value → remove matching
+    return [item for item in lst if item != func]
+
+
+def _builtin_pluck(lst, key):
+    """Extract a single property from each dict/struct: pluck(users, "name") → ["Alice","Bob"]"""
+    if isinstance(key, str):
+        return [item.get(key, None) if isinstance(item, dict) else getattr(item, key, None) for item in lst]
+    raise MOLTypeError(
+        f"pluck requires a property name (string), got {type(key).__name__}.\n"
+        f"  Hint: pluck(\"name\")"
+    )
+
+
+def _builtin_each(lst, func):
+    """Execute function for each element (side effects): each(items, fn(x) -> show(x))
+    Returns the original list unchanged."""
+    if callable(func):
+        for item in lst:
+            func(item)
+        return lst
+    raise MOLTypeError(
+        f"each requires a function, got {type(func).__name__}.\n"
+        f"  Hint: each(fn(x) -> show(x))"
+    )
+
+
+def _builtin_compact(lst):
+    """Remove null/false values: compact([1, null, 2, false, 3, 0]) → [1, 2, 3]"""
+    return [item for item in lst if item is not None and item is not False and item != 0 and item != ""]
+
+
+def _builtin_first(lst):
+    """Get first element: first([10,20,30]) → 10"""
+    if not lst:
+        return None
+    return lst[0]
+
+
+def _builtin_last(lst):
+    """Get last element: last([10,20,30]) → 30"""
+    if not lst:
+        return None
+    return lst[-1]
+
+
+def _builtin_sum_list(lst):
+    """Sum all numbers: sum_list([1,2,3,4,5]) → 15"""
+    return sum(lst)
+
+
+def _builtin_min_list(lst):
+    """Get minimum: min_list([3,1,4,1,5]) → 1"""
+    return min(lst)
+
+
+def _builtin_max_list(lst):
+    """Get maximum: max_list([3,1,4,1,5]) → 5"""
+    return max(lst)
+
+
+def _builtin_contains(lst, value):
+    """Check if list contains value: contains([1,2,3], 2) → true"""
+    return value in lst
 
 
 # ── Math & Statistics ─────────────────────────────────────────
@@ -1014,9 +1142,16 @@ def _builtin_base64_decode(text):
 # ── Sorting Algorithms ───────────────────────────────────────
 
 def _builtin_sort_by(lst, func):
-    """Sort by function: sort_by(users, get_age) → sorted by age"""
+    """Sort by function: sort_by(users, get_age) → sorted by age
+    Smart mode: sort_by(users, "age") → sorted by the 'age' property."""
+    if isinstance(func, str):
+        key = func
+        return sorted(lst, key=lambda item: item.get(key, 0) if isinstance(item, dict) else getattr(item, key, 0))
     if not callable(func):
-        raise MOLTypeError("sort_by requires a function as second argument")
+        raise MOLTypeError(
+            f"sort_by requires a function or property name, got {type(func).__name__}.\n"
+            f"  Hint: sort_by(fn(x) -> x.age) or sort_by(\"age\")"
+        )
     return sorted(lst, key=func)
 
 
@@ -1504,6 +1639,20 @@ STDLIB: dict[str, callable] = {
     "chunk_list": _builtin_chunk_list,
     "every": _builtin_every,
     "some": _builtin_some,
+
+    # Convenience aliases & extras (v1.1.0)
+    "where": _builtin_where,
+    "select": _builtin_select,
+    "reject": _builtin_reject,
+    "pluck": _builtin_pluck,
+    "each": _builtin_each,
+    "compact": _builtin_compact,
+    "first": _builtin_first,
+    "last": _builtin_last,
+    "sum_list": _builtin_sum_list,
+    "min_list": _builtin_min_list,
+    "max_list": _builtin_max_list,
+    "contains": _builtin_contains,
 
     # Math & Statistics
     "floor": _builtin_floor,
