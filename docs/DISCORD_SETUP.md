@@ -45,7 +45,7 @@ MOL is a programming language with auto-tracing pipelines, built for AI/RAG work
 📦 Install: `pip install mol-lang`
 🎮 Playground: https://mol.cruxlabx.in
 💻 GitHub: https://github.com/crux-ecosystem/mol-lang
-📖 Docs: https://crux-ecosystem.github.io/MOL
+📖 Docs: https://crux-ecosystem.github.io/mol-lang/
 
 **Rules:**
 1. Be respectful — follow our Code of Conduct

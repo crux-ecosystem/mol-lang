@@ -1,10 +1,10 @@
 site_name: MOL Language
 site_description: The cognitive programming language with auto-tracing pipelines
 site_author: CruxLabx / IntraMind
-site_url: https://crux-ecosystem.github.io/MOL
+site_url: https://crux-ecosystem.github.io/mol-lang
 
-repo_name: crux-ecosystem/MOL
-repo_url: https://github.com/crux-ecosystem/MOL
+repo_name: crux-ecosystem/mol-lang
+repo_url: https://github.com/crux-ecosystem/mol-lang
 
 theme:
   name: material
