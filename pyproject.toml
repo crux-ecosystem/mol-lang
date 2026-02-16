@@ -1,6 +1,6 @@
 [project]
 name = "mol-lang"
-version = "0.10.0"
+version = "1.0.0"
 description = "MOL — The Cognitive Programming Language with auto-tracing pipelines"
 requires-python = ">=3.10"
 license = {text = "MIT"}
@@ -9,7 +9,7 @@ authors = [
 ]
 keywords = ["programming-language", "pipeline", "ai", "rag", "cognitive", "dsl", "mol"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
