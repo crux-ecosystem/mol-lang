@@ -6,6 +6,48 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [1.1.0] — 2026-02-16
+
+### 🧠 Smart Functions & Developer Experience
+
+Making MOL easier to learn and use. Smart HOFs accept values, strings, and lambdas — no boilerplate needed.
+
+### Added
+- **`==` and `!=` operators** — Use familiar syntax alongside `is`/`is not`
+- **Smart `filter()`** — Pass a value for equality match: `filter(30)`, a string for truthy property: `filter("active")`, or a lambda: `filter(fn(x) -> x > 5)`
+- **Smart `map()`** — Pass a string to extract properties: `map("name")`
+- **Smart `find()`** — `find(30)` for equality match
+- **Smart `every()`/`some()`** — `every(3)` checks all equal 3
+- **Smart `group_by()`** — `group_by("role")` groups by property
+- **Smart `sort_by()`** — `sort_by("age")` sorts by property
+- **`where()`** — Readable alias for `filter` in pipes
+- **`select()`** — Readable alias for `map` in pipes
+- **`reject()`** — Opposite of filter (remove matching elements)
+- **`pluck()`** — Extract a property from list of objects
+- **`each()`** — Execute side effects, return original list
+- **`compact()`** — Remove null/false/0/empty values
+- **`first()`/`last()`** — Get first/last element
+- **`sum_list()`/`min_list()`/`max_list()`** — Aggregate functions
+- **`contains()`** — Check list membership
+- **Better error messages** — All HOFs now show hints with correct syntax
+
+### Improved
+- All HOF error messages include syntax hints (e.g., "Hint: use a lambda → filter(fn(x) -> x > 5)")
+- Documentation rewritten with lambda-first examples
+- 162 stdlib functions (up from 143)
+- 202 tests (168 core + 34 sandbox), all passing
+
+---
+
+## [1.0.1] — 2025-06-14
+
+### Fixed
+- Fixed PyPI links pointing to private repository
+- Fixed documentation site deployment
+- Updated all docs to reference public `mol-lang` repo
+
+---
+
 ## [1.0.0] — 2025-06-14
 
 ### 🎉 MOL 1.0 — First Stable Release

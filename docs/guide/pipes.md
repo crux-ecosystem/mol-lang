@@ -87,15 +87,70 @@ Or in code, short chains (< 3 stages) never trace:
 Your functions work seamlessly in pipes:
 
 ```text
-fn double(x)
+define double(x)
   return x * 2
 end
 
-fn add_ten(x)
+define add_ten(x)
   return x + 10
 end
 
 show 5 |> double |> add_ten |> double
+```
+
+## Lambdas in Pipes
+
+Use inline functions (`fn(x) -> expr`) directly in pipes — no separate function needed:
+
+```text
+let nums be [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+-- Filter, map, reduce — all inline
+show nums |>
+  filter(fn(x) -> x > 5) |>
+  map(fn(x) -> x * 2) |>
+  reduce(fn(a, b) -> a + b, 0)
+-- 80
+```
+
+### Common Pipe Patterns
+
+```text
+let data be [10, 20, 30, 40, 50]
+
+-- Get items > 25, doubled
+show data |> where(fn(x) -> x > 25) |> select(fn(x) -> x * 2)
+-- [60, 80, 100]
+
+-- Find first item > 25
+show data |> where(fn(x) -> x > 25) |> first
+-- 30
+
+-- Count matching items
+show data |> where(fn(x) -> x > 25) |> len
+-- 3
+
+-- Sum of filtered items
+show data |> where(fn(x) -> x > 25) |> sum_list
+-- 120
+```
+
+### Working with Objects
+
+```text
+let users be [
+  {"name": "Alice", "age": 25, "active": true},
+  {"name": "Bob", "age": 35, "active": false},
+  {"name": "Charlie", "age": 30, "active": true}
+]
+
+-- Smart mode: extract properties and filter by truthy fields
+show users |> filter("active") |> pluck("name")
+-- ["Alice", "Charlie"]
+
+-- Sort by property
+show users |> sort_by("age") |> map("name")
+-- ["Alice", "Charlie", "Bob"]
 ```
 
 ```text

@@ -11,10 +11,10 @@ hide:
 **The cognitive programming language with auto-tracing pipelines.**
 
 <div class="badge-row">
-  <img src="https://img.shields.io/badge/version-1.0.1-blue?style=flat-square" alt="version">
+  <img src="https://img.shields.io/badge/version-1.1.0-blue?style=flat-square" alt="version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="license">
   <img src="https://img.shields.io/badge/python-3.12%2B-yellow?style=flat-square" alt="python">
-  <img src="https://img.shields.io/badge/tests-181%20passing-brightgreen?style=flat-square" alt="tests">
+  <img src="https://img.shields.io/badge/tests-202%20passing-brightgreen?style=flat-square" alt="tests">
 </div>
 
 [Get Started](getting-started/installation.md){ .md-button .md-button--primary }

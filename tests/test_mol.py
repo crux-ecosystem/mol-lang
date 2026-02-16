@@ -1802,6 +1802,232 @@ let final_total be parsed["total"]
     assert interp.global_env.get("final_total") == 1050.0  # 90*5 + 200*3
 
 
+# ── v1.1.0 Tests: Smart HOFs, Operators, Aliases ──────────────
+
+def test_smart_filter_value():
+    """filter(value) does equality matching"""
+    interp = run("""
+let nums be [10, 20, 30, 40, 50]
+let result be filter(nums, 30)
+""")
+    assert interp.global_env.get("result") == [30]
+
+
+def test_smart_filter_lambda():
+    """filter with lambda still works"""
+    interp = run("""
+let nums be [10, 20, 30, 40, 50]
+let result be filter(nums, fn(x) -> x > 30)
+""")
+    assert interp.global_env.get("result") == [40, 50]
+
+
+def test_eq_neq_operators():
+    """== and != operators work"""
+    interp = run("""
+let a be 10 == 10
+let b be 10 != 20
+let c be "hi" == "hi"
+let d be 5 == 6
+""")
+    assert interp.global_env.get("a") == True
+    assert interp.global_env.get("b") == True
+    assert interp.global_env.get("c") == True
+    assert interp.global_env.get("d") == False
+
+
+def test_eq_in_lambda():
+    """== inside lambda expressions"""
+    interp = run("""
+let nums be [1, 2, 3, 2, 1]
+let result be filter(nums, fn(x) -> x == 2)
+""")
+    assert interp.global_env.get("result") == [2, 2]
+
+
+def test_where_alias():
+    """where is an alias for filter"""
+    interp = run("""
+let nums be [10, 20, 30, 40, 50]
+let result be nums |> where(fn(x) -> x >= 30)
+""")
+    assert interp.global_env.get("result") == [30, 40, 50]
+
+
+def test_select_alias():
+    """select is an alias for map"""
+    interp = run("""
+let nums be [1, 2, 3]
+let result be nums |> select(fn(x) -> x * 10)
+""")
+    assert interp.global_env.get("result") == [10, 20, 30]
+
+
+def test_reject():
+    """reject removes matching elements"""
+    interp = run("""
+let nums be [10, 20, 30, 40, 50]
+let r1 be reject(nums, fn(x) -> x > 30)
+let r2 be reject(nums, 30)
+""")
+    assert interp.global_env.get("r1") == [10, 20, 30]
+    assert interp.global_env.get("r2") == [10, 20, 40, 50]
+
+
+def test_first_last():
+    """first and last functions"""
+    interp = run("""
+let nums be [10, 20, 30]
+let f be first(nums)
+let l be last(nums)
+let empty_f be first([])
+""")
+    assert interp.global_env.get("f") == 10
+    assert interp.global_env.get("l") == 30
+    assert interp.global_env.get("empty_f") is None
+
+
+def test_compact():
+    """compact removes null/false/0/empty values"""
+    interp = run("""
+let result be compact([1, null, 2, false, 3])
+""")
+    assert interp.global_env.get("result") == [1, 2, 3]
+
+
+def test_contains():
+    """contains checks list membership"""
+    interp = run("""
+let a be contains([1, 2, 3], 2)
+let b be contains([1, 2, 3], 9)
+""")
+    assert interp.global_env.get("a") == True
+    assert interp.global_env.get("b") == False
+
+
+def test_sum_min_max_list():
+    """sum_list, min_list, max_list"""
+    interp = run("""
+let nums be [10, 20, 30, 40, 50]
+let s be sum_list(nums)
+let mn be min_list(nums)
+let mx be max_list(nums)
+""")
+    assert interp.global_env.get("s") == 150
+    assert interp.global_env.get("mn") == 10
+    assert interp.global_env.get("mx") == 50
+
+
+def test_pluck():
+    """pluck extracts property from list of dicts"""
+    interp = run("""
+let users be [{"name": "Alice", "age": 25}, {"name": "Bob", "age": 30}]
+let names be pluck(users, "name")
+""")
+    assert interp.global_env.get("names") == ["Alice", "Bob"]
+
+
+def test_smart_map_property():
+    """map with string extracts property"""
+    interp = run("""
+let users be [{"name": "Alice"}, {"name": "Bob"}]
+let names be users |> map("name")
+""")
+    assert interp.global_env.get("names") == ["Alice", "Bob"]
+
+
+def test_smart_filter_truthy_property():
+    """filter with string on dicts filters by truthy property"""
+    interp = run("""
+let items be [{"name": "A", "active": true}, {"name": "B", "active": false}, {"name": "C", "active": true}]
+let result be items |> filter("active") |> map("name")
+""")
+    assert interp.global_env.get("result") == ["A", "C"]
+
+
+def test_smart_group_by_property():
+    """group_by with string groups by property"""
+    interp = run("""
+let items be [{"type": "fruit", "name": "apple"}, {"type": "veg", "name": "carrot"}, {"type": "fruit", "name": "banana"}]
+let groups be group_by(items, "type")
+""")
+    groups = interp.global_env.get("groups")
+    assert len(groups["fruit"]) == 2
+    assert len(groups["veg"]) == 1
+
+
+def test_smart_sort_by_property():
+    """sort_by with string sorts by property"""
+    interp = run("""
+let users be [{"name": "Charlie", "age": 35}, {"name": "Alice", "age": 25}, {"name": "Bob", "age": 30}]
+let result be users |> sort_by("age") |> map("name")
+""")
+    assert interp.global_env.get("result") == ["Alice", "Bob", "Charlie"]
+
+
+def test_smart_find_value():
+    """find with value does equality matching"""
+    interp = run("""
+let nums be [10, 20, 30, 40]
+let result be find(nums, 30)
+let missing be find(nums, 99)
+""")
+    assert interp.global_env.get("result") == 30
+    assert interp.global_env.get("missing") is None
+
+
+def test_every_some_value():
+    """every and some with value shorthand"""
+    interp = run("""
+let a be every([3, 3, 3], 3)
+let b be every([3, 3, 4], 3)
+let c be some([1, 2, 3], 2)
+let d be some([1, 2, 3], 9)
+""")
+    assert interp.global_env.get("a") == True
+    assert interp.global_env.get("b") == False
+    assert interp.global_env.get("c") == True
+    assert interp.global_env.get("d") == False
+
+
+def test_each_function():
+    """each executes function for each element, returns original list"""
+    interp = run("""
+let nums be [1, 2, 3]
+let collected be []
+define collector(x)
+  set collected to collected + [x * 10]
+end
+let result be each(nums, collector)
+""")
+    assert interp.global_env.get("collected") == [10, 20, 30]
+    assert interp.global_env.get("result") == [1, 2, 3]
+
+
+def test_chained_smart_pipeline():
+    """Full pipeline with smart HOFs and new aliases"""
+    interp = run("""
+let data be [
+  {"name": "Alice", "score": 85, "active": true},
+  {"name": "Bob", "score": 60, "active": false},
+  {"name": "Charlie", "score": 92, "active": true},
+  {"name": "Diana", "score": 45, "active": true}
+]
+
+let honor_roll be data |> where(fn(item) -> item["active"]) |> where(fn(item) -> item["score"] >= 80) |> select(fn(item) -> item["name"])
+""")
+    assert interp.global_env.get("honor_roll") == ["Alice", "Charlie"]
+
+
+def test_pipe_with_first_last():
+    """first and last work in pipes"""
+    interp = run("""
+let nums be [5, 3, 8, 1, 9, 2]
+let result be nums |> where(fn(x) -> x > 4) |> first
+""")
+    assert interp.global_env.get("result") == 5
+
+
 if __name__ == "__main__":
     tests = [v for k, v in globals().items() if k.startswith("test_")]
     passed = 0

@@ -7,11 +7,11 @@
 <p align="center">
   <img src="https://img.shields.io/pypi/v/mol-lang?label=PyPI&color=blue" alt="PyPI">
   <img src="https://img.shields.io/pypi/v/mol-lang?label=PyPI&color=blue" alt="PyPI">
-  <img src="https://img.shields.io/badge/version-1.0.1-blue" alt="version">
+  <img src="https://img.shields.io/badge/version-1.1.0-blue" alt="version">
   <img src="https://img.shields.io/badge/license-Proprietary-red" alt="license">
   <img src="https://img.shields.io/badge/python-3.12%2B-green" alt="python">
-  <img src="https://img.shields.io/badge/tests-181%20passed-brightgreen" alt="tests">
-  <img src="https://img.shields.io/badge/stdlib-143%20functions-orange" alt="stdlib">
+  <img src="https://img.shields.io/badge/tests-202%20passed-brightgreen" alt="tests">
+  <img src="https://img.shields.io/badge/stdlib-162%20functions-orange" alt="stdlib">
   <img src="https://img.shields.io/badge/playground-🔒%20sandboxed-10b981" alt="sandbox">
   <img src="https://img.shields.io/badge/self--hosted-codebase-ff69b4" alt="self-hosted">
   <img src="https://img.shields.io/badge/docs-GitHub%20Pages-blueviolet" alt="docs">
