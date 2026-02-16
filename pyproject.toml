@@ -27,7 +27,7 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/crux-ecosystem/mol-lang"
 Repository = "https://github.com/crux-ecosystem/mol-lang"
-Playground = "http://135.235.138.217:8000"
+Playground = "https://mol.cruxlabx.in"
 Changelog = "https://github.com/crux-ecosystem/MOL/blob/main/CHANGELOG.md"
 
 [project.readme]
