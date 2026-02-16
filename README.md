@@ -6,20 +6,18 @@
 
 <p align="center">
   <img src="https://img.shields.io/pypi/v/mol-lang?label=PyPI&color=blue" alt="PyPI">
-  <img src="https://img.shields.io/pypi/v/mol-lang?label=PyPI&color=blue" alt="PyPI">
   <img src="https://img.shields.io/badge/version-1.1.0-blue" alt="version">
   <img src="https://img.shields.io/badge/license-Proprietary-red" alt="license">
   <img src="https://img.shields.io/badge/python-3.12%2B-green" alt="python">
   <img src="https://img.shields.io/badge/tests-202%20passed-brightgreen" alt="tests">
   <img src="https://img.shields.io/badge/stdlib-162%20functions-orange" alt="stdlib">
   <img src="https://img.shields.io/badge/playground-🔒%20sandboxed-10b981" alt="sandbox">
-  <img src="https://img.shields.io/badge/self--hosted-codebase-ff69b4" alt="self-hosted">
   <img src="https://img.shields.io/badge/docs-GitHub%20Pages-blueviolet" alt="docs">
   <img src="https://img.shields.io/badge/built%20for-IntraMind-purple" alt="intramind">
 </p>
 
 <p align="center">
-  <strong>The first programming language with native pipeline operators and auto-tracing — built for AI/RAG pipelines.</strong>
+  <strong>The pipeline language for AI, data, and automation — with auto-tracing built in.</strong>
 </p>
 
 <p align="center">
@@ -52,6 +50,78 @@ No other language has this combination:
 | F# | `\|>` | No | No | No |
 | Rust | No | No | No | No |
 | **MOL** | **`\|>`** | **Yes** | **Yes** | **Yes** |
+
+---
+
+## Use Cases
+
+MOL is purpose-built for domains where **pipeline visibility** and **readable code** directly reduce debugging time and onboarding cost.
+
+### 🔬 AI & ML Pipelines
+
+Every RAG pipeline is invisible glue code. MOL makes every stage visible — automatically.
+
+```mol
+let index be doc |> chunk(512) |> embed("model-v1") |> store("kb")
+let answer be retrieve(query, "kb", 5) |> think("answer this")
+guard answer.confidence > 0.5 : "Low confidence"
+```
+
+**Auto-trace output** — zero configuration, every step timed:
+```
+  ┌─ Pipeline Trace ──────────────────────────────────────
+  │ 0.  input                   ─  <Document "data.txt">
+  │ 1.  chunk(512)          0.1ms  → List<5 Chunks>
+  │ 2.  embed("model-v1")   0.2ms  → List<5 Embeddings>
+  │ 3.  store("kb")         0.0ms  → <VectorStore "kb">
+  └─ 3 steps · 0.4ms total ───────────────────────────
+```
+
+### 📊 Data Processing & ETL
+
+Smart higher-order functions eliminate boilerplate. Filter, transform, and aggregate with one-liner pipes.
+
+```mol
+let sales be load_data("sales.json")
+
+-- Top performers: filter → sort → extract
+let top_reps be sales |>
+  filter("closed") |>
+  where(fn(s) -> s["amount"] > 15000) |>
+  sort_by("amount") |>
+  pluck("rep")
+
+-- Revenue summary
+let total be sales |> filter("closed") |> pluck("amount") |> sum_list
+let avg be sales |> pluck("amount") |> mean
+```
+
+### 🛠️ DevOps & Automation
+
+Log analysis, monitoring, SLA validation — with `guard` assertions and built-in statistics.
+
+```mol
+let logs be load_data("app.log")
+
+let errors be logs |>
+  where(fn(l) -> l["level"] == "ERROR") |>
+  group_by("service")
+
+let p95 be logs |> pluck("latency") |> percentile(95)
+guard p95 < 1000 : "P95 latency exceeds SLA"
+```
+
+### Why Teams Choose MOL
+
+| Benefit | How |
+|---|---|
+| **60-80% less debugging time** | Auto-tracing replaces manual `print()`/logging |
+| **Lower onboarding cost** | Reads like English, not like Perl |
+| **Audit-ready pipelines** | Every execution is traced and timed |
+| **Safe scripting** | Sandboxed execution for production environments |
+| **No vendor lock-in** | Transpiles to Python or JavaScript |
+
+> 📖 **See full examples**: [Use Cases Documentation](https://crux-ecosystem.github.io/mol-lang/use-cases/)
 
 ---
 
@@ -378,7 +448,7 @@ let x : Number be "hello"   -- 🚫 MOLTypeError at declaration
 
 ---
 
-## Standard Library (90+ functions)
+## Standard Library (162 functions)
 
 | Category | Functions |
 |---|---|
@@ -650,7 +720,7 @@ MOL/
 ├── docs/                       # MkDocs Material documentation source
 ├── examples/                   # 16 example programs
 ├── tutorial/                   # 6 tutorial files + cheatsheet
-├── tests/test_mol.py           # 68 tests (all passing)
+├── tests/test_mol.py           # 202 tests (all passing)
 ├── mol-vscode/                 # VS Code extension + LSP client
 ├── mkdocs.yml                  # MkDocs configuration
 ├── pyproject.toml              # Python project config
@@ -689,7 +759,7 @@ source .venv/bin/activate
 python tests/test_mol.py
 ```
 
-147 tests covering: variables, arithmetic, control flow, functions, recursion, lists, maps, strings, domain types, typed declarations, access control, events, pipes, guards, pipelines, chunking, embedding, vector search, full RAG integration, functional programming (map/filter/reduce), math functions, statistics, string algorithms, hashing, sorting, type checks, lambdas, pattern matching, null coalescing, string interpolation, destructuring, error handling, default parameters, built-in testing, spawn/await, channels, parallel map, race, concurrency patterns, field/index mutation, zero-arg lambdas, try/rescue with return, JSON functions, struct methods, and module system.
+202 tests covering: variables, arithmetic, control flow, functions, recursion, lists, maps, strings, domain types, typed declarations, access control, events, pipes, guards, pipelines, chunking, embedding, vector search, full RAG integration, functional programming (map/filter/reduce), math functions, statistics, string algorithms, hashing, sorting, type checks, lambdas, pattern matching, null coalescing, string interpolation, destructuring, error handling, default parameters, built-in testing, spawn/await, channels, parallel map, race, concurrency patterns, field/index mutation, zero-arg lambdas, try/rescue with return, JSON functions, struct methods, and module system.
 
 ---
 
@@ -697,7 +767,8 @@ python tests/test_mol.py
 
 | Version | Highlights |
 |---|---|
-| **v1.0.0** (current) | **First stable release**: 143 stdlib functions, structs, pattern matching, generators, concurrency, modules, WASM, LSP, sandboxed playground, 181 tests, community infrastructure |
+| **v1.1.0** (current) | **Smart functions & developer experience**: 162 stdlib functions, smart HOFs (`filter("active")`, `sort_by("name")`), `==`/`!=` operators, 19 new functions (`where`, `select`, `reject`, `pluck`, `compact`, `first`, `last`, `sum_list`, `min_list`, `max_list`, `contains`), better error messages, 202 tests |
+| **v1.0.0** | **First stable release**: 143 stdlib functions, structs, pattern matching, generators, concurrency, modules, WASM, LSP, sandboxed playground, 181 tests, community infrastructure |
 | **v0.10.0** | **Security hardening**: sandboxed playground, 26 dangerous functions blocked, execution timeout, rate limiting, code size limits, CORS restrictions, `/api/security` endpoint, 181 tests |
 | **v0.9.0** | Self-hosted codebase, web API server, IntraMind AI core, field/index mutation, `serve()`, `json_parse/stringify`, 147 tests |
 | **v0.8.0** | Structs with methods, generators/iterators, file I/O, HTTP fetch, modules (`use`/`export`), 123 tests |

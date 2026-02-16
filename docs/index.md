@@ -8,7 +8,7 @@ hide:
 
 # MOL
 
-**The cognitive programming language with auto-tracing pipelines.**
+**The pipeline language for AI, data, and automation — with auto-tracing built in.**
 
 <div class="badge-row">
   <img src="https://img.shields.io/badge/version-1.1.0-blue?style=flat-square" alt="version">
@@ -26,7 +26,7 @@ hide:
 
 ## The Problem
 
-Every AI pipeline is invisible glue code. You chain loaders, splitters, embedders, and models — then add `print()` and logging everywhere to see what happened.
+Every pipeline — AI, data, or automation — is invisible glue code. You chain operations together, then add `print()` and logging everywhere to see what happened.
 
 **MOL fixes this at the language level.**
 
@@ -89,9 +89,9 @@ guard confidence > 0.5 : "Too low"
 
 <div class="feature-card" markdown>
 
-### :material-function: 50+ Stdlib Functions
+### :material-function: 162 Stdlib Functions
 
-Math, strings, lists, maps, sorting, searching, JSON, hashing, functional programming, and RAG operations.
+Math, strings, lists, maps, sorting, searching, JSON, hashing, functional programming, statistics, and RAG operations.
 
 </div>
 
@@ -120,6 +120,54 @@ access "mind_core" with "admin"
 </div>
 
 </div>
+
+---
+
+## Built For Real Domains
+
+MOL is purpose-built for domains where pipeline visibility and readable code directly reduce debugging time.
+
+<div class="feature-grid" markdown>
+
+<div class="feature-card" markdown>
+
+### :material-brain: AI & ML Pipelines
+
+Build RAG pipelines in 3 lines. Every stage auto-traced with timing and type info. Built-in domain types: `Document`, `Chunk`, `Embedding`, `VectorStore`.
+
+```text
+doc |> chunk(512) |> embed |> store("kb")
+```
+
+</div>
+
+<div class="feature-card" markdown>
+
+### :material-chart-bar: Data Processing & ETL
+
+Smart functions eliminate boilerplate. `filter("active")`, `sort_by("name")`, `pluck("id")` — no lambdas needed for common operations.
+
+```text
+sales |> filter("closed") |> sort_by("amount") |> pluck("rep")
+```
+
+</div>
+
+<div class="feature-card" markdown>
+
+### :material-server: DevOps & Automation
+
+Log analysis, monitoring, SLA validation with `guard` assertions and built-in statistics (`mean`, `median`, `percentile`).
+
+```text
+logs |> pluck("latency") |> percentile(95)
+```
+
+</div>
+
+</div>
+
+[See All Use Cases](use-cases.md){ .md-button }
 
 ---
 

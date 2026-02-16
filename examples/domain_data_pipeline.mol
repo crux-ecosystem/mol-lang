@@ -1,0 +1,59 @@
+-- ============================================================
+-- MOL for Data Engineering: Sales Analytics Pipeline
+-- ============================================================
+-- Process sales data, filter, aggregate, and report — all
+-- with auto-tracing so you can see every transformation.
+
+show "═══ Sales Analytics Pipeline ═══"
+
+-- ── Raw Data ───────────────────────────────────────────────
+let sales be [
+  {"rep": "Alice",   "region": "North", "amount": 15000, "closed": true},
+  {"rep": "Bob",     "region": "South", "amount": 8500,  "closed": false},
+  {"rep": "Charlie", "region": "North", "amount": 22000, "closed": true},
+  {"rep": "Diana",   "region": "East",  "amount": 12000, "closed": true},
+  {"rep": "Eve",     "region": "South", "amount": 19000, "closed": true},
+  {"rep": "Frank",   "region": "East",  "amount": 7000,  "closed": false},
+  {"rep": "Grace",   "region": "North", "amount": 31000, "closed": true},
+  {"rep": "Hank",    "region": "West",  "amount": 14000, "closed": true}
+]
+
+-- ── Pipeline 1: Top performers (closed deals > 15k) ────────
+show ""
+show "📊 Top Performers:"
+let top_reps be sales |>
+  filter("closed") |>
+  where(fn(s) -> s["amount"] > 15000) |>
+  sort_by(fn(s) -> 0 - s["amount"]) |>
+  pluck("rep")
+
+show top_reps
+
+-- ── Pipeline 2: Revenue by region ──────────────────────────
+show ""
+show "📍 Revenue by Region:"
+let by_region be sales |> filter("closed") |> group_by("region")
+
+for region in keys(by_region) do
+  let region_sales be by_region[region]
+  let total be region_sales |> pluck("amount") |> sum_list
+  show "  " + region + ": $" + to_text(total)
+end
+
+-- ── Pipeline 3: Quick stats ────────────────────────────────
+show ""
+show "📈 Quick Stats:"
+let closed_amounts be sales |> filter("closed") |> pluck("amount")
+
+show "  Total revenue: $" + to_text(sum_list(closed_amounts))
+show "  Average deal:  $" + to_text(round(mean(closed_amounts), 2))
+show "  Median deal:   $" + to_text(median(closed_amounts))
+show "  Largest deal:  $" + to_text(max_list(closed_amounts))
+show "  Close rate:    " + to_text(round(len(closed_amounts) / len(sales) * 100, 1)) + "%"
+
+-- ── Pipeline 4: Data quality checks ────────────────────────
+show ""
+show "✅ Data Quality:"
+guard every(sales, fn(s) -> s["amount"] > 0) : "All amounts must be positive"
+guard len(sales) > 0 : "Sales list must not be empty"
+show "  All validations passed"

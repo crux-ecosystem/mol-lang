@@ -1,0 +1,71 @@
+-- ============================================================
+-- MOL for DevOps: Log Analysis & Monitoring
+-- ============================================================
+-- Parse structured log data, detect anomalies, generate
+-- alerts — with pipeline traceability for auditing.
+
+show "═══ Log Analysis Pipeline ═══"
+
+-- ── Simulated log entries ──────────────────────────────────
+let logs be [
+  {"ts": "2026-02-16T10:00:01", "level": "INFO",  "service": "auth",    "latency": 45,  "status": 200},
+  {"ts": "2026-02-16T10:00:02", "level": "WARN",  "service": "payment", "latency": 890, "status": 200},
+  {"ts": "2026-02-16T10:00:03", "level": "ERROR", "service": "auth",    "latency": 120, "status": 500},
+  {"ts": "2026-02-16T10:00:04", "level": "INFO",  "service": "search",  "latency": 30,  "status": 200},
+  {"ts": "2026-02-16T10:00:05", "level": "ERROR", "service": "payment", "latency": 2100,"status": 503},
+  {"ts": "2026-02-16T10:00:06", "level": "INFO",  "service": "auth",    "latency": 55,  "status": 200},
+  {"ts": "2026-02-16T10:00:07", "level": "WARN",  "service": "search",  "latency": 450, "status": 200},
+  {"ts": "2026-02-16T10:00:08", "level": "INFO",  "service": "payment", "latency": 60,  "status": 200},
+  {"ts": "2026-02-16T10:00:09", "level": "ERROR", "service": "auth",    "latency": 95,  "status": 500},
+  {"ts": "2026-02-16T10:00:10", "level": "INFO",  "service": "search",  "latency": 25,  "status": 200}
+]
+
+show "Total log entries: " + to_text(len(logs))
+
+-- ── Error Detection Pipeline ───────────────────────────────
+show ""
+show "🚨 Errors Detected:"
+let errors be logs |>
+  where(fn(l) -> l["level"] == "ERROR") |>
+  select(fn(l) -> l["service"] + " @ " + l["ts"] + " (HTTP " + to_text(l["status"]) + ")")
+
+for e in errors do
+  show "  ❌ " + e
+end
+
+-- ── Slow Request Detection (> 500ms) ───────────────────────
+show ""
+show "🐌 Slow Requests (>500ms):"
+let slow be logs |>
+  where(fn(l) -> l["latency"] > 500) |>
+  sort_by(fn(l) -> 0 - l["latency"])
+
+for req in slow do
+  show "  ⚠️  " + req["service"] + ": " + to_text(req["latency"]) + "ms"
+end
+
+-- ── Service Health Summary ─────────────────────────────────
+show ""
+show "📊 Service Health:"
+let by_service be logs |> group_by("service")
+
+for svc in keys(by_service) do
+  let entries be by_service[svc]
+  let error_count be entries |> where(fn(l) -> l["level"] == "ERROR") |> len
+  let avg_latency be entries |> pluck("latency") |> mean |> round(1)
+  let status be "✅"
+  if error_count > 0 then
+    set status to "🔴"
+  end
+  show "  " + status + " " + svc + ": " + to_text(avg_latency) + "ms avg, " + to_text(error_count) + " errors"
+end
+
+-- ── Uptime Calculation ─────────────────────────────────────
+show ""
+show "📈 Overall Stats:"
+let total be len(logs)
+let success be logs |> where(fn(l) -> l["status"] == 200) |> len
+let uptime be round(success / total * 100, 1)
+show "  Uptime: " + to_text(uptime) + "%"
+show "  P50 latency: " + to_text(median(logs |> pluck("latency"))) + "ms"
+show "  P95 latency: " + to_text(percentile(logs |> pluck("latency"), 95)) + "ms"
