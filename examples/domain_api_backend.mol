@@ -1,0 +1,63 @@
+-- ============================================================
+-- MOL for API Backends: REST Microservice
+-- ============================================================
+-- Build an HTTP API with JSON processing, validation, and
+-- structured responses — all with built-in safety.
+
+show "═══ API Request Processing ═══"
+
+-- ── Simulated incoming API request ─────────────────────────
+let request_body be {
+  "action": "get_users",
+  "filters": {"active": true, "min_age": 21},
+  "limit": 5
+}
+
+show "📨 Incoming request:"
+show "  Action: " + request_body["action"]
+show "  Filters: " + to_text(request_body["filters"])
+
+-- ── In-memory data store ───────────────────────────────────
+let users be [
+  {"id": 1, "name": "Alice",   "age": 28, "active": true,  "role": "engineer"},
+  {"id": 2, "name": "Bob",     "age": 19, "active": false, "role": "intern"},
+  {"id": 3, "name": "Charlie", "age": 35, "active": true,  "role": "manager"},
+  {"id": 4, "name": "Diana",   "age": 22, "active": true,  "role": "engineer"},
+  {"id": 5, "name": "Eve",     "age": 31, "active": true,  "role": "lead"},
+  {"id": 6, "name": "Frank",   "age": 20, "active": false, "role": "intern"},
+  {"id": 7, "name": "Grace",   "age": 27, "active": true,  "role": "engineer"},
+  {"id": 8, "name": "Hank",    "age": 45, "active": true,  "role": "director"}
+]
+
+-- ── Request validation ─────────────────────────────────────
+guard request_body["action"] is not null : "Missing action field"
+guard request_body["limit"] > 0 : "Limit must be positive"
+guard request_body["limit"] <= 100 : "Limit cannot exceed 100"
+
+-- ── Process: filter → transform → paginate ─────────────────
+let min_age be request_body["filters"]["min_age"]
+
+let result be users |>
+  filter("active") |>
+  where(fn(u) -> u["age"] >= min_age) |>
+  sort_by("name") |>
+  take(request_body["limit"])
+
+-- ── Build API response ─────────────────────────────────────
+let response be {
+  "status": "ok",
+  "count": len(result),
+  "data": result |> select(fn(u) -> pick(u, "id", "name", "age", "role"))
+}
+
+show ""
+show "📤 API Response:"
+show json_stringify(response)
+
+-- ── Analytics: role distribution ───────────────────────────
+show ""
+show "📊 Role Distribution:"
+let roles be result |> group_by("role")
+for role in keys(roles) do
+  show "  " + role + ": " + to_text(len(roles[role]))
+end
