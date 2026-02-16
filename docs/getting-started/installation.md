@@ -2,15 +2,28 @@
 
 ## Requirements
 
-- **Python 3.10** or higher
+- **Python 3.10** or higher (3.12+ recommended)
 - **pip** (comes with Python)
+
+## Install from PyPI (Recommended)
+
+```bash
+pip install mol-lang
+```
+
+## Verify Installation
+
+```bash
+mol version
+# MOL v1.0.0
+```
 
 ## Install from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/crux-ecosystem/MOL.git
-cd MOL
+git clone https://github.com/crux-ecosystem/mol-lang.git
+cd mol-lang
 
 # Create virtual environment
 python -m venv .venv
@@ -19,13 +32,6 @@ source .venv/bin/activate  # Linux/macOS
 
 # Install MOL
 pip install -e .
-```
-
-## Verify Installation
-
-```bash
-mol version
-# MOL v0.2.0
 ```
 
 ## VS Code Extension
@@ -60,7 +66,5 @@ Development dependencies:
 ## Updating
 
 ```bash
-cd MOL
-git pull
-pip install -e .
+pip install --upgrade mol-lang
 ```

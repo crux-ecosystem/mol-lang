@@ -6,7 +6,133 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## [0.9.0] — 2025-06-13
+## [1.0.0] — 2025-06-14
+
+### 🎉 MOL 1.0 — First Stable Release
+
+This is the first stable release of MOL, consolidating all features from v0.5.0 through v0.10.0 into a production-ready language. MOL 1.0 is the culmination of months of development — a complete programming language with 143 stdlib functions, native pipeline operators, auto-tracing, and a full ecosystem.
+
+### Highlights
+
+- **143 stdlib functions** — math, statistics, hashing, functional programming, file I/O, HTTP, concurrency
+- **Native `|>` pipe operator** with auto-tracing (3+ stage chains automatically traced)
+- **Structs with methods** — `struct`/`impl` for custom types with `self` binding
+- **Pattern matching** — `match/with/when` expressions with guard clauses
+- **Error handling** — `try/rescue/ensure` blocks
+- **Generators** — `yield`-based lazy iterators with `.next()` and `.to_list()`
+- **Concurrency** — `spawn/await`, channels, `parallel_map`, `wait_all`, `race`, mutex
+- **Module system** — `use`/`export` with package manager (`mol init/install/publish`)
+- **WASM compilation** — `mol build` to standalone HTML, JavaScript, or Node.js
+- **File I/O** — 12 functions for reading, writing, and managing files
+- **HTTP** — `fetch()` for HTTP requests, `serve()` for HTTP servers
+- **Transpilation** — compile `.mol` to Python or JavaScript
+- **AI domain types** — `Thought`, `Memory`, `Node`, `Stream`, `Document`, `Chunk`, `Embedding`, `VectorStore`
+- **Docker support** — multi-mode image for run/repl/playground
+- **VS Code extension** — full LSP server with autocomplete, hover docs, diagnostics, go-to-definition
+- **Online playground** — [mol.cruxlabx.in](https://mol.cruxlabx.in) with HTTPS and sandbox security
+- **181 tests** — comprehensive test suite covering all language features
+- **Self-hosted codebase** — collections, algorithms, testing framework written in MOL itself
+
+### Security (from v0.10.0)
+
+- **Sandbox mode** — 26 dangerous functions blocked in playground
+- **Execution timeout** — threaded 10-second kill switch
+- **Rate limiting** — per-IP request throttling
+- **Code size limits** — 50KB maximum
+- **Restricted CORS** — only `mol.cruxlabx.in` origin allowed
+- **Security endpoint** — `/api/security` for transparency
+
+### Community Infrastructure
+
+- `SECURITY.md` — vulnerability reporting policy
+- `CODE_OF_CONDUCT.md` — Contributor Covenant 2.1
+- `.github/ISSUE_TEMPLATE/bug_report.md` — structured bug reports
+- `.github/ISSUE_TEMPLATE/feature_request.md` — feature proposals
+- `.github/PULL_REQUEST_TEMPLATE.md` — PR checklist
+
+### Documentation
+
+- **8 new guide pages**: Structs, Modules, Pattern Matching, Error Handling, Generators, Concurrency, Why MOL?, FAQ
+- **Playground documentation** with API reference
+- **Updated installation guide** with PyPI-first workflow
+- **3 showcase examples**: Todo App, Data Pipeline, Chat Bot
+- **20+ existing examples** updated and verified
+
+### Changed
+
+- Version: `0.10.0` → `1.0.0`
+- PyPI status: `Beta` → `Production/Stable`
+- Test suite: 181 tests (all passing)
+- Stdlib: 143 built-in functions
+
+---
+
+## [0.10.0] — 2025-06-14
+
+### Added — Playground Security Hardening
+
+- **Sandbox mode** — 26 dangerous functions blocked when `sandbox=True`
+- **Threaded execution timeout** — kills runaway programs after 10 seconds
+- **Rate limiting** — per-IP request throttling (60/min run, 120/min general)
+- **Code size limits** — maximum 50KB per submission
+- **Restricted CORS** — locked to `https://mol.cruxlabx.in`
+- **Security endpoint** — `GET /api/security` returns sandbox config
+- **HTTPS deployment** — Let's Encrypt SSL via nginx reverse proxy
+- **34 security tests** — comprehensive sandbox coverage
+
+### Changed
+
+- Test suite: 147 → 181 tests
+- Playground URL: `https://mol.cruxlabx.in` (was HTTP)
+
+---
+
+## [0.9.1] — 2025-06-13
+
+### Added — Power Features
+
+- **Pattern Matching** (`match/with/when`):
+  - `match expr with | pattern -> result end`
+  - Guard clauses: `| pattern when condition -> result`
+  - Wildcard: `_` matches anything
+  - Multi-line arms with block syntax
+
+- **Try/Rescue/Ensure** (error handling):
+  - `try ... rescue err ... ensure ... end`
+  - Named error binding
+  - Ensure block always runs
+
+- **Lambdas** (`fn`):
+  - `fn(x) -> x * 2` — single-expression lambdas
+  - Zero-arg: `fn() -> "hello"`
+  - Works in `map`, `filter`, `sort_by`, and pipes
+
+- **F-strings**:
+  - `f"Hello {name}, you are {age} years old"`
+  - Expression interpolation inside `{}`
+
+- **Concurrency** (`spawn/await`):
+  - `spawn do ... end` — run block in background thread
+  - `await task` — wait for result
+  - `wait_all(tasks)`, `race(tasks)`
+  - `channel()`, `send(ch, val)`, `receive(ch)`
+  - `parallel_map(list, func)`
+  - `mutex()`, `lock_acquire()`, `lock_release()`
+
+- **New stdlib** (23 new functions, ~143 total):
+  - `sleep(ms)`, `spawn`, `await`, `wait_all`, `race`
+  - `channel`, `send`, `receive`
+  - `parallel_map`, `mutex`, `lock_acquire`, `lock_release`
+  - `flatten`, `zip`, `enumerate`, `chunk_list`
+  - `starts_with`, `ends_with`, `pad_left`, `pad_right`
+  - `compose`, `pipe` (functional combinators)
+
+### Changed
+
+- Test suite: 147 → 147 tests (refactored, no regressions)
+- Grammar: added `match`, `when`, `fn`, `spawn`, `await`, `try`, `rescue`, `ensure`
+
+---
 
 ### Added — Self-Hosted Codebase, Web Server, AI Core
 

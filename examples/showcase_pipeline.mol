@@ -1,0 +1,139 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL Showcase: Data Processing Pipeline
+-- ══════════════════════════════════════════════════════════
+-- A real-world data analysis pipeline demonstrating:
+--   • Pipe operator |> with auto-tracing
+--   • Functional programming (map, filter, reduce, group_by)
+--   • Pattern matching
+--   • Structs
+--   • Statistics functions
+--
+-- Run: mol run examples/showcase_pipeline.mol
+-- ══════════════════════════════════════════════════════════
+
+-- ── Sample Data: Sales Records ──────────────────────────
+
+struct Sale do
+  product, category, amount, quantity, region
+end
+
+let sales be [
+  Sale("Laptop",    "Electronics", 1200, 2, "North"),
+  Sale("Phone",     "Electronics",  800, 5, "South"),
+  Sale("Desk",      "Furniture",    450, 3, "North"),
+  Sale("Chair",     "Furniture",    250, 8, "East"),
+  Sale("Monitor",   "Electronics",  600, 4, "West"),
+  Sale("Tablet",    "Electronics",  500, 6, "South"),
+  Sale("Bookshelf", "Furniture",    350, 2, "East"),
+  Sale("Keyboard",  "Electronics",   80, 15, "North"),
+  Sale("Sofa",      "Furniture",    900, 1, "West"),
+  Sale("Headphones","Electronics",  150, 10, "South")
+]
+
+-- ── Analysis 1: Revenue by Category ────────────────────
+
+show "═══ Revenue by Category ═══"
+
+let revenue_per_sale be map(sales, fn(s) -> {
+  "product": s.product,
+  "category": s.category,
+  "revenue": s.amount * s.quantity
+})
+
+let electronics_revenue be revenue_per_sale
+  |> filter(fn(r) -> r["category"] is "Electronics")
+  |> map(fn(r) -> r["revenue"])
+  |> sum
+
+let furniture_revenue be revenue_per_sale
+  |> filter(fn(r) -> r["category"] is "Furniture")
+  |> map(fn(r) -> r["revenue"])
+  |> sum
+
+show f"  Electronics: ${electronics_revenue}"
+show f"  Furniture:   ${furniture_revenue}"
+show f"  Total:       ${electronics_revenue + furniture_revenue}"
+show ""
+
+-- ── Analysis 2: Top Products by Revenue ────────────────
+
+show "═══ Top 5 Products by Revenue ═══"
+
+revenue_per_sale
+  |> sort_by(fn(r) -> r["revenue"])
+  |> reverse
+  |> take(5)
+  |> map(fn(r) -> f"  {r['product']}: ${r['revenue']}")
+  |> join("\n")
+  |> show
+
+show ""
+
+-- ── Analysis 3: Regional Performance ───────────────────
+
+show "═══ Revenue by Region ═══"
+
+let regions be ["North", "South", "East", "West"]
+
+for region in regions do
+  let regional_revenue be revenue_per_sale
+    |> filter(fn(r) -> true)
+
+  -- Calculate region revenue manually
+  let region_sales be filter(sales, fn(s) -> s.region is region)
+  let region_rev be region_sales
+    |> map(fn(s) -> s.amount * s.quantity)
+    |> sum
+
+  let bar_len be floor(region_rev / 500)
+  let bar be repeat("█", bar_len)
+  show f"  {region}: {bar} ${region_rev}"
+end
+show ""
+
+-- ── Analysis 4: Statistics ─────────────────────────────
+
+show "═══ Price Statistics ═══"
+
+let prices be map(sales, fn(s) -> s.amount)
+
+show f"  Mean:    ${mean(prices)}"
+show f"  Median:  ${median(prices)}"
+show f"  StdDev:  ${round(stdev(prices), 2)}"
+show f"  Min:     ${min(prices)}"
+show f"  Max:     ${max(prices)}"
+show ""
+
+-- ── Analysis 5: Category Classification ────────────────
+
+show "═══ Product Value Tier ═══"
+
+define classify_price(amount)
+  return match amount with
+    | n when n >= 800 -> "Premium"
+    | n when n >= 400 -> "Mid-range"
+    | n when n >= 100 -> "Budget"
+    | _ -> "Accessory"
+  end
+end
+
+for sale in sales do
+  let tier be classify_price(sale.amount)
+  show f"  {sale.product}: ${sale.amount} → {tier}"
+end
+show ""
+
+-- ── Summary Pipeline ───────────────────────────────────
+
+show "═══ Full Pipeline Summary ═══"
+
+let summary be sales
+  |> map(fn(s) -> s.amount * s.quantity)
+  |> sort
+  |> reverse
+
+show f"  Total products: {len(sales)}"
+show f"  Total revenue:  ${sum(summary)}"
+show f"  Avg order value: ${round(mean(summary), 2)}"
+show f"  Largest order:  ${summary[0]}"
+show f"  Smallest order: ${summary[len(summary) - 1]}"

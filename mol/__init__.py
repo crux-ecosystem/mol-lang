@@ -10,11 +10,11 @@ Features:
   - Built-in domain types: Thought, Memory, Node, Stream, Document, Chunk, Embedding
   - Native pipeline operator |> with auto-tracing
   - Safety rails with access control and guard assertions
-  - 90+ stdlib functions: algorithms, math, statistics, hashing, functional programming
+  - 143 stdlib functions: algorithms, math, statistics, hashing, functional programming
   - Transpilable to Python, JavaScript, and more
 
 File extension: .mol
 """
 
-__version__ = "0.10.0"
+__version__ = "1.0.0"
 __author__ = "IntraMind / CruxLabx"

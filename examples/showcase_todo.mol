@@ -1,0 +1,143 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL Showcase: Todo App with Structs & Pattern Matching
+-- ══════════════════════════════════════════════════════════
+-- A complete todo manager demonstrating:
+--   • Structs with methods
+--   • Pattern matching
+--   • Pipes & functional patterns
+--   • Error handling
+--
+-- Run: mol run examples/showcase_todo.mol
+-- ══════════════════════════════════════════════════════════
+
+-- ── Data Model ──────────────────────────────────────────
+
+struct Todo do
+  id, title, done, priority
+end
+
+impl Todo do
+  define toggle()
+    set self.done to not self.done
+    return self
+  end
+
+  define display()
+    let check be match self.done with
+      | true -> "[x]"
+      | false -> "[ ]"
+    end
+    let prio be match self.priority with
+      | "high"   -> "!!!"
+      | "medium" -> "!! "
+      | "low"    -> "!  "
+      | _        -> "   "
+    end
+    return f"{check} {prio} #{self.id} {self.title}"
+  end
+end
+
+-- ── Todo Manager ────────────────────────────────────────
+
+struct TodoManager do
+  todos, next_id
+end
+
+impl TodoManager do
+  define add(title, priority)
+    let todo be Todo(self.next_id, title, false, priority)
+    push(self.todos, todo)
+    set self.next_id to self.next_id + 1
+    return todo
+  end
+
+  define complete(id)
+    for todo in self.todos do
+      if todo.id is id then
+        todo.toggle()
+        return todo
+      end
+    end
+    return null
+  end
+
+  define remove(id)
+    let new_todos be filter(self.todos, fn(t) -> t.id is not id)
+    set self.todos to new_todos
+  end
+
+  define pending()
+    return filter(self.todos, fn(t) -> not t.done)
+  end
+
+  define completed()
+    return filter(self.todos, fn(t) -> t.done)
+  end
+
+  define by_priority(level)
+    return filter(self.todos, fn(t) -> t.priority is level)
+  end
+
+  define stats()
+    let total be len(self.todos)
+    let done be len(self.completed())
+    let pending be total - done
+    return f"Total: {total} | Done: {done} | Pending: {pending}"
+  end
+
+  define display_all()
+    show "╔══════════════════════════════════════╗"
+    show "║           MOL Todo Manager           ║"
+    show "╚══════════════════════════════════════╝"
+    show ""
+    if len(self.todos) is 0 then
+      show "  No todos yet. Add some!"
+    else
+      for todo in self.todos do
+        show "  " + todo.display()
+      end
+    end
+    show ""
+    show "  " + self.stats()
+    show ""
+  end
+end
+
+-- ── Demo ────────────────────────────────────────────────
+
+let manager be TodoManager { todos: [], next_id: 1 }
+
+-- Add todos
+manager.add("Learn MOL basics", "high")
+manager.add("Build a pipeline", "high")
+manager.add("Write tests", "medium")
+manager.add("Deploy to production", "medium")
+manager.add("Update docs", "low")
+
+show "=== Initial State ==="
+manager.display_all()
+
+-- Complete some
+manager.complete(1)
+manager.complete(3)
+
+show "=== After Completing #1 and #3 ==="
+manager.display_all()
+
+-- Show high priority only
+show "=== High Priority ==="
+let urgent be manager.by_priority("high")
+for todo in urgent do
+  show "  " + todo.display()
+end
+show ""
+
+-- Pipeline: get pending titles sorted
+show "=== Pending Titles (sorted) ==="
+manager.pending()
+  |> map(fn(t) -> t.title)
+  |> sort
+  |> enumerate
+  |> map(fn(pair) -> f"  {pair[0] + 1}. {pair[1]}")
+  |> join("\n")
+  |> show

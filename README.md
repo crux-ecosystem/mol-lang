@@ -7,7 +7,7 @@
 <p align="center">
   <img src="https://img.shields.io/pypi/v/mol-lang?label=PyPI&color=blue" alt="PyPI">
   <img src="https://img.shields.io/pypi/v/mol-lang?label=PyPI&color=blue" alt="PyPI">
-  <img src="https://img.shields.io/badge/version-0.10.0-blue" alt="version">
+  <img src="https://img.shields.io/badge/version-1.0.0-blue" alt="version">
   <img src="https://img.shields.io/badge/license-Proprietary-red" alt="license">
   <img src="https://img.shields.io/badge/python-3.12%2B-green" alt="python">
   <img src="https://img.shields.io/badge/tests-181%20passed-brightgreen" alt="tests">

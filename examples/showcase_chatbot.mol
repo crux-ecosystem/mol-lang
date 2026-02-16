@@ -1,0 +1,128 @@
+-- ══════════════════════════════════════════════════════════
+-- MOL Showcase: Chat Bot State Machine
+-- ══════════════════════════════════════════════════════════
+-- A conversational state machine demonstrating:
+--   • Pattern matching for state transitions
+--   • Structs for modeling state
+--   • String processing pipelines
+--   • Error handling with try/rescue
+--
+-- Run: mol run examples/showcase_chatbot.mol
+-- ══════════════════════════════════════════════════════════
+
+-- ── Bot State ───────────────────────────────────────────
+
+struct BotState do
+  phase, user_name, order_items, total
+end
+
+impl BotState do
+  define respond(input)
+    let cleaned be input |> trim |> lower
+
+    return match self.phase with
+      | "greeting" -> self.handle_greeting(cleaned)
+      | "menu" -> self.handle_menu(cleaned)
+      | "confirm" -> self.handle_confirm(cleaned)
+      | "done" -> self.handle_done(cleaned)
+      | _ -> ["I'm confused. Let's start over.", "greeting"]
+    end
+  end
+
+  define handle_greeting(input)
+    if len(input) > 0 then
+      set self.user_name to input
+      return [f"Nice to meet you, {input}! Here's our menu:\n  1. Coffee ($3)\n  2. Tea ($2)\n  3. Juice ($4)\n  4. Done ordering\nWhat would you like?", "menu"]
+    end
+    return ["Hi! What's your name?", "greeting"]
+  end
+
+  define handle_menu(input)
+    let response be match input with
+      | "1" -> self.add_item("Coffee", 3)
+      | "coffee" -> self.add_item("Coffee", 3)
+      | "2" -> self.add_item("Tea", 2)
+      | "tea" -> self.add_item("Tea", 2)
+      | "3" -> self.add_item("Juice", 4)
+      | "juice" -> self.add_item("Juice", 4)
+      | "4" -> self.show_order()
+      | "done" -> self.show_order()
+      | _ -> [f"I don't have '{input}'. Pick 1-3 or 'done'.", "menu"]
+    end
+    return response
+  end
+
+  define add_item(name, price)
+    push(self.order_items, name)
+    set self.total to self.total + price
+    return [f"Added {name} (${price}). Total: ${self.total}. Anything else? (1-3 or 'done')", "menu"]
+  end
+
+  define show_order()
+    if len(self.order_items) is 0 then
+      return ["You haven't ordered anything! Pick 1-3.", "menu"]
+    end
+    let items_str be join(self.order_items, ", ")
+    return [f"Your order: {items_str}\nTotal: ${self.total}\nConfirm? (yes/no)", "confirm"]
+  end
+
+  define handle_confirm(input)
+    return match input with
+      | "yes" -> [f"Order confirmed! Thanks {self.user_name}! 🎉", "done"]
+      | "y" -> [f"Order confirmed! Thanks {self.user_name}! 🎉", "done"]
+      | "no" -> self.cancel_order()
+      | "n" -> self.cancel_order()
+      | _ -> ["Please say 'yes' or 'no'.", "confirm"]
+    end
+  end
+
+  define cancel_order()
+    set self.order_items to []
+    set self.total to 0
+    return ["Order cancelled. Here's the menu again:\n  1. Coffee ($3)\n  2. Tea ($2)\n  3. Juice ($4)\n  4. Done\nWhat would you like?", "menu"]
+  end
+
+  define handle_done(input)
+    return [f"Goodbye {self.user_name}! Come back soon! 👋", "done"]
+  end
+end
+
+-- ── Simulation ──────────────────────────────────────────
+
+show "╔══════════════════════════════════════╗"
+show "║        MOL Coffee Shop Bot ☕        ║"
+show "╚══════════════════════════════════════╝"
+show ""
+
+let bot be BotState {
+  phase: "greeting",
+  user_name: "",
+  order_items: [],
+  total: 0
+}
+
+-- Simulate a conversation
+let inputs be ["Alice", "1", "3", "2", "done", "yes"]
+
+show "Bot: Hi! What's your name?"
+show ""
+
+for input in inputs do
+  show f"You: {input}"
+
+  let result be bot.respond(input)
+  let message be result[0]
+  let next_phase be result[1]
+  set bot.phase to next_phase
+
+  show f"Bot: {message}"
+  show ""
+end
+
+-- Stats
+show "═══ Conversation Stats ═══"
+show f"  Customer: {bot.user_name}"
+show f"  Items ordered: {len(bot.order_items)}"
+show f"  Order: {join(bot.order_items, ', ')}"
+show f"  Total: ${bot.total}"
+show f"  Messages exchanged: {len(inputs) * 2}"

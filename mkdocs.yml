@@ -92,6 +92,7 @@ extra_css:
 
 nav:
   - Home: index.md
+  - Why MOL?: why-mol.md
   - Getting Started:
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quickstart.md
@@ -102,6 +103,12 @@ nav:
     - Control Flow: guide/control-flow.md
     - Functions: guide/functions.md
     - Pipe Operator: guide/pipes.md
+    - Structs & Methods: guide/structs.md
+    - Modules & Imports: guide/modules.md
+    - Pattern Matching: guide/pattern-matching.md
+    - Error Handling: guide/error-handling.md
+    - Generators: guide/generators.md
+    - Concurrency: guide/concurrency.md
     - Domain Types: guide/domain-types.md
     - Safety & Guards: guide/safety.md
     - Algorithms: guide/algorithms.md
@@ -115,8 +122,10 @@ nav:
     - Data Processing: tutorials/data-processing.md
     - Neural Simulation: tutorials/neural-sim.md
   - Ecosystem:
+    - Online Playground: ecosystem/playground.md
     - VS Code Extension: ecosystem/vscode.md
     - Transpiler: ecosystem/transpiler.md
     - Roadmap: ecosystem/roadmap.md
+  - FAQ: faq.md
   - Changelog: changelog.md
   - Contributing: contributing.md
