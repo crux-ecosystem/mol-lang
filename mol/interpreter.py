@@ -11,7 +11,7 @@ Walks the AST and executes MOL programs. Features:
 
 from mol.ast_nodes import *
 from mol.types import Thought, Memory, Node, Stream, Document, Chunk, Embedding, VectorStore
-from mol.stdlib import STDLIB, SecurityContext, MOLSecurityError, MOLTypeError, MOLTask, _THREAD_POOL
+from mol.stdlib import STDLIB, SecurityContext, MOLSecurityError, MOLTypeError, MOLTask, _THREAD_POOL, get_sandbox_stdlib, SANDBOX_BLOCKED_FUNCTIONS
 from mol.stdlib import MOLAssertionError
 import time as _time
 
@@ -207,7 +207,7 @@ class Interpreter:
         interp.run(ast)
     """
 
-    def __init__(self, security: SecurityContext | None = None, trace: bool = True):
+    def __init__(self, security: SecurityContext | None = None, trace: bool = True, sandbox: bool = False):
         self.global_env = Environment()
         self.security = security or SecurityContext()
         self.output: list[str] = []           # captured output
@@ -216,9 +216,11 @@ class Interpreter:
         self._current_line = 0                # v0.8.0: line tracking for errors
         self._current_col = 0                 # v0.8.0: column tracking
         self._source_file = "<stdin>"         # v0.8.0: current file name
+        self._sandbox = sandbox               # v0.10.0: sandbox mode for playground
 
         # Load standard library into global scope
-        for name, fn in STDLIB.items():
+        stdlib = get_sandbox_stdlib() if sandbox else STDLIB
+        for name, fn in stdlib.items():
             self.global_env.set(name, fn)
 
     # ── Public API ───────────────────────────────────────────

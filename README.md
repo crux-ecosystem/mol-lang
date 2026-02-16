@@ -6,11 +6,13 @@
 
 <p align="center">
   <img src="https://img.shields.io/pypi/v/mol-lang?label=PyPI&color=blue" alt="PyPI">
-  <img src="https://img.shields.io/badge/version-0.9.1-blue" alt="version">
+  <img src="https://img.shields.io/pypi/v/mol-lang?label=PyPI&color=blue" alt="PyPI">
+  <img src="https://img.shields.io/badge/version-0.10.0-blue" alt="version">
   <img src="https://img.shields.io/badge/license-Proprietary-red" alt="license">
   <img src="https://img.shields.io/badge/python-3.12%2B-green" alt="python">
-  <img src="https://img.shields.io/badge/tests-147%20passed-brightgreen" alt="tests">
-  <img src="https://img.shields.io/badge/stdlib-120%2B%20functions-orange" alt="stdlib">
+  <img src="https://img.shields.io/badge/tests-181%20passed-brightgreen" alt="tests">
+  <img src="https://img.shields.io/badge/stdlib-143%20functions-orange" alt="stdlib">
+  <img src="https://img.shields.io/badge/playground-🔒%20sandboxed-10b981" alt="sandbox">
   <img src="https://img.shields.io/badge/self--hosted-codebase-ff69b4" alt="self-hosted">
   <img src="https://img.shields.io/badge/docs-GitHub%20Pages-blueviolet" alt="docs">
   <img src="https://img.shields.io/badge/built%20for-IntraMind-purple" alt="intramind">
@@ -109,6 +111,29 @@ cp -r mol-vscode/ ~/.vscode/extensions/mol-language-0.5.0
 ### 5. Online Playground (No Install)
 
 Try MOL directly in your browser: **http://135.235.138.217:8000**
+
+> **🔒 Sandbox Mode**: The playground runs in a secure sandbox. File I/O, network requests, server binding, and concurrency primitives are disabled. Install MOL locally for full access to all 143 stdlib functions.
+
+---
+
+## Security
+
+The MOL playground implements multiple layers of security:
+
+| Protection | Details |
+|---|---|
+| **Sandbox Mode** | 26 dangerous functions blocked (file I/O, network, server, concurrency) |
+| **Execution Timeout** | Code killed after 5 seconds to prevent infinite loops |
+| **Rate Limiting** | 30 requests/minute per IP address |
+| **Code Size Limit** | Maximum 10KB input code |
+| **Output Truncation** | Output capped at 50K characters |
+| **Recursion Limit** | Python recursion depth enforced |
+| **Loop Detection** | Built-in infinite loop detector (1M iterations) |
+| **CORS Restricted** | Only authorized origins allowed |
+
+Check the security policy at: `GET /api/security`
+
+To report security issues: [open a GitHub issue](https://github.com/crux-ecosystem/mol-lang/issues) or contact `kaliyugiheart@gmail.com`.
 
 ---
 
@@ -672,7 +697,8 @@ python tests/test_mol.py
 
 | Version | Highlights |
 |---|---|
-| **v0.9.0** (current) | Self-hosted codebase, web API server, IntraMind AI core, field/index mutation, `serve()`, `json_parse/stringify`, 147 tests |
+| **v0.10.0** (current) | **Security hardening**: sandboxed playground, 26 dangerous functions blocked, execution timeout, rate limiting, code size limits, CORS restrictions, `/api/security` endpoint, 181 tests |
+| **v0.9.0** | Self-hosted codebase, web API server, IntraMind AI core, field/index mutation, `serve()`, `json_parse/stringify`, 147 tests |
 | **v0.8.0** | Structs with methods, generators/iterators, file I/O, HTTP fetch, modules (`use`/`export`), 123 tests |
 | **v0.7.0** | `spawn`/`await`, channels, `parallel()`, `race()`, `wait_all()`, `sleep()`, 102 tests |
 | **v0.6.0** | Pattern matching, lambdas, `??` null safety, `f""` interpolation, destructuring, `try/rescue/ensure`, default params, `mol test` |
