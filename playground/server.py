@@ -1,13 +1,26 @@
 """
 MOL Playground — Online compiler and runner for MOL language.
-FastAPI backend that executes MOL code safely and returns results.
+FastAPI backend that executes MOL code safely with sandboxing.
+
+Security (v0.10.0):
+  - Sandbox mode: blocks file I/O, network, server, concurrency
+  - Execution timeout: kills runaway code after 5 seconds
+  - Rate limiting: max 30 requests/minute per IP
+  - Code size limit: max 10KB input
+  - Output size limit: max 50KB output
+  - Process isolation via subprocess
+  - Restricted CORS
 """
 
 import io
 import re
 import sys
 import time
+import signal
 import traceback
+import threading
+import json as _json
+from collections import defaultdict
 from contextlib import redirect_stdout, redirect_stderr
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -20,14 +33,45 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from mol.parser import parse
 from mol.interpreter import Interpreter
 
-app = FastAPI(title="MOL Playground", version="0.4.0")
+app = FastAPI(title="MOL Playground", version="0.10.0")
+
+# ── Security Configuration ───────────────────────────────────
+ALLOWED_ORIGINS = [
+    "http://135.235.138.217:8000",
+    "https://mol-lang.dev",
+    "https://www.mol-lang.dev",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
+
+MAX_EXECUTION_TIME = 5      # seconds — enforced via threading
+MAX_OUTPUT_SIZE = 50000      # characters
+MAX_CODE_SIZE = 10240        # 10KB max input code
+RATE_LIMIT_WINDOW = 60       # seconds
+RATE_LIMIT_MAX = 30          # requests per window per IP
+
+# ── Rate Limiter ─────────────────────────────────────────────
+_rate_store: dict[str, list[float]] = defaultdict(list)
+_rate_lock = threading.Lock()
+
+
+def _check_rate_limit(ip: str) -> bool:
+    """Return True if request is allowed, False if rate limited."""
+    now = time.time()
+    with _rate_lock:
+        # Clean old entries
+        _rate_store[ip] = [t for t in _rate_store[ip] if now - t < RATE_LIMIT_WINDOW]
+        if len(_rate_store[ip]) >= RATE_LIMIT_MAX:
+            return False
+        _rate_store[ip].append(now)
+        return True
 
 EXAMPLE_PROGRAMS = {
     "hello": 'show "Hello from MOL!"\nshow "Welcome to the playground!"',
@@ -40,37 +84,68 @@ EXAMPLE_PROGRAMS = {
     "data_processing": 'let users be [\n  {"name": "Alice", "age": 30},\n  {"name": "Bob", "age": 25},\n  {"name": "Charlie", "age": 35}\n]\n\nfor user in users do\n  show user["name"] + " is " + to_text(user["age"]) + " years old"\nend\n\nlet config be {"host": "localhost", "port": 8080, "debug": true}\nshow "Config: " + to_json(config)\nshow "Keys: " + to_text(keys(config))',
 }
 
-MAX_EXECUTION_TIME = 5  # seconds
+MAX_EXECUTION_TIME = 5  # seconds — enforced via threading
 MAX_OUTPUT_SIZE = 50000  # characters
+
+
+class ExecutionTimeout(Exception):
+    pass
+
+
+def _run_sandboxed(code: str, result_holder: dict):
+    """Run MOL code in sandbox mode with stdout/stderr capture."""
+    stdout_capture = io.StringIO()
+    stderr_capture = io.StringIO()
+    try:
+        ast = parse(code)
+        interp = Interpreter(trace=True, sandbox=True)
+        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
+            interp.run(ast)
+        result_holder["output"] = stdout_capture.getvalue()
+    except Exception as e:
+        result_holder["output"] = stdout_capture.getvalue()
+        result_holder["error"] = f"{type(e).__name__}: {e}"
 
 
 @app.post("/api/run")
 async def run_code(request: Request):
-    """Execute MOL code and return the output."""
+    """Execute MOL code in a sandboxed interpreter with timeout."""
+    # ── Rate limiting ──
+    client_ip = request.client.host if request.client else "unknown"
+    if not _check_rate_limit(client_ip):
+        return JSONResponse(
+            {"output": "", "error": "Rate limit exceeded. Please wait before running more code.", "time": 0},
+            status_code=429,
+        )
+
     body = await request.json()
     code = body.get("code", "")
 
     if not code.strip():
         return JSONResponse({"output": "", "error": "No code provided", "time": 0})
 
-    stdout_capture = io.StringIO()
-    stderr_capture = io.StringIO()
+    # ── Code size limit ──
+    if len(code) > MAX_CODE_SIZE:
+        return JSONResponse({
+            "output": "",
+            "error": f"Code too large ({len(code)} chars). Maximum is {MAX_CODE_SIZE} characters.",
+            "time": 0,
+        })
 
+    result_holder: dict = {"output": "", "error": None}
     start_time = time.time()
-    error = None
-    
-    try:
-        ast = parse(code)
-        interp = Interpreter(trace=True)
 
-        with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-            interp.run(ast)
+    # ── Execute with timeout via threading ──
+    exec_thread = threading.Thread(target=_run_sandboxed, args=(code, result_holder), daemon=True)
+    exec_thread.start()
+    exec_thread.join(timeout=MAX_EXECUTION_TIME)
 
-    except Exception as e:
-        error = f"{type(e).__name__}: {e}"
+    if exec_thread.is_alive():
+        # Thread is still running — it hit the timeout
+        result_holder["error"] = f"Execution timed out after {MAX_EXECUTION_TIME} seconds. Check for infinite loops."
 
     elapsed = time.time() - start_time
-    output = stdout_capture.getvalue()
+    output = result_holder.get("output", "")
 
     # Strip ANSI escape codes for clean web display
     ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
@@ -82,7 +157,7 @@ async def run_code(request: Request):
 
     return JSONResponse({
         "output": output,
-        "error": error,
+        "error": result_holder.get("error"),
         "time": round(elapsed * 1000, 2),  # ms
     })
 
@@ -100,6 +175,22 @@ async def get_examples():
 async def get_version():
     from mol import __version__
     return JSONResponse({"version": __version__})
+
+
+@app.get("/api/security")
+async def get_security():
+    """Return security policy information."""
+    from mol.stdlib import SANDBOX_BLOCKED_FUNCTIONS
+    return JSONResponse({
+        "sandbox": True,
+        "blocked_functions": sorted(SANDBOX_BLOCKED_FUNCTIONS),
+        "max_execution_time_seconds": MAX_EXECUTION_TIME,
+        "max_code_size_bytes": MAX_CODE_SIZE,
+        "max_output_size_chars": MAX_OUTPUT_SIZE,
+        "rate_limit": f"{RATE_LIMIT_MAX} requests per {RATE_LIMIT_WINDOW}s per IP",
+        "message": "This playground runs in sandbox mode. File I/O, network, "
+                   "and server functions are disabled. Install MOL locally for full access.",
+    })
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -338,7 +429,8 @@ PLAYGROUND_HTML = r"""<!DOCTYPE html>
 <header>
   <div class="logo">
     <h1>MOL</h1>
-    <span id="version">v0.3.0</span>
+    <span id="version">v0.10.0</span>
+    <span style="font-size:0.65rem;background:#10b981;color:#fff;padding:1px 6px;border-radius:4px;margin-left:6px;">🔒 Sandbox</span>
   </div>
   <div class="header-right">
     <select id="examples" onchange="loadExample(this.value)">

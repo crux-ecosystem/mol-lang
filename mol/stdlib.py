@@ -71,6 +71,49 @@ class SecurityContext:
         self._allowed_resources.discard(resource)
 
 
+# ── Sandbox Mode (v0.10.0) ──────────────────────────────────
+# Functions blocked in playground/sandbox mode to prevent abuse
+SANDBOX_BLOCKED_FUNCTIONS = {
+    # File system — arbitrary read/write/delete on server
+    "read_file", "write_file", "append_file", "delete_file",
+    "file_exists", "list_dir", "make_dir", "file_size",
+    "path_join", "path_dir", "path_base", "path_ext",
+    # Network — SSRF, port scanning, data exfiltration
+    "fetch", "url_encode",
+    # Server — bind ports on the host machine
+    "serve",
+    # Concurrency — thread pool exhaustion, DoS
+    "channel", "send", "receive", "parallel", "race", "wait_all", "task_done",
+    # Dangerous utilities
+    "sleep",   # block server threads
+    "wait",    # block server threads
+    "panic",   # crash the process
+    # RAG pipeline (uses real file I/O)
+    "load_text",
+}
+
+
+def _sandbox_blocked(name):
+    """Return a function that raises SecurityError when called in sandbox."""
+    def _blocked(*args, **kwargs):
+        raise MOLSecurityError(
+            f"'{name}()' is not available in the playground for security reasons. "
+            f"Install MOL locally to use this function: pip install mol-lang"
+        )
+    _blocked.__name__ = name
+    _blocked.__doc__ = f"[BLOCKED in playground] {name}"
+    return _blocked
+
+
+def get_sandbox_stdlib():
+    """Return a copy of STDLIB with dangerous functions replaced by blockers."""
+    safe = dict(STDLIB)
+    for name in SANDBOX_BLOCKED_FUNCTIONS:
+        if name in safe:
+            safe[name] = _sandbox_blocked(name)
+    return safe
+
+
 # ── Built-in Functions ───────────────────────────────────────
 def _builtin_len(obj):
     return len(obj)
