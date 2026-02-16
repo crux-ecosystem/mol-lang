@@ -2,20 +2,52 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| Version | Supported |
+|---------|-----------|
+| 1.0.x   | ✅ Active  |
+| 0.10.x  | ✅ Active  |
+| 0.9.x   | ⚠️ Critical fixes only |
+| < 0.9   | ❌ End of life |
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+**Do NOT report security vulnerabilities through public GitHub issues.**
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+Instead, please report them via email:
+
+📧 **kaliyugiheart@gmail.com**
+
+Include the following in your report:
+- Description of the vulnerability
+- Steps to reproduce
+- Impact assessment
+- Suggested fix (if any)
+
+### What to expect
+- **Acknowledgment**: Within 48 hours
+- **Assessment**: Within 1 week
+- **Fix timeline**: Critical issues within 72 hours, others within 2 weeks
+- **Credit**: You'll be credited in the release notes (unless you prefer anonymity)
+
+## Playground Security
+
+The MOL online playground at [https://mol.cruxlabx.in](https://mol.cruxlabx.in) runs in **sandbox mode** with:
+
+- 26 dangerous functions blocked (file I/O, network, server, concurrency)
+- 5-second execution timeout
+- 30 requests/minute rate limiting per IP
+- 10KB code size limit
+- HTTPS with Let's Encrypt SSL
+- Nginx reverse proxy with security headers
+
+Full security policy available at: `GET /api/security`
+
+## Responsible Disclosure
+
+We follow responsible disclosure practices. If you discover a vulnerability:
+
+1. Report it privately via the email above
+2. Allow reasonable time for a fix before public disclosure
+3. We'll coordinate the disclosure timeline with you
+
+Thank you for helping keep MOL and its community safe.

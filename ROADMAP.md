@@ -8,7 +8,7 @@ and it compiles/transpiles to whatever runtime you need.
 
 ---
 
-## Current Status (v0.1.0) — DONE
+## Current Status (v1.0.0) — STABLE RELEASE ✅
 
 - [x] Grammar specification (Lark EBNF)
 - [x] Lexer/Parser (LALR)
