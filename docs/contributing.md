@@ -1,12 +1,12 @@
 # Contributing to MOL
 
-See the full [CONTRIBUTING.md](https://github.com/crux-ecosystem/MOL/blob/main/CONTRIBUTING.md) on GitHub.
+See the full [CONTRIBUTING.md](https://github.com/crux-ecosystem/mol-lang/blob/main/CONTRIBUTING.md) on GitHub.
 
 ## Quick Setup
 
 ```bash
-git clone https://github.com/crux-ecosystem/MOL.git
-cd MOL
+git clone https://github.com/crux-ecosystem/mol-lang.git
+cd mol-lang
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
 python tests/test_mol.py   # 68 tests should pass
