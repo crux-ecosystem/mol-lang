@@ -110,7 +110,7 @@ cp -r mol-vscode/ ~/.vscode/extensions/mol-language-0.5.0
 
 ### 5. Online Playground (No Install)
 
-Try MOL directly in your browser: **http://135.235.138.217:8000**
+Try MOL directly in your browser: **[https://mol.cruxlabx.in](https://mol.cruxlabx.in)**
 
 > **🔒 Sandbox Mode**: The playground runs in a secure sandbox. File I/O, network requests, server binding, and concurrency primitives are disabled. Install MOL locally for full access to all 143 stdlib functions.
 

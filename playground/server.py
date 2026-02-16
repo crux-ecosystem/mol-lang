@@ -37,9 +37,9 @@ app = FastAPI(title="MOL Playground", version="0.10.0")
 
 # ── Security Configuration ───────────────────────────────────
 ALLOWED_ORIGINS = [
+    "https://mol.cruxlabx.in",
+    "http://mol.cruxlabx.in",
     "http://135.235.138.217:8000",
-    "https://mol-lang.dev",
-    "https://www.mol-lang.dev",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]

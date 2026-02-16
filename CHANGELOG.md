@@ -199,7 +199,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 ### Infrastructure
 
 - Published to PyPI: `pip install mol-lang`
-- Online playground deployed at http://135.235.138.217:8000
+- Online playground deployed at https://mol.cruxlabx.in
 - Blog post and social media launch materials
 - Strategy document for distribution
 
