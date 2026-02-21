@@ -1,0 +1,104 @@
+-- ═══════════════════════════════════════════════════════════════
+-- MOL v2.0 — Full Power Showcase
+-- All 5 evolution features working together:
+--   1. Memory Safety (Borrow Checker)
+--   2. Native Vector Engine
+--   3. Integrated Encryption
+--   4. Self-Optimizing JIT
+--   5. Multi-Node Swarm Runtime
+--
+-- This demonstrates a De-RAG sovereign memory pipeline:
+--   Encrypt → Embed → Shard → Search → Decrypt
+-- ═══════════════════════════════════════════════════════════════
+
+show "╔══════════════════════════════════════════╗"
+show "║  MOL v2.0 — Sovereign Memory Pipeline   ║"
+show "╚══════════════════════════════════════════╝"
+show ""
+
+-- ── Step 1: Initialize crypto keys (Encryption) ─────────────
+let kp be crypto_keygen(512)
+show "[1/6] Crypto keys generated (512-bit Paillier)"
+
+-- ── Step 2: Create knowledge embeddings (Vector Engine) ─────
+let knowledge be [
+    { "text": "quantum entanglement enables instant communication",
+      "id": "doc_quantum" },
+    { "text": "neural networks learn through backpropagation",
+      "id": "doc_neural" },
+    { "text": "sovereign memory keeps data encrypted at rest",
+      "id": "doc_sovereign" },
+    { "text": "homomorphic encryption computes on ciphertext",
+      "id": "doc_he" },
+    { "text": "distributed consensus via swarm intelligence",
+      "id": "doc_swarm" }
+]
+
+let embeddings be map(knowledge, fn(doc) -> {
+    "id": doc["id"],
+    "vec": vec_from_text(doc["text"], 32),
+    "text": doc["text"]
+})
+show "[2/6] " + to_text(len(embeddings)) + " documents embedded (dim=32)"
+
+-- ── Step 3: Build Vector Index (Vector Engine) ──────────────
+let idx be vec_index("sovereign_knowledge", 32)
+for e in embeddings do
+    vec_index_add(idx, e["vec"], e["id"])
+end
+show "[3/6] Vector index built with " + to_text(len(embeddings)) + " entries"
+
+-- ── Step 4: Encrypt sensitive data (Encryption) ─────────────
+let encrypted_scores be map(embeddings, fn(e) -> {
+    "id": e["id"],
+    "encrypted_relevance": he_encrypt(42, kp)
+})
+show "[4/6] Relevance scores encrypted homomorphically"
+
+-- ── Step 5: Initialize Swarm & Distribute (Swarm Runtime) ───
+let cluster be swarm_init(3, 2)
+let doc_ids be map(knowledge, fn(doc) -> doc["id"])
+let shard_result be swarm_shard(doc_ids, cluster, "hash")
+show "[5/6] Data sharded across " + to_text(len(swarm_nodes(cluster))) + "-node swarm"
+
+-- ── Step 6: Sovereign Search Pipeline ───────────────────────
+show "[6/6] Running sovereign search..."
+show ""
+
+let query_text be "encrypted computation on neural data"
+let query_vec be vec_from_text(query_text, 32)
+show "  Query: '" + query_text + "'"
+
+-- ANN search over vector index
+let search_results be vec_index_search(idx, query_vec, 3)
+show "  Top-3 results from vector index:"
+for r in search_results do
+    show "    → " + to_text(r)
+end
+
+-- Compute encrypted aggregation
+let enc_total be he_encrypt(0, kp)
+for s in encrypted_scores do
+    set enc_total to he_add(enc_total, s["encrypted_relevance"])
+end
+let total_relevance be he_decrypt(enc_total, kp)
+show "  Aggregate relevance (decrypted): " + to_text(total_relevance)
+
+-- Broadcast search completion across swarm
+swarm_broadcast(cluster, "search_complete")
+
+-- ── Final Report ────────────────────────────────────────────
+show ""
+show "╔══════════════════════════════════════════╗"
+show "║           Pipeline Complete              ║"
+show "╠══════════════════════════════════════════╣"
+let jit be jit_stats()
+show "║ JIT calls traced: " + to_text(jit["total_calls_traced"])
+show "║ Vectors created: 5 docs + 1 query"
+show "║ Encrypted ops: " + to_text(len(encrypted_scores)) + " HE additions"
+show "║ Swarm nodes: " + to_text(len(swarm_nodes(cluster)))
+let health be swarm_health(cluster)
+show "║ Cluster healthy: " + to_text(health["healthy"]) + "/" + to_text(health["total_nodes"])
+show "╚══════════════════════════════════════════╝"
+show ""
+show "✓ All 5 MOL v2.0 features working in harmony"

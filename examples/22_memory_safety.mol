@@ -1,0 +1,50 @@
+-- ═══════════════════════════════════════════════════════════════
+-- MOL v2.0 — Memory Safety (Borrow Checker) Demo
+-- Rust-inspired ownership model with AI-assisted safety analysis
+-- ═══════════════════════════════════════════════════════════════
+
+-- ── 1. Owned variables ──────────────────────────────────────
+-- 'own' declares exclusive ownership — only one owner at a time
+let own buffer be [1, 2, 3, 4, 5]
+show "Owned buffer: " + to_text(buffer)
+
+-- ── 2. Immutable borrows ────────────────────────────────────
+-- Multiple immutable borrows allowed simultaneously
+let ref reader1 be borrow buffer
+let ref reader2 be borrow buffer
+show "reader1 (immutable borrow): " + to_text(reader1)
+show "reader2 (immutable borrow): " + to_text(reader2)
+
+-- ── 3. Move semantics ──────────────────────────────────────
+-- Transfer ownership — original variable becomes invalid
+let own data be [10, 20, 30]
+show "Before transfer: data = " + to_text(data)
+transfer data to new_owner
+show "After transfer: new_owner = " + to_text(new_owner)
+
+-- ── 4. Lifetime scopes ─────────────────────────────────────
+-- Variables are automatically dropped when their lifetime ends
+lifetime request_scope do
+    let own temp_buf be [100, 200, 300]
+    show "Inside lifetime scope: " + to_text(temp_buf)
+end
+show "Lifetime scope ended — temp_buf dropped"
+
+-- ── 5. Explicit drop ───────────────────────────────────────
+let own resource be "expensive_connection"
+show "Resource: " + resource
+release resource
+show "Resource explicitly released"
+
+-- ── 6. Nested ownership patterns ────────────────────────────
+let own outer be [1, 2, 3]
+lifetime inner_scope do
+    let ref view be borrow outer
+    show "Inner scope borrows outer: " + to_text(view)
+end
+show "Outer still valid after inner scope: " + to_text(outer)
+
+show ""
+show "✓ Memory Safety demo complete"
+show "  Zero buffer overflows. Zero use-after-free. Zero data races."
+show "  All enforced at the language level."

@@ -4,10 +4,22 @@ MOL Domain Types
 
 Built-in types specific to IntraMind: Thought, Memory, Node, Stream.
 These are first-class citizens in MOL — not just strings and integers.
+
+v2.0.0 additions: Vector, Encrypted, SwarmCluster as primitive types.
 """
 
 import time
 import uuid
+
+# Re-export new v2.0.0 primitive types so they're accessible from mol.types
+from mol.vector_engine import (
+    Vector, QuantizedVector, VectorIndex, VectorError,
+)
+from mol.encryption import (
+    EncryptedValue, EncryptedVector, EncryptedMemory,
+    CryptoKeyPair, CryptoError, EncryptionError,
+)
+from mol.swarm_runtime import SwarmCluster
 
 
 class MolObject:

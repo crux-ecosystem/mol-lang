@@ -1,0 +1,89 @@
+-- ═══════════════════════════════════════════════════════════════
+-- MOL v2.0 — Integrated Encryption Demo
+-- Homomorphic encryption: compute on encrypted data without
+-- ever seeing the plaintext. De-RAG's sovereign memory layer.
+-- ═══════════════════════════════════════════════════════════════
+
+-- ── 1. Homomorphic Encryption (Paillier scheme) ─────────────
+show "=== Homomorphic Encryption ==="
+
+let kp be crypto_keygen(512)
+show "Key pair generated (512-bit)"
+
+-- Encrypt two values
+let enc_a be he_encrypt(42, kp)
+let enc_b be he_encrypt(18, kp)
+show "E(42) type = " + type_of(enc_a)
+show "E(18) type = " + type_of(enc_b)
+
+-- Add encrypted values — never decrypts!
+let enc_sum be he_add(enc_a, enc_b)
+let result be he_decrypt(enc_sum, kp)
+show "E(42) + E(18) = " + to_text(result) + " (computed on ciphertext!)"
+
+-- Subtract
+let enc_diff be he_sub(enc_a, enc_b)
+let diff_result be he_decrypt(enc_diff, kp)
+show "E(42) - E(18) = " + to_text(diff_result)
+
+-- Scalar multiplication
+let enc_scaled be he_mul_scalar(enc_a, 3)
+let scaled_result be he_decrypt(enc_scaled, kp)
+show "E(42) * 3 = " + to_text(scaled_result)
+
+-- ── 2. Symmetric Encryption ─────────────────────────────────
+show ""
+show "=== Symmetric Encryption ==="
+
+let sym_key be sym_keygen(32)
+show "Symmetric key generated"
+
+let secret_msg be "De-RAG sovereign memory payload"
+let encrypted be sym_encrypt(secret_msg, sym_key)
+show "Encrypted: " + to_text(encrypted)
+
+let decrypted be sym_decrypt(encrypted, sym_key)
+show "Decrypted: " + decrypted
+
+-- ── 3. Zero-Knowledge Proofs ────────────────────────────────
+show ""
+show "=== Zero-Knowledge Proofs ==="
+
+let my_secret be "sovereign_identity_proof"
+let commitment be zk_commit(my_secret)
+show "Commitment: " + to_text(commitment)
+
+let valid be zk_verify(my_secret, commitment["commitment"], commitment["blinding"])
+show "Verification (correct secret): " + to_text(valid)
+
+let invalid be zk_verify("wrong_secret", commitment["commitment"], commitment["blinding"])
+show "Verification (wrong secret): " + to_text(invalid)
+
+-- Knowledge proof
+let proof be zk_prove(my_secret)
+show "ZK Proof generated: " + to_text(keys(proof))
+
+-- ── 4. Secure Hashing ───────────────────────────────────────
+show ""
+show "=== Secure Hashing ==="
+
+let h256 be secure_hash("neural kernel data", "sha256")
+show "SHA-256: " + h256
+
+let h512 be secure_hash("neural kernel data", "sha512")
+show "SHA-512: " + h512
+
+-- ── 5. Secure Random ────────────────────────────────────────
+let rand_hex be secure_random(16)
+show "Secure random (16 bytes): " + rand_hex
+
+-- ── 6. Constant-time compare (timing attack safe) ───────────
+let a_hash be secure_hash("password123")
+let b_hash be secure_hash("password123")
+let c_hash be secure_hash("password456")
+
+show "Same hash compare: " + to_text(constant_time_compare(a_hash, b_hash))
+show "Diff hash compare: " + to_text(constant_time_compare(a_hash, c_hash))
+
+show ""
+show "✓ Encryption Engine demo complete"

@@ -6,11 +6,11 @@
 
 <p align="center">
   <img src="https://img.shields.io/pypi/v/mol-lang?label=PyPI&color=blue" alt="PyPI">
-  <img src="https://img.shields.io/badge/version-1.1.0-blue" alt="version">
+  <img src="https://img.shields.io/badge/version-2.0.0-blue" alt="version">
   <img src="https://img.shields.io/badge/license-Proprietary-red" alt="license">
   <img src="https://img.shields.io/badge/python-3.12%2B-green" alt="python">
   <img src="https://img.shields.io/badge/tests-202%20passed-brightgreen" alt="tests">
-  <img src="https://img.shields.io/badge/stdlib-162%20functions-orange" alt="stdlib">
+  <img src="https://img.shields.io/badge/stdlib-210%20functions-orange" alt="stdlib">
   <img src="https://img.shields.io/badge/playground-🔒%20sandboxed-10b981" alt="sandbox">
   <img src="https://img.shields.io/badge/docs-GitHub%20Pages-blueviolet" alt="docs">
   <img src="https://img.shields.io/badge/built%20for-IntraMind-purple" alt="intramind">
@@ -122,6 +122,113 @@ guard p95 < 1000 : "P95 latency exceeds SLA"
 | **No vendor lock-in** | Transpiles to Python or JavaScript |
 
 > 📖 **See full examples**: [Use Cases Documentation](https://crux-ecosystem.github.io/mol-lang/use-cases/)
+
+---
+
+## 🚀 v2.0 — Kernel-Grade Evolution
+
+MOL v2.0 introduces **5 major systems** that transform MOL from a scripting language into kernel-grade infrastructure for **Neural Kernel** and **De-RAG / Sovereign Memory**.
+
+| Feature | What It Does | Functions Added |
+|---|---|---|
+| **🛡️ Memory Safety** | Rust-inspired borrow checker with `own`, `borrow`, `transfer`, `release`, `lifetime` | 6 new AST constructs |
+| **📐 Native Vectors** | First-class `Vector` type with SIMD-like ops, ANN search, quantization | 25 functions (`vec_*`) |
+| **🔐 Integrated Encryption** | Homomorphic encryption (Paillier), symmetric crypto, zero-knowledge proofs | 15 functions (`he_*`, `sym_*`, `zk_*`) |
+| **⚡ JIT Tracing** | Self-optimizing hot-path detection, type specialization, inline caching | 7 functions (`jit_*`) |
+| **🌐 Swarm Runtime** | Multi-node distributed execution, consistent hashing, MapReduce | 12 functions (`swarm_*`) |
+
+**Total: 210 stdlib functions** (up from 162 in v1.1)
+
+### Memory Safety — Own, Borrow, Release
+
+```mol
+-- Declare owned variable (exclusive ownership)
+let own buffer be [1, 2, 3, 4, 5]
+
+-- Multiple immutable borrows are allowed
+let ref reader1 be borrow buffer
+let ref reader2 be borrow buffer
+
+-- Transfer ownership (original becomes invalid)
+transfer buffer to new_owner
+
+-- Lifetime scopes auto-drop at end
+lifetime request_scope do
+    let own temp be "scoped resource"
+end
+```
+
+### Native Vector Engine — De-RAG Nanosecond Retrieval
+
+```mol
+-- Create and operate on vectors as primitives
+let a be vec(1.0, 0.0, 0.0)
+let b be vec(0.0, 1.0, 0.0)
+show vec_cosine(a, b)            -- 0.0
+show vec_distance(a, b)          -- 1.414
+
+-- Text to vector embedding + ANN search
+let idx be vec_index("knowledge_base", 32)
+vec_index_add(idx, vec_from_text("quantum computing", 32), "quantum")
+vec_index_add(idx, vec_from_text("machine learning", 32), "ml")
+let results be vec_index_search(idx, vec_from_text("deep learning", 32), 2)
+```
+
+### Integrated Encryption — Compute on Ciphertext
+
+```mol
+-- Homomorphic encryption: add encrypted values without decrypting
+let keys be crypto_keygen(512)
+let enc_a be he_encrypt(42, keys)
+let enc_b be he_encrypt(18, keys)
+let enc_sum be he_add(enc_a, enc_b)
+show he_decrypt(enc_sum, keys)   -- 60 (computed on ciphertext!)
+
+-- Zero-knowledge proofs
+let commitment be zk_commit("secret")
+show zk_verify("secret", commitment["commitment"], commitment["blinding"])
+```
+
+### Self-Optimizing JIT — Hot-Path Recompilation
+
+```mol
+-- JIT automatically traces and optimizes hot functions
+define fibonacci(n)
+    let a be 0
+    let b be 1
+    let i be 0
+    while i < n do
+        let temp be b
+        set b to a + b
+        set a to temp
+        set i to i + 1
+    end
+    return a
+end
+
+-- After 50+ calls, JIT specializes for int fast-paths
+show jit_stats()
+show jit_hot_paths()
+```
+
+### Swarm Runtime — The Network IS the Computer
+
+```mol
+-- Initialize a 5-node simulated cluster
+let cluster be swarm_init(5, 2)
+
+-- Shard data across nodes via consistent hashing
+let data be ["weight_1", "weight_2", "weight_3", "weight_4"]
+swarm_shard(data, cluster, "hash")
+
+-- MapReduce over the swarm
+let mapped be swarm_map(cluster, fn(d) -> len(d))
+let total be swarm_reduce(mapped, fn(acc, v) -> acc + v)
+
+-- Dynamic scaling
+swarm_add_node(cluster)
+swarm_rebalance(cluster)
+```
 
 ---
 

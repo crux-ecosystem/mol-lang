@@ -113,6 +113,7 @@ nav:
     - Domain Types: guide/domain-types.md
     - Safety & Guards: guide/safety.md
     - Algorithms: guide/algorithms.md
+    - v2.0 Features: guide/v2-features.md
   - API Reference:
     - Standard Library: reference/stdlib.md
     - Domain Types: reference/types.md

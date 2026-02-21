@@ -425,3 +425,45 @@ class ExportStmt(ASTNode):
     """export name — mark a symbol for module export"""
     names: list = field(default_factory=list)  # list of str
 
+
+# ── Memory Safety / Ownership (v2.0.0) ──────────────────────
+@dataclass
+class OwnDeclare(ASTNode):
+    """let own x be expr — owned value with borrow-checker tracking"""
+    name: str = ""
+    value: Any = None
+
+
+@dataclass
+class BorrowDeclare(ASTNode):
+    """let ref y be borrow x — immutable borrow"""
+    name: str = ""
+    source: str = ""
+
+
+@dataclass
+class BorrowMutDeclare(ASTNode):
+    """let ref mut z be borrow_mut x — mutable borrow"""
+    name: str = ""
+    source: str = ""
+
+
+@dataclass
+class MoveOwnership(ASTNode):
+    """move x to y — transfer ownership"""
+    source: str = ""
+    target: str = ""
+
+
+@dataclass
+class DropValue(ASTNode):
+    """drop x — explicitly drop a value"""
+    name: str = ""
+
+
+@dataclass
+class LifetimeScope(ASTNode):
+    """lifetime 'a do ... end — explicit lifetime scope"""
+    name: str = ""
+    body: list = field(default_factory=list)
+

@@ -7,12 +7,20 @@ Walks the AST and executes MOL programs. Features:
   - Safety-rail enforcement via SecurityContext
   - Domain-type awareness (Thought, Memory, Node, Stream)
   - Event system for trigger/listen
+  - v2.0.0: Borrow checker, JIT tracing, Vector/Encrypted types
 """
 
 from mol.ast_nodes import *
-from mol.types import Thought, Memory, Node, Stream, Document, Chunk, Embedding, VectorStore
+from mol.types import (
+    Thought, Memory, Node, Stream, Document, Chunk, Embedding, VectorStore,
+    Vector, QuantizedVector, VectorIndex,
+    EncryptedValue, EncryptedVector, EncryptedMemory, CryptoKeyPair,
+    SwarmCluster,
+)
 from mol.stdlib import STDLIB, SecurityContext, MOLSecurityError, MOLTypeError, MOLTask, _THREAD_POOL, get_sandbox_stdlib, SANDBOX_BLOCKED_FUNCTIONS
 from mol.stdlib import MOLAssertionError
+from mol.borrow_checker import BorrowChecker, BorrowError, OwnershipError, UseAfterFreeError, BufferOverflowError, MemoryRegion
+from mol.jit_tracer import JITTracer, _global_jit
 import time as _time
 
 
@@ -217,6 +225,12 @@ class Interpreter:
         self._current_col = 0                 # v0.8.0: column tracking
         self._source_file = "<stdin>"         # v0.8.0: current file name
         self._sandbox = sandbox               # v0.10.0: sandbox mode for playground
+
+        # v2.0.0: Hardware-level memory safety
+        self._borrow_checker = BorrowChecker(ai_assist=True)
+
+        # v2.0.0: JIT tracing optimization
+        self._jit = _global_jit
 
         # Load standard library into global scope
         stdlib = get_sandbox_stdlib() if sandbox else STDLIB
@@ -592,6 +606,54 @@ class Interpreter:
             self._exports.add(name)
         return None
 
+    # ── v2.0.0 — Memory Safety / Ownership ──────────────────
+
+    def _exec_OwnDeclare(self, node, env):
+        """let own x be expr — declare an owned value with borrow tracking."""
+        value = self._eval(node.value, env)
+        env.set(node.name, value)
+        self._borrow_checker.register_owned(node.name, value)
+        # Auto-register buffer bounds for lists
+        if isinstance(value, list):
+            self._borrow_checker.register_buffer(node.name, len(value))
+        return value
+
+    def _exec_BorrowDeclare(self, node, env):
+        """let ref y be borrow x — create an immutable borrow."""
+        self._borrow_checker.borrow(node.name, node.source)
+        value = env.get(node.source)
+        env.set(node.name, value)
+        return value
+
+    def _exec_BorrowMutDeclare(self, node, env):
+        """let ref mut z be borrow_mut x — create a mutable borrow."""
+        self._borrow_checker.borrow_mut(node.name, node.source)
+        value = env.get(node.source)
+        env.set(node.name, value)
+        return value
+
+    def _exec_MoveOwnership(self, node, env):
+        """move x to y — transfer ownership."""
+        value = env.get(node.source)
+        self._borrow_checker.move_ownership(node.source, node.target)
+        env.set(node.target, value)
+        return value
+
+    def _exec_DropValue(self, node, env):
+        """drop x — explicitly drop a value and free memory."""
+        self._borrow_checker.drop(node.name)
+        return None
+
+    def _exec_LifetimeScope(self, node, env):
+        """lifetime 'a do ... end — explicit lifetime scope."""
+        lt = self._borrow_checker.enter_lifetime(node.name)
+        scope_env = Environment(env)
+        try:
+            result = self._exec_block(node.body, scope_env)
+        finally:
+            self._borrow_checker.exit_lifetime()
+        return result
+
     # ── Expression Evaluation ────────────────────────────────
     def _eval(self, node, env: Environment):
         if node is None:
@@ -638,6 +700,18 @@ class Interpreter:
     def _eval_BinaryOp(self, node, env):
         left = self._eval(node.left, env)
         right = self._eval(node.right, env)
+        # v2.0.0: JIT fast-path arithmetic
+        jit_result = self._jit.optimize_arithmetic(node.op, left, right)
+        if jit_result is not None:
+            return jit_result
+        # v2.0.0: Vector arithmetic support
+        if isinstance(left, Vector) or isinstance(right, Vector):
+            if node.op == "+":
+                return left + right
+            if node.op == "-":
+                return left - right
+            if node.op == "*":
+                return left * right
         ops = {
             "+": lambda a, b: a + b,
             "-": lambda a, b: a - b,
@@ -852,10 +926,24 @@ class Interpreter:
 
     def _invoke_callable(self, func, args, name="<anon>"):
         """Invoke a builtin, MOLFunction, MOLPipeline, or MOLLambda with args."""
+        # v2.0.0: JIT fast-path check
+        specialized = self._jit.get_specialization(name, args)
+        if specialized:
+            return specialized(*args)
+
+        call_start = _time.time()
+
         if callable(func) and not isinstance(func, (MOLFunction, MOLPipeline, MOLLambda, MOLStructDef)):
-            return func(*args)
+            result = func(*args)
+            # v2.0.0: JIT trace builtin calls
+            elapsed = (_time.time() - call_start) * 1000
+            self._jit.trace_call(name, args, result, elapsed)
+            return result
         if isinstance(func, MOLLambda):
-            return self._invoke_lambda(func, args)
+            result = self._invoke_lambda(func, args)
+            elapsed = (_time.time() - call_start) * 1000
+            self._jit.trace_call(name, args, result, elapsed)
+            return result
         if isinstance(func, (MOLFunction, MOLPipeline)):
             # Handle default parameters (v0.6.0)
             required = 0
@@ -893,7 +981,13 @@ class Interpreter:
             try:
                 self._exec_block(func.body, call_env)
             except ReturnSignal as ret:
+                # v2.0.0: JIT trace function calls
+                elapsed = (_time.time() - call_start) * 1000
+                self._jit.trace_call(name, args, ret.value, elapsed)
                 return ret.value
+            # v2.0.0: JIT trace function calls (no explicit return)
+            elapsed = (_time.time() - call_start) * 1000
+            self._jit.trace_call(name, args, None, elapsed)
             return None
         raise MOLRuntimeError(f"'{name}' is not callable")
 
@@ -1014,6 +1108,12 @@ class Interpreter:
             return "List<empty>"
         if isinstance(value, dict):
             return f"Map<{len(value)} entries>"
+        if isinstance(value, Vector):
+            return value.mol_repr()
+        if isinstance(value, EncryptedValue):
+            return value.mol_repr()
+        if isinstance(value, SwarmCluster):
+            return value.mol_repr()
         if isinstance(value, (Thought, Memory, Node, Stream,
                               Document, Chunk, Embedding, VectorStore)):
             return value.mol_repr()
@@ -1199,6 +1299,12 @@ class Interpreter:
             if value == int(value):
                 return str(int(value))
             return str(value)
+        if isinstance(value, Vector):
+            return value.mol_repr()
+        if isinstance(value, EncryptedValue):
+            return value.mol_repr()
+        if isinstance(value, SwarmCluster):
+            return value.mol_repr()
         if isinstance(value, (Thought, Memory, Node, Stream,
                               Document, Chunk, Embedding, VectorStore)):
             return value.mol_repr()
@@ -1227,6 +1333,9 @@ class Interpreter:
             "Chunk": lambda v: isinstance(v, Chunk),
             "Embedding": lambda v: isinstance(v, Embedding),
             "VectorStore": lambda v: isinstance(v, VectorStore),
+            "Vector": lambda v: isinstance(v, Vector),
+            "Encrypted": lambda v: isinstance(v, EncryptedValue),
+            "SwarmCluster": lambda v: isinstance(v, SwarmCluster),
         }
         checker = type_checks.get(type_name)
         if checker and not checker(value):

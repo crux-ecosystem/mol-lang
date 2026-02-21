@@ -1,0 +1,92 @@
+-- ═══════════════════════════════════════════════════════════════
+-- MOL v2.0 — Multi-Node Swarm Runtime Demo
+-- Treat a distributed network as a single CPU.
+-- Consistent hashing, data sharding, MapReduce, fault tolerance.
+-- ═══════════════════════════════════════════════════════════════
+
+-- ── 1. Initialize a swarm cluster ───────────────────────────
+let cluster be swarm_init(5, 2)
+show "Swarm cluster initialized"
+show "Type: " + type_of(cluster)
+
+-- ── 2. List nodes ───────────────────────────────────────────
+let nodes be swarm_nodes(cluster)
+show "Nodes in cluster: " + to_text(len(nodes))
+for n in nodes do
+    show "  " + to_text(n)
+end
+
+-- ── 3. Health check ─────────────────────────────────────────
+let health be swarm_health(cluster)
+show "Cluster health: " + to_text(health)
+
+-- ── 4. Data sharding (consistent hash ring) ─────────────────
+let dataset be [
+    "neural_weight_1", "neural_weight_2", "neural_weight_3",
+    "memory_block_A", "memory_block_B", "memory_block_C",
+    "embedding_alpha", "embedding_beta", "embedding_gamma",
+    "gradient_x", "gradient_y", "gradient_z"
+]
+let sharded be swarm_shard(dataset, cluster, "hash")
+show ""
+show "Data sharded across cluster:"
+show "  Total items: " + to_text(len(dataset))
+show "  Shard result: " + to_text(sharded)
+
+-- ── 5. Gather shards back ───────────────────────────────────
+let gathered be swarm_gather(cluster)
+show "Gathered " + to_text(len(gathered)) + " items back"
+
+-- ── 6. MapReduce — distributed computation ──────────────────
+show ""
+show "=== MapReduce ==="
+
+-- Map: transform each node's data
+let mapped be swarm_map(cluster, fn(data) -> len(data))
+show "Map result (data sizes per node): " + to_text(mapped)
+
+-- Reduce: aggregate
+let total be swarm_reduce(mapped, fn(acc, val) -> acc + val)
+show "Reduce (total items): " + to_text(total)
+
+-- ── 7. Broadcast a message ──────────────────────────────────
+let broadcast_result be swarm_broadcast(cluster, "sync_checkpoint_v2")
+show "Broadcast result: " + to_text(broadcast_result)
+
+-- ── 8. Scatter — distribute items round-robin ───────────────
+let tasks be ["task_A", "task_B", "task_C", "task_D", "task_E",
+             "task_F", "task_G", "task_H", "task_I", "task_J"]
+let scatter_result be swarm_scatter(cluster, tasks)
+show "Scatter result: " + to_text(scatter_result)
+
+-- ── 9. Dynamic scaling ──────────────────────────────────────
+show ""
+show "=== Dynamic Scaling ==="
+
+-- Add a node
+let new_node be swarm_add_node(cluster)
+show "Added node: " + to_text(new_node)
+
+let nodes_after be swarm_nodes(cluster)
+show "Nodes after add: " + to_text(len(nodes_after))
+
+-- Rebalance data
+let rebalanced be swarm_rebalance(cluster)
+show "Rebalance successful: " + to_text(rebalanced)
+
+-- Remove a node
+let removed be swarm_remove_node(cluster, new_node["node_id"])
+show "Removed node: " + to_text(removed)
+
+show "Final node count: " + to_text(len(swarm_nodes(cluster)))
+
+-- ── 10. Final health ────────────────────────────────────────
+let final_health be swarm_health(cluster)
+show ""
+show "=== Final Cluster Health ==="
+show to_text(final_health)
+
+show ""
+show "✓ Swarm Runtime demo complete"
+show "  5 nodes. Consistent hashing. MapReduce. Fault tolerance."
+show "  The network IS the computer."

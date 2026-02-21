@@ -145,6 +145,9 @@ class MOLTransformer(Transformer):
     def type_text(self):     return "Text"
     def type_bool(self):     return "Bool"
     def type_list(self):     return "List"
+    def type_vector(self):   return "Vector"
+    def type_encrypted(self): return "Encrypted"
+    def type_swarm(self):    return "SwarmCluster"
     def type_custom(self, n): return str(n)
 
     # ── Expressions ──────────────────────────────────────────
@@ -484,6 +487,25 @@ class MOLTransformer(Transformer):
     # ── v0.8.0 — Export ─────────────────────────────────────
     def export_stmt(self, *names):
         return ExportStmt(names=[str(n) for n in names])
+
+    # ── v2.0.0 — Memory Safety / Ownership ──────────────────
+    def own_declare(self, name, value):
+        return OwnDeclare(name=str(name), value=value)
+
+    def borrow_declare(self, borrower, source):
+        return BorrowDeclare(name=str(borrower), source=str(source))
+
+    def borrow_mut_declare(self, borrower, source):
+        return BorrowMutDeclare(name=str(borrower), source=str(source))
+
+    def move_ownership(self, source, target):
+        return MoveOwnership(source=str(source), target=str(target))
+
+    def drop_value(self, name):
+        return DropValue(name=str(name))
+
+    def lifetime_scope(self, name, body):
+        return LifetimeScope(name=str(name), body=body if body else [])
 
     # ── v0.6.0 — Match Expression ───────────────────────────
     def match_expr(self, subject, *arms):
