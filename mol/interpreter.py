@@ -909,6 +909,11 @@ class Interpreter:
             func = env.get(stage.name)
             return self._invoke_callable(func, [piped_value], stage.name)
         elif isinstance(stage, MethodCall):
+            # ── Security: block dunder method access in pipe stages ──
+            if stage.method.startswith('__'):
+                raise MOLSecurityError(
+                    f"Access to internal method '{stage.method}' is forbidden for security reasons"
+                )
             obj = self._eval(stage.obj, env)
             method = getattr(obj, stage.method, None)
             if method and callable(method):
@@ -1191,6 +1196,12 @@ class Interpreter:
         obj = self._eval(node.obj, env)
         args = [self._eval(a, env) for a in node.args]
 
+        # ── Security: block dunder method access (prevents RCE via class hierarchy traversal) ──
+        if node.method.startswith('__'):
+            raise MOLSecurityError(
+                f"Access to internal method '{node.method}' is forbidden for security reasons"
+            )
+
         # Struct method call — bind self
         if isinstance(obj, MOLStructInstance):
             method_name = node.method
@@ -1251,6 +1262,12 @@ class Interpreter:
 
     def _eval_FieldAccess(self, node: FieldAccess, env):
         obj = self._eval(node.obj, env)
+
+        # ── Security: block dunder attribute access (prevents RCE via class hierarchy traversal) ──
+        if node.field_name.startswith('__'):
+            raise MOLSecurityError(
+                f"Access to internal attribute '{node.field_name}' is forbidden for security reasons"
+            )
 
         # Struct field access
         if isinstance(obj, MOLStructInstance):
