@@ -200,3 +200,74 @@ class TestSandboxStdlib:
         for name in safe:
             if name not in SANDBOX_BLOCKED_FUNCTIONS:
                 assert safe[name] is STDLIB[name], f"'{name}' was incorrectly replaced"
+
+
+# ═══════════════════════════════════════════════════════════════
+#  CVE FIX: Dunder Attribute Traversal RCE (v2.0.1)
+# ═══════════════════════════════════════════════════════════════
+
+class TestDunderAttributeBlock:
+    """
+    Verify that Python class hierarchy traversal via dunder attributes
+    is blocked — prevents Full RCE on the playground server.
+
+    Attack vector: obj.__class__.__subclasses__() → os._wrap_close
+                   → __init__.__globals__["popen"]("cmd")
+    """
+
+    def test_block_class_field_access(self):
+        """Block __class__ field access on any object."""
+        err = run_sandbox_error('let x be "hello".__class__')
+        assert "forbidden" in err.lower()
+
+    def test_block_subclasses_method_call(self):
+        """Block __subclasses__() method call."""
+        err = run_sandbox_error('let x be "hello".__subclasses__()')
+        assert "forbidden" in err.lower()
+
+    def test_block_init_method_call(self):
+        """Block __init__() method call."""
+        err = run_sandbox_error('let x be "hello".__init__()')
+        assert "forbidden" in err.lower()
+
+    def test_block_globals_field_access(self):
+        """Block __globals__ field access."""
+        err = run_sandbox_error('let x be "hello".__globals__')
+        assert "forbidden" in err.lower()
+
+    def test_block_builtins_field_access(self):
+        """Block __builtins__ field access."""
+        err = run_sandbox_error('let x be "hello".__builtins__')
+        assert "forbidden" in err.lower()
+
+    def test_block_dict_field_access(self):
+        """Block __dict__ field access."""
+        err = run_sandbox_error('let x be "hello".__dict__')
+        assert "forbidden" in err.lower()
+
+    def test_block_dunder_on_list(self):
+        """Block dunder access on lists too."""
+        err = run_sandbox_error('let x be [1, 2].__class__')
+        assert "forbidden" in err.lower()
+
+    def test_block_dunder_on_dict(self):
+        """Block dunder access on dicts."""
+        err = run_sandbox_error('let x be {"a": 1}.__class__')
+        assert "forbidden" in err.lower()
+
+    def test_normal_field_access_works(self):
+        """Normal (non-dunder) field access must still work."""
+        out = run_sandbox('let d be {"name": "Alice"}\nshow d.name')
+        assert out == "Alice"
+
+    def test_normal_method_call_works(self):
+        """Normal (non-dunder) method calls must still work."""
+        out = run_sandbox('let nums be [1, 2, 3]\nnums.push(4)\nshow to_text(len(nums))')
+        assert out == "4"
+
+    def test_block_in_non_sandbox_too(self):
+        """Dunder blocking applies in ALL modes, not just sandbox."""
+        ast = parse('let x be "hello".__class__')
+        interp = Interpreter(trace=False, sandbox=False)
+        with pytest.raises(MOLSecurityError):
+            interp.run(ast)
