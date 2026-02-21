@@ -1,0 +1,93 @@
+-- ═══════════════════════════════════════════════════════════════
+-- MOL v2.0 — Native Vector Engine Demo
+-- De-RAG nanosecond retrieval with first-class Vector primitives
+-- ═══════════════════════════════════════════════════════════════
+
+-- ── 1. Create vectors ────────────────────────────────────────
+let a be vec(1.0, 0.0, 0.0)
+let b be vec(0.0, 1.0, 0.0)
+let c be vec(1.0, 1.0, 0.0)
+
+show "Vector a: " + to_text(a)
+show "Vector b: " + to_text(b)
+show "Vector c: " + to_text(c)
+
+-- ── 2. Arithmetic (SIMD-like batch ops) ─────────────────────
+let sum_ab be vec_add(a, b)
+show "a + b = " + to_text(sum_ab)
+
+let scaled be vec_scale(c, 3.0)
+show "c * 3 = " + to_text(scaled)
+
+-- ── 3. Similarity & Distance ────────────────────────────────
+let cos_ac be vec_cosine(a, c)
+show "cosine(a, c) = " + to_text(cos_ac)
+
+let dist_ab be vec_distance(a, b)
+show "L2 distance(a, b) = " + to_text(dist_ab)
+
+let dot_ab be vec_dot(a, b)
+show "dot(a, b) = " + to_text(dot_ab)
+
+-- ── 4. Normalize ────────────────────────────────────────────
+let normed be vec_normalize(c)
+show "normalize(c) = " + to_text(normed)
+show "dim(normed) = " + to_text(vec_dim(normed))
+
+-- ── 5. Factory functions ────────────────────────────────────
+let zeros be vec_zeros(4)
+let ones_v be vec_ones(4)
+let random_v be vec_rand(4)
+show "zeros(4) = " + to_text(zeros)
+show "ones(4) = " + to_text(ones_v)
+show "rand(4) = " + to_text(random_v)
+
+-- ── 6. Text to Vector embedding ─────────────────────────────
+let embed_hello be vec_from_text("hello world", 8)
+let embed_hi be vec_from_text("hi world", 8)
+let text_sim be vec_cosine(embed_hello, embed_hi)
+show "cosine('hello world', 'hi world') = " + to_text(text_sim)
+
+-- ── 7. Batch cosine & Top-K retrieval ───────────────────────
+let query be vec_from_text("machine learning", 16)
+let docs be [
+    vec_from_text("deep learning neural networks", 16),
+    vec_from_text("cooking recipes pasta", 16),
+    vec_from_text("artificial intelligence AI", 16),
+    vec_from_text("gardening flowers plants", 16),
+    vec_from_text("neural network training", 16)
+]
+let labels be ["deep learning", "cooking", "AI", "gardening", "neural training"]
+let top3 be vec_top_k(query, docs, 3, labels)
+show "Top-3 matches for 'machine learning':"
+for r in top3 do
+    show "  " + to_text(r)
+end
+
+-- ── 8. Quantization (int8 compression) ─────────────────────
+let big_vec be vec_rand(128)
+let quantized be vec_quantize(big_vec)
+show "Quantized type: " + type_of(quantized)
+
+-- ── 9. Activation functions ─────────────────────────────────
+let raw be vec(-1.0, 0.5, 2.0, -0.3)
+let after_relu be vec_relu(raw)
+let after_softmax be vec_softmax(raw)
+show "ReLU(" + to_text(raw) + ") = " + to_text(after_relu)
+show "Softmax = " + to_text(after_softmax)
+
+-- ── 10. Vector Index (ANN search) ───────────────────────────
+let idx be vec_index("knowledge_base", 8)
+vec_index_add(idx, vec_from_text("quantum computing", 8), "quantum")
+vec_index_add(idx, vec_from_text("machine learning", 8), "ml")
+vec_index_add(idx, vec_from_text("database systems", 8), "db")
+vec_index_add(idx, vec_from_text("computer vision", 8), "cv")
+
+let search_q be vec_from_text("deep learning AI", 8)
+let results be vec_index_search(idx, search_q, 2)
+show "ANN search for 'deep learning AI':"
+for r in results do
+    show "  " + to_text(r)
+end
+
+show "✓ Vector Engine demo complete"

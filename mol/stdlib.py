@@ -16,6 +16,37 @@ from mol.types import (
     Thought, Memory, Node, Stream,
     Document, Chunk, Embedding, VectorStore,
 )
+from mol.vector_engine import (
+    Vector, QuantizedVector, VectorIndex,
+    create_vector, vec_zeros, vec_ones, vec_rand, vec_from_text,
+    vec_dot, vec_cosine, vec_distance, vec_normalize,
+    vec_add, vec_sub, vec_scale, vec_dim, vec_concat,
+    vec_batch_cosine, vec_top_k, vec_quantize,
+    create_vector_index, vec_index_add, vec_index_search,
+    vec_softmax, vec_relu,
+)
+from mol.encryption import (
+    EncryptedValue, EncryptedVector, EncryptedMemory, CryptoKeyPair,
+    _builtin_crypto_keygen, _builtin_he_encrypt, _builtin_he_decrypt,
+    _builtin_he_add, _builtin_he_sub, _builtin_he_mul_scalar,
+    _builtin_sym_keygen, _builtin_sym_encrypt, _builtin_sym_decrypt,
+    _builtin_zk_commit, _builtin_zk_verify, _builtin_zk_prove,
+    _builtin_secure_hash, _builtin_secure_random,
+    _builtin_constant_time_compare,
+)
+from mol.jit_tracer import (
+    _builtin_jit_stats, _builtin_jit_hot_paths, _builtin_jit_profile,
+    _builtin_jit_reset, _builtin_jit_warmup, _builtin_jit_enabled,
+    _builtin_jit_toggle,
+)
+from mol.swarm_runtime import (
+    SwarmCluster,
+    _builtin_swarm_init, _builtin_swarm_shard, _builtin_swarm_map,
+    _builtin_swarm_reduce, _builtin_swarm_gather, _builtin_swarm_broadcast,
+    _builtin_swarm_health, _builtin_swarm_nodes, _builtin_swarm_rebalance,
+    _builtin_swarm_add_node, _builtin_swarm_remove_node,
+    _builtin_swarm_scatter,
+)
 
 
 class MOLSecurityError(Exception):
@@ -134,12 +165,26 @@ def _builtin_type_of(obj):
         Memory: "Memory",
         Node: "Node",
         Stream: "Stream",
+        Vector: "Vector",
+        QuantizedVector: "QuantizedVector",
+        VectorIndex: "VectorIndex",
+        EncryptedValue: "Encrypted",
+        EncryptedVector: "EncryptedVector",
+        EncryptedMemory: "EncryptedMemory",
+        CryptoKeyPair: "CryptoKeyPair",
+        SwarmCluster: "SwarmCluster",
     }
     return type_map.get(type(obj), type(obj).__name__)
 
 
 def _builtin_to_text(obj):
     if isinstance(obj, (Thought, Memory, Node, Stream)):
+        return obj.mol_repr()
+    if isinstance(obj, Vector):
+        return obj.mol_repr()
+    if isinstance(obj, EncryptedValue):
+        return obj.mol_repr()
+    if isinstance(obj, SwarmCluster):
         return obj.mol_repr()
     return str(obj)
 
@@ -1751,4 +1796,68 @@ STDLIB: dict[str, callable] = {
     "serve": _builtin_serve,
     "json_parse": _builtin_json_parse,
     "json_stringify": _builtin_json_stringify,
+
+    # ── Vector Engine (v2.0.0) ────────────────────────────────
+    "vec": create_vector,
+    "vec_zeros": vec_zeros,
+    "vec_ones": vec_ones,
+    "vec_rand": vec_rand,
+    "vec_from_text": vec_from_text,
+    "vec_dot": vec_dot,
+    "vec_cosine": vec_cosine,
+    "vec_distance": vec_distance,
+    "vec_normalize": vec_normalize,
+    "vec_add": vec_add,
+    "vec_sub": vec_sub,
+    "vec_scale": vec_scale,
+    "vec_dim": vec_dim,
+    "vec_concat": vec_concat,
+    "vec_batch_cosine": vec_batch_cosine,
+    "vec_top_k": vec_top_k,
+    "vec_quantize": vec_quantize,
+    "vec_softmax": vec_softmax,
+    "vec_relu": vec_relu,
+    "vec_index": create_vector_index,
+    "vec_index_add": vec_index_add,
+    "vec_index_search": vec_index_search,
+
+    # ── Encryption Engine (v2.0.0) ────────────────────────────
+    "crypto_keygen": _builtin_crypto_keygen,
+    "he_encrypt": _builtin_he_encrypt,
+    "he_decrypt": _builtin_he_decrypt,
+    "he_add": _builtin_he_add,
+    "he_sub": _builtin_he_sub,
+    "he_mul_scalar": _builtin_he_mul_scalar,
+    "sym_keygen": _builtin_sym_keygen,
+    "sym_encrypt": _builtin_sym_encrypt,
+    "sym_decrypt": _builtin_sym_decrypt,
+    "zk_commit": _builtin_zk_commit,
+    "zk_verify": _builtin_zk_verify,
+    "zk_prove": _builtin_zk_prove,
+    "secure_hash": _builtin_secure_hash,
+    "secure_random": _builtin_secure_random,
+    "constant_time_compare": _builtin_constant_time_compare,
+
+    # ── JIT Tracer (v2.0.0) ──────────────────────────────────
+    "jit_stats": _builtin_jit_stats,
+    "jit_hot_paths": _builtin_jit_hot_paths,
+    "jit_profile": _builtin_jit_profile,
+    "jit_reset": _builtin_jit_reset,
+    "jit_warmup": _builtin_jit_warmup,
+    "jit_enabled": _builtin_jit_enabled,
+    "jit_toggle": _builtin_jit_toggle,
+
+    # ── Swarm Runtime (v2.0.0) ────────────────────────────────
+    "swarm_init": _builtin_swarm_init,
+    "swarm_shard": _builtin_swarm_shard,
+    "swarm_map": _builtin_swarm_map,
+    "swarm_reduce": _builtin_swarm_reduce,
+    "swarm_gather": _builtin_swarm_gather,
+    "swarm_broadcast": _builtin_swarm_broadcast,
+    "swarm_health": _builtin_swarm_health,
+    "swarm_nodes": _builtin_swarm_nodes,
+    "swarm_rebalance": _builtin_swarm_rebalance,
+    "swarm_add_node": _builtin_swarm_add_node,
+    "swarm_remove_node": _builtin_swarm_remove_node,
+    "swarm_scatter": _builtin_swarm_scatter,
 }

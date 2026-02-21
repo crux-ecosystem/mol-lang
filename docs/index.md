@@ -11,10 +11,10 @@ hide:
 **The pipeline language for AI, data, and automation — with auto-tracing built in.**
 
 <div class="badge-row">
-  <img src="https://img.shields.io/badge/version-1.1.0-blue?style=flat-square" alt="version">
+  <img src="https://img.shields.io/badge/version-2.0.0-blue?style=flat-square" alt="version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="license">
   <img src="https://img.shields.io/badge/python-3.12%2B-yellow?style=flat-square" alt="python">
-  <img src="https://img.shields.io/badge/tests-202%20passing-brightgreen?style=flat-square" alt="tests">
+  <img src="https://img.shields.io/badge/tests-168%20passing-brightgreen?style=flat-square" alt="tests">
 </div>
 
 [Get Started](getting-started/installation.md){ .md-button .md-button--primary }
@@ -89,9 +89,9 @@ guard confidence > 0.5 : "Too low"
 
 <div class="feature-card" markdown>
 
-### :material-function: 162 Stdlib Functions
+### :material-function: 210 Stdlib Functions
 
-Math, strings, lists, maps, sorting, searching, JSON, hashing, functional programming, statistics, and RAG operations.
+Math, strings, lists, maps, sorting, searching, JSON, vectors, encryption, JIT tracing, swarm computing, and RAG operations.
 
 </div>
 
@@ -115,6 +115,85 @@ Built-in security model for AI resource management.
 
 ```text
 access "mind_core" with "admin"
+```
+
+</div>
+
+</div>
+
+---
+
+## 🚀 v2.0 — Kernel-Grade Evolution
+
+Five new systems transform MOL into infrastructure for **Neural Kernel** and **De-RAG / Sovereign Memory**.
+
+<div class="feature-grid" markdown>
+
+<div class="feature-card" markdown>
+
+### :material-shield-lock: Memory Safety
+
+Rust-inspired borrow checker: `own`, `borrow`, `transfer`, `release`, `lifetime`. Zero buffer overflows, zero use-after-free — enforced at the language level.
+
+```text
+let own buffer be [1, 2, 3]
+let ref view be borrow buffer
+lifetime scope do ... end
+```
+
+</div>
+
+<div class="feature-card" markdown>
+
+### :material-vector-line: Native Vectors
+
+First-class `Vector` type with SIMD-like ops, ANN search, quantization. 25 functions for nanosecond retrieval.
+
+```text
+let v be vec(1.0, 0.0, 0.0)
+vec_cosine(v, vec_rand(3))
+vec_index_search(idx, query, 5)
+```
+
+</div>
+
+<div class="feature-card" markdown>
+
+### :material-lock: Integrated Encryption
+
+Homomorphic encryption (Paillier), symmetric crypto, zero-knowledge proofs. Compute on ciphertext without decrypting.
+
+```text
+let keys be crypto_keygen(512)
+let enc be he_encrypt(42, keys)
+he_add(enc, he_encrypt(18, keys))
+```
+
+</div>
+
+<div class="feature-card" markdown>
+
+### :material-lightning-bolt: JIT Tracing
+
+Self-optimizing hot-path detection. Type specialization, inline caching, automatic recompilation.
+
+```text
+show jit_stats()
+show jit_hot_paths()
+```
+
+</div>
+
+<div class="feature-card" markdown>
+
+### :material-lan: Swarm Runtime
+
+Multi-node distributed execution. Consistent hashing, data sharding, MapReduce, dynamic scaling.
+
+```text
+let c be swarm_init(5, 2)
+swarm_shard(data, c, "hash")
+swarm_map(c, fn(d) -> len(d))
 ```
 
 </div>

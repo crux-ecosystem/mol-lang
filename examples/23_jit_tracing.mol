@@ -1,0 +1,75 @@
+-- ═══════════════════════════════════════════════════════════════
+-- MOL v2.0 — Self-Optimizing JIT Tracing Demo
+-- Hot-path detection, type specialization, inline caching
+-- ═══════════════════════════════════════════════════════════════
+
+-- ── 1. JIT Status ───────────────────────────────────────────
+show "JIT enabled: " + to_text(jit_enabled())
+let stats be jit_stats()
+show "Initial JIT stats: " + to_text(stats)
+
+-- ── 2. Hot loop — JIT traces this automatically ─────────────
+-- After the loop crosses the hot threshold, the JIT will
+-- specialize the inner arithmetic for int fast-paths
+define fibonacci(n)
+    let a be 0
+    let b be 1
+    let i be 0
+    while i < n do
+        let temp be b
+        set b to a + b
+        set a to temp
+        set i to i + 1
+    end
+    return a
+end
+
+-- Run enough times to trigger JIT optimization
+let result be 0
+let iter be 0
+while iter < 200 do
+    set result to fibonacci(20)
+    set iter to iter + 1
+end
+show "fibonacci(20) = " + to_text(result)
+
+-- ── 3. Check hot paths ─────────────────────────────────────
+let hot be jit_hot_paths()
+show "Hot paths detected: " + to_text(len(hot))
+for path in hot do
+    show "  " + to_text(path)
+end
+
+-- ── 4. Profile a specific function ──────────────────────────
+let profile be jit_profile("fibonacci")
+show "Profile for fibonacci: " + to_text(profile)
+
+-- ── 5. Another hot function — string operations ─────────────
+define build_greeting(name)
+    return "Hello, " + name + "! Welcome to MOL v2.0"
+end
+
+let greet_iter be 0
+while greet_iter < 150 do
+    let msg be build_greeting("Mounesh")
+    set greet_iter to greet_iter + 1
+end
+show "Greeting: " + build_greeting("Mounesh")
+
+-- ── 6. Final JIT statistics ─────────────────────────────────
+let final_stats be jit_stats()
+show ""
+show "=== Final JIT Report ==="
+show "Total calls traced: " + to_text(final_stats["total_calls_traced"])
+show "Hot paths: " + to_text(final_stats["hot_paths"])
+show "Optimized functions: " + to_text(final_stats["optimized_functions"])
+show "Loop traces: " + to_text(final_stats["loop_traces"])
+
+-- ── 7. JIT toggle ───────────────────────────────────────────
+jit_toggle(false)
+show "JIT disabled: " + to_text(jit_enabled())
+jit_toggle(true)
+show "JIT re-enabled: " + to_text(jit_enabled())
+
+show ""
+show "✓ JIT Tracing demo complete"

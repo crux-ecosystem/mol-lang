@@ -2,6 +2,60 @@
 
 All notable changes to MOL are documented here.
 
+## [2.0.0] - 2026-02-21
+
+### Added — Kernel-Grade Evolution (56 new functions, 5 new systems)
+
+**🛡️ Memory Safety — Borrow Checker (`borrow_checker.py`)**
+
+- Rust-inspired ownership model: `own`, `borrow`, `borrow_mut`, `transfer`, `release`
+- Lifetime scopes with automatic resource cleanup
+- Use-after-free detection, buffer overflow prevention
+- AI-assisted safety analysis
+- New AST nodes: `OwnDeclare`, `BorrowDeclare`, `BorrowMutDeclare`, `MoveOwnership`, `DropValue`, `LifetimeScope`
+
+**📐 Native Vector Engine (`vector_engine.py`) — 25 functions**
+
+- First-class `Vector` type backed by `array.array` for SIMD-like performance
+- Arithmetic: `vec_add`, `vec_sub`, `vec_scale`, `vec_concat`
+- Similarity: `vec_dot`, `vec_cosine`, `vec_distance`, `vec_normalize`
+- Factory: `vec`, `vec_zeros`, `vec_ones`, `vec_rand`, `vec_from_text`
+- ML: `vec_softmax`, `vec_relu`, `vec_quantize` (int8 compression)
+- ANN search: `vec_index`, `vec_index_add`, `vec_index_search` with LSH bucketing
+- Batch operations: `vec_batch_cosine`, `vec_top_k`
+
+**🔐 Integrated Encryption (`encryption.py`) — 15 functions**
+
+- Homomorphic encryption (Paillier scheme): `crypto_keygen`, `he_encrypt`, `he_decrypt`, `he_add`, `he_sub`, `he_mul_scalar`
+- Symmetric encryption (HMAC-based): `sym_keygen`, `sym_encrypt`, `sym_decrypt`
+- Zero-knowledge proofs: `zk_commit`, `zk_verify`, `zk_prove`
+- Utilities: `secure_hash`, `secure_random`, `constant_time_compare`
+
+**⚡ Self-Optimizing JIT Tracing (`jit_tracer.py`) — 7 functions**
+
+- Hot-path detection with configurable thresholds (50/100 calls)
+- Type profiling and specialization (Int, Float, String fast-paths)
+- Inline caching and constant folding
+- Functions: `jit_stats`, `jit_hot_paths`, `jit_profile`, `jit_reset`, `jit_warmup`, `jit_enabled`, `jit_toggle`
+
+**🌐 Multi-Node Swarm Runtime (`swarm_runtime.py`) — 12 functions**
+
+- Consistent hash ring for data distribution
+- Functions: `swarm_init`, `swarm_shard`, `swarm_map`, `swarm_reduce`, `swarm_gather`
+- Communication: `swarm_broadcast`, `swarm_scatter`
+- Management: `swarm_health`, `swarm_nodes`, `swarm_rebalance`, `swarm_add_node`, `swarm_remove_node`
+- ThreadPoolExecutor-based parallel execution with fault tolerance
+
+**Infrastructure:**
+
+- Grammar updated with ownership syntax rules
+- Parser extended with 6 new transformer methods
+- Interpreter extended with 7 new exec methods + JIT integration in all function calls
+- Type system extended: `Vector`, `QuantizedVector`, `VectorIndex`, `EncryptedValue`, `EncryptedVector`, `EncryptedMemory`, `CryptoKeyPair`, `SwarmCluster`
+- Total stdlib: **210 functions** (up from 162)
+- 6 new examples: `20_vector_engine`, `21_encryption`, `22_memory_safety`, `23_jit_tracing`, `24_swarm_runtime`, `25_sovereign_pipeline`
+- All 168 existing tests pass with zero regressions
+
 ## [0.3.0] - 2026-02-10
 
 ### Added

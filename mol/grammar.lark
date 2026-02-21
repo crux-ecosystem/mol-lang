@@ -13,6 +13,10 @@ start: (_NL* statement)*  _NL*
 // ── Statements ──────────────────────────────────────────────
 ?statement: show_stmt
           | declare_stmt
+          | own_stmt
+          | move_stmt
+          | drop_stmt
+          | lifetime_stmt
           | destructure_list_stmt
           | destructure_map_stmt
           | assign_stmt
@@ -47,6 +51,14 @@ show_stmt: "show" expr
 // ── Variable Declaration ────────────────────────────────────
 declare_stmt: "let" NAME "be" expr              -> declare_infer
             | "let" NAME ":" type_name "be" expr -> declare_typed
+
+// ── Ownership & Memory Safety (v2.0.0) ─────────────────────
+own_stmt: "let" "own" NAME "be" expr                    -> own_declare
+        | "let" "ref" NAME "be" "borrow" NAME           -> borrow_declare
+        | "let" "ref" "mut" NAME "be" "borrow_mut" NAME -> borrow_mut_declare
+move_stmt: "transfer" NAME "to" NAME                      -> move_ownership
+drop_stmt: "release" NAME                                -> drop_value
+lifetime_stmt: "lifetime" NAME "do" _NL block "end"      -> lifetime_scope
 
 // ── Destructuring Assignment ────────────────────────────────
 destructure_list_stmt: "let" "[" destruct_names "]" "be" expr         -> destructure_list
@@ -142,6 +154,9 @@ type_name: "Thought" -> type_thought
          | "Text"    -> type_text
          | "Bool"    -> type_bool
          | "List"    -> type_list
+         | "Vector"  -> type_vector
+         | "Encrypted" -> type_encrypted
+         | "SwarmCluster" -> type_swarm
          | NAME      -> type_custom
 
 // ── Expressions ─────────────────────────────────────────────
@@ -229,7 +244,7 @@ match_pattern_list: match_pattern ("," match_pattern)*
 
 // ── Terminals ───────────────────────────────────────────────
 // NAME must exclude all keywords to avoid ambiguity
-NAME: /(?!(?:if|then|elif|else|end|while|for|in|do|define|return|begin|let|be|set|to|show|and|or|not|is|true|false|null|trigger|link|process|access|sync|evolve|emit|listen|with|pipeline|guard|use|as|try|rescue|ensure|test|match|when|fn|spawn|await|struct|impl|yield|export)\b)[a-zA-Z_][a-zA-Z0-9_]*/
+NAME: /(?!(?:if|then|elif|else|end|while|for|in|do|define|return|begin|let|be|set|to|show|and|or|not|is|true|false|null|trigger|link|process|access|sync|evolve|emit|listen|with|pipeline|guard|use|as|try|rescue|ensure|test|match|when|fn|spawn|await|struct|impl|yield|export|own|ref|mut|borrow|borrow_mut|transfer|release|lifetime)\b)[a-zA-Z_][a-zA-Z0-9_]*/
 
 // Spread operator for destructuring
 SPREAD: "..."
