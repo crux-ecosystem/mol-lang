@@ -1,0 +1,146 @@
+-- ═══════════════════════════════════════════════════════════════
+-- Neural Kernel Agent Orchestration (MOL)
+-- ═══════════════════════════════════════════════════════════════
+-- Demonstrates Neural Kernel agent management via MOL:
+--   • Spawn agents with capability-based security
+--   • CFS scheduler picks by virtual runtime
+--   • IPC channels for inter-agent communication
+--   • Syscall interface
+--
+-- Run: mol run nk_agents.mol
+-- ═══════════════════════════════════════════════════════════════
+
+show "=== Neural Kernel Agent Orchestration ==="
+show ""
+
+-- Boot the kernel
+nk_init({max_agents: 128, time_slice_ms: 10})
+show "Neural Kernel initialized"
+show ""
+
+-- ─── Agent Deployment ────────────────────────────────────────
+
+show "--- Deploying Agent Fleet ---"
+
+-- Define agent configurations as a pipeline
+define deploy_agent(name, priority, caps)
+    let agent be nk_agent_spawn(name, priority, caps)
+    show f"  Deployed: {agent.name} (priority={agent.priority})"
+    show f"    Capabilities: {agent.capabilities}"
+    return agent
+end
+
+let indexer be deploy_agent("vector_indexer", "high", [
+    "execute", "vector_read", "vector_write", "vector_index",
+    "mem_alloc", "fs_read"
+])
+
+let searcher be deploy_agent("semantic_search", "high", [
+    "execute", "vector_search", "vector_read",
+    "model_infer"
+])
+
+let encryptor be deploy_agent("encryption_engine", "realtime", [
+    "execute", "crypto_encrypt", "crypto_decrypt",
+    "crypto_sign", "crypto_verify"
+])
+
+let gateway be deploy_agent("api_gateway", "normal", [
+    "execute", "net_listen", "net_send", "net_receive",
+    "ipc_send", "ipc_receive", "ipc_create_channel"
+])
+
+let monitor be deploy_agent("health_monitor", "idle", [
+    "execute", "audit_read", "audit_write"
+])
+
+show ""
+show f"Fleet size: {len(nk_agent_list())} agents"
+show ""
+
+-- ─── Capability Management ───────────────────────────────────
+
+show "--- Dynamic Capability Management ---"
+
+-- Grant additional capabilities at runtime
+nk_grant(indexer.agent_id, "ipc_send", "ipc_receive")
+show f"  Granted IPC to indexer"
+
+-- Revoke unused capabilities  
+nk_revoke(monitor.agent_id, "audit_write")
+show f"  Revoked audit_write from monitor"
+show ""
+
+-- ─── CFS Scheduling ─────────────────────────────────────────
+
+show "--- CFS Scheduler Dispatch ---"
+
+-- Schedule 5 rounds — CFS picks by lowest vruntime
+for i in range(1, 6) do
+    let result be nk_schedule()
+    show f"  Round {i}: scheduled → {result.scheduled}"
+end
+show ""
+
+-- ─── Inter-Process Communication ─────────────────────────────
+
+show "--- IPC Message Passing ---"
+
+-- Simulate a request flow: gateway → searcher → encryptor
+nk_ipc_send("gateway_to_search", {
+    type: "search_request",
+    query: "quantum resistant algorithms",
+    top_k: 10
+}, gateway.agent_id)
+show "  Gateway → Search: query dispatched"
+
+nk_ipc_send("search_to_crypto", {
+    type: "encrypt_results",
+    results: ["doc_001", "doc_042", "doc_117"],
+    key_id: "session_key_01"
+}, searcher.agent_id)
+show "  Search → Crypto: results for encryption"
+
+-- Receive and process
+let search_msg be nk_ipc_recv("gateway_to_search")
+show f"  Searcher received: {search_msg.payload.type} for '{search_msg.payload.query}'"
+
+let crypto_msg be nk_ipc_recv("search_to_crypto")
+show f"  Encryptor received: {crypto_msg.payload.type} ({len(crypto_msg.payload.results)} docs)"
+show ""
+
+-- ─── Syscalls ────────────────────────────────────────────────
+
+show "--- Syscall Interface ---"
+
+let hash be nk_syscall("crypto_hash", "Neural Kernel v1.0")
+show f"  crypto_hash: {hash}"
+
+let mem be nk_syscall("mem_stats")
+show f"  mem_stats: {mem.agents} agents, {mem.total} bytes total"
+
+nk_syscall("yield")
+show "  yield: execution yielded"
+show ""
+
+-- ─── Status Report ───────────────────────────────────────────
+
+show "--- Kernel Status ---"
+let status be nk_status()
+show f"  Agents: {status.agents} total"
+show f"    Running: {status.agents_running}"
+show f"    Ready: {status.agents_ready}"
+show f"  Tokens: {status.tokens}"
+show f"  IPC Channels: {status.ipc_channels}"
+show f"  Syscalls: {status.syscalls}"
+show ""
+
+-- ─── Graceful Shutdown ───────────────────────────────────────
+
+show "--- Shutting Down ---"
+nk_agent_kill(monitor.agent_id)
+show "  Terminated: health_monitor"
+show f"  Active agents: {len(nk_agent_list())}"
+
+show ""
+show "=== Orchestration Complete ==="

@@ -1,0 +1,232 @@
+-- ═══════════════════════════════════════════════════════════════
+-- Sovereign AI Stack — Full Demo (MOL)
+-- ═══════════════════════════════════════════════════════════════
+-- This script demonstrates the entire Crux ecosystem working
+-- together: MOL orchestrates De-RAG + Neural Kernel + IntraMind.
+--
+-- Run: mol run sovereign_demo.mol
+-- ═══════════════════════════════════════════════════════════════
+
+show "╔═══════════════════════════════════════════════════════════╗"
+show "║         SOVEREIGN AI STACK — FULL DEMONSTRATION          ║"
+show "║     MOL × De-RAG × Neural Kernel × IntraMind            ║"
+show "╚═══════════════════════════════════════════════════════════╝"
+show ""
+
+-- ─── Phase 1: Initialize the Stack ──────────────────────────
+
+show "▶ Phase 1: Stack Initialization"
+show "  Booting Neural Kernel..."
+nk_init({max_agents: 256, time_slice_ms: 5})
+show "  ✓ Neural Kernel online"
+
+show "  Booting De-RAG..."
+derag_init({algorithm: "AES-256-GCM", shard_threshold: 3, shard_total: 5})
+show "  ✓ De-RAG online"
+
+show "  Booting IntraMind..."
+let im_status be intramind_init("core")
+show f"  ✓ IntraMind online (engine: {im_status.engine})"
+show ""
+
+-- ─── Phase 2: Spawn Specialized Agents ──────────────────────
+
+show "▶ Phase 2: Agent Deployment"
+
+-- RAG Worker: handles document retrieval and generation
+let rag_agent be nk_agent_spawn("rag_worker", "high", [
+    "execute", "vector_read", "vector_write", "vector_search",
+    "model_load", "model_infer", "fs_read"
+])
+show f"  ✓ RAG Agent: {rag_agent.name} [{rag_agent.agent_id}]"
+
+-- Crypto Engine: handles all encryption operations
+let crypto_agent be nk_agent_spawn("crypto_engine", "high", [
+    "execute", "crypto_encrypt", "crypto_decrypt",
+    "crypto_sign", "crypto_verify"
+])
+show f"  ✓ Crypto Agent: {crypto_agent.name} [{crypto_agent.agent_id}]"
+
+-- Network Node: handles P2P communication
+let net_agent be nk_agent_spawn("p2p_node", "normal", [
+    "execute", "net_connect", "net_listen",
+    "net_send", "net_receive"
+])
+show f"  ✓ Network Agent: {net_agent.name} [{net_agent.agent_id}]"
+
+-- Audit Agent: handles lineage and provenance tracking
+let audit_agent be nk_agent_spawn("audit_tracker", "normal", [
+    "execute", "audit_read", "audit_write", "fs_write"
+])
+show f"  ✓ Audit Agent: {audit_agent.name} [{audit_agent.agent_id}]"
+
+show f"  Total agents: {len(nk_agent_list())}"
+show ""
+
+-- ─── Phase 3: Cryptographic Operations ──────────────────────
+
+show "▶ Phase 3: Cryptographic Operations"
+
+-- Generate encryption keys
+let key be derag_keygen("sovereign_master_key")
+show f"  ✓ Generated master key: {key.key_id}"
+
+-- Encrypt sensitive data
+let secret_data be "The quantum key distribution protocol uses BB84 basis states for secure communication."
+let envelope be derag_encrypt(secret_data, key.key_id)
+show f"  ✓ Encrypted: {len(secret_data)} chars → envelope (AES-256-GCM)"
+
+-- Decrypt and verify
+let decrypted be derag_decrypt(envelope)
+show f"  ✓ Decrypted: {decrypted}"
+show f"  ✓ Integrity verified: {decrypted == secret_data}"
+
+-- Content-addressable hash
+let content_hash be derag_hash(secret_data)
+show f"  ✓ Content hash (BLAKE3): {content_hash}"
+show ""
+
+-- ─── Phase 4: Secret Sharing ────────────────────────────────
+
+show "▶ Phase 4: Shamir Secret Sharing"
+
+let shards be derag_shard(secret_data, 3, 5)
+show f"  ✓ Split into {len(shards)} shards (threshold: 3 of 5)"
+
+for shard in shards do
+    show f"    Shard {shard.index}: {len(shard.data)} bytes"
+end
+
+-- Distribute to network peers
+let distribution be derag_distribute(shards, [
+    "node-alpha:9100",
+    "node-beta:9100",
+    "node-gamma:9100"
+])
+show f"  ✓ Distributed to {distribution.peers_used} peers"
+
+-- Reconstruct from any 3 shards
+let subset be [shards[0], shards[2], shards[4]]
+let reconstructed be derag_reconstruct(subset)
+show f"  ✓ Reconstructed from 3 shards: {reconstructed == secret_data}"
+show ""
+
+-- ─── Phase 5: Agent IPC & Scheduling ────────────────────────
+
+show "▶ Phase 5: Agent IPC & Scheduling"
+
+-- Create IPC channels for inter-agent communication
+-- RAG → Crypto: send data for encryption
+nk_ipc_send("rag_to_crypto", {
+    type: "encrypt_request",
+    data: "Classified research findings on neural architecture search",
+    priority: "high"
+}, rag_agent.agent_id)
+show "  ✓ RAG → Crypto: encrypt request sent"
+
+-- Crypto → Network: send encrypted data for distribution
+nk_ipc_send("crypto_to_net", {
+    type: "distribute_request",
+    envelope: "encrypted_payload",
+    target_peers: 3
+}, crypto_agent.agent_id)
+show "  ✓ Crypto → Network: distribute request sent"
+
+-- Read messages
+let crypto_msg be nk_ipc_recv("rag_to_crypto")
+show f"  ✓ Crypto received: {crypto_msg.payload.type}"
+
+let net_msg be nk_ipc_recv("crypto_to_net")
+show f"  ✓ Network received: {net_msg.payload.type}"
+
+-- Schedule agents (CFS picks lowest vruntime)
+let scheduled be nk_schedule()
+show f"  ✓ Scheduler picked: {scheduled.scheduled}"
+show ""
+
+-- ─── Phase 6: IntraMind RAG ─────────────────────────────────
+
+show "▶ Phase 6: IntraMind RAG Pipeline"
+
+let query be "What is the relationship between encryption and quantum computing?"
+show f"  Query: {query}"
+
+let rag_result be intramind_query(query, 5)
+show f"  ✓ IntraMind response: {rag_result.answer}"
+show f"  ✓ Sources: {len(rag_result.sources)}"
+show f"  ✓ Elapsed: {rag_result.elapsed_ms}ms"
+show ""
+
+-- ─── Phase 7: Full Sovereign Pipeline ───────────────────────
+
+show "▶ Phase 7: Sovereign Query Pipeline"
+
+let sovereign_result be sovereign_query("Explain zero-knowledge proofs", 3)
+show f"  ✓ Answer: {sovereign_result.answer}"
+show f"  ✓ Steps completed: {len(sovereign_result.steps)}"
+show f"  ✓ Total elapsed: {sovereign_result.elapsed_ms}ms"
+show ""
+
+-- ─── Phase 8: Audit & Lineage ───────────────────────────────
+
+show "▶ Phase 8: Audit Trail & Lineage"
+
+let audit_log be derag_audit()
+show f"  ✓ Total audit entries: {len(audit_log)}"
+
+-- Show last 5 audit entries
+let recent be audit_log
+for entry in recent do
+    show f"    [{entry.subsystem}] {entry.action}"
+end
+show ""
+
+-- ─── Phase 9: Stack Status ──────────────────────────────────
+
+show "▶ Phase 9: Full Stack Status"
+let status be sovereign_status()
+
+show f"  De-RAG:"
+show f"    Keys: {status.derag.keys}"
+show f"    Documents: {status.derag.documents}"
+show f"    Shards: {status.derag.shards}"
+show f"    Peers: {status.derag.peers}"
+
+show f"  Neural Kernel:"
+show f"    Agents: {status.nk.agents}"
+show f"    Running: {status.nk.agents_running}"
+show f"    Tokens: {status.nk.tokens}"
+show f"    IPC Channels: {status.nk.ipc_channels}"
+
+show f"  IntraMind:"
+show f"    Engine: {status.intramind.engine}"
+show f"    Edition: {status.intramind.edition}"
+show f"    Queries: {status.intramind.queries_processed}"
+
+show f"  Audit: {status.audit_entries} entries"
+show ""
+
+-- ─── Phase 10: Cleanup ──────────────────────────────────────
+
+show "▶ Phase 10: Graceful Shutdown"
+nk_agent_kill(net_agent.agent_id)
+show "  ✓ Network agent terminated"
+nk_agent_kill(audit_agent.agent_id)
+show "  ✓ Audit agent terminated"
+show f"  Remaining agents: {len(nk_agent_list())}"
+show ""
+
+show "╔═══════════════════════════════════════════════════════════╗"
+show "║              SOVEREIGN STACK DEMO COMPLETE               ║"
+show "║                                                          ║"
+show "║  MOL orchestrated:                                       ║"
+show "║    ✓ 4 Neural Kernel agents with CFS scheduling          ║"
+show "║    ✓ AES-256-GCM envelope encryption                     ║"
+show "║    ✓ Shamir (3,5) secret sharing                         ║"
+show "║    ✓ Distributed shard storage                           ║"
+show "║    ✓ Inter-agent IPC messaging                           ║"
+show "║    ✓ IntraMind RAG pipeline                              ║"
+show "║    ✓ Full Merkle audit trail                             ║"
+show "║                                                          ║"
+show "║  github.com/crux-ecosystem                               ║"
+show "╚═══════════════════════════════════════════════════════════╝"

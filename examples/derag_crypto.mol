@@ -1,0 +1,87 @@
+-- ═══════════════════════════════════════════════════════════════
+-- De-RAG Encryption Pipeline (MOL)
+-- ═══════════════════════════════════════════════════════════════
+-- Demonstrates De-RAG's encryption and secret sharing from MOL.
+-- The pipe operator makes data flow natural and readable.
+--
+-- Run: mol run derag_crypto.mol
+-- ═══════════════════════════════════════════════════════════════
+
+show "=== De-RAG Cryptographic Pipeline ==="
+show ""
+
+-- Initialize
+derag_init()
+
+-- ─── Envelope Encryption ─────────────────────────────────────
+
+show "--- Envelope Encryption (AES-256-GCM) ---"
+
+let key be derag_keygen("demo_key")
+show f"Key generated: {key.key_id}"
+
+-- Pipe operator: encrypt → hash in one flow
+let message be "Confidential: Project Aurora specifications v2.1"
+let encrypted be message |> derag_encrypt(key.key_id)
+show f"Encrypted: envelope created"
+
+let decrypted be encrypted |> derag_decrypt
+show f"Decrypted: {decrypted}"
+show f"Match: {decrypted == message}"
+show ""
+
+-- ─── Content Hashing ─────────────────────────────────────────
+
+show "--- Content-Addressable Hashing ---"
+
+let hash_blake3 be derag_hash(message, "blake3")
+let hash_sha256 be derag_hash(message, "sha256")
+let hash_blake2 be derag_hash(message, "blake2b")
+
+show f"BLAKE3:  {hash_blake3}"
+show f"SHA-256: {hash_sha256}"
+show f"BLAKE2b: {hash_blake2}"
+show ""
+
+-- ─── Shamir Secret Sharing ───────────────────────────────────
+
+show "--- Shamir Secret Sharing (GF(2^8)) ---"
+
+-- Split secret into 7 shards, need any 4 to reconstruct
+let shards be derag_shard(message, 4, 7)
+show f"Shards created: {len(shards)} (threshold: 4 of 7)"
+
+for s in shards do
+    show f"  Shard {s.index}: {len(s.data)} bytes, hash={s.doc_hash}"
+end
+show ""
+
+-- Reconstruct from exactly 4 shards (indices 1, 3, 5, 7)
+let subset be [shards[0], shards[2], shards[4], shards[6]]
+show f"Reconstructing from shards: {map(subset, fn(s) -> s.index)}"
+let recovered be derag_reconstruct(subset)
+show f"Recovered: {recovered}"
+show f"Match: {recovered == message}"
+show ""
+
+-- ─── Distribute to Network ──────────────────────────────────
+
+show "--- Shard Distribution ---"
+
+let peers be ["alpha.derag.local:9100", "beta.derag.local:9100", "gamma.derag.local:9100"]
+let dist be shards |> derag_distribute(peers)
+
+show f"Distributed {dist.total_shards} shards to {dist.peers_used} peers"
+show ""
+
+-- ─── Audit Trail ─────────────────────────────────────────────
+
+show "--- Merkle Audit Log ---"
+let log be derag_audit()
+show f"Total entries: {len(log)}"
+for entry in log do
+    show f"  [{entry.subsystem}:{entry.action}] hash={entry.hash}"
+end
+
+show ""
+show "=== Pipeline Complete ==="

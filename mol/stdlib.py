@@ -47,6 +47,10 @@ from mol.swarm_runtime import (
     _builtin_swarm_add_node, _builtin_swarm_remove_node,
     _builtin_swarm_scatter,
 )
+from mol.ecosystem import (
+    ECOSYSTEM_STDLIB,
+    DeRAGEnvelope, DeRAGShard, NKAgent, NKCapabilityToken, IntraMindResult,
+)
 
 
 class MOLSecurityError(Exception):
@@ -1860,4 +1864,8 @@ STDLIB: dict[str, callable] = {
     "swarm_add_node": _builtin_swarm_add_node,
     "swarm_remove_node": _builtin_swarm_remove_node,
     "swarm_scatter": _builtin_swarm_scatter,
+
+    # ── Sovereign AI Stack (v3.0.0) ───────────────────────────
+    # De-RAG + Neural Kernel + IntraMind ecosystem integration
+    **ECOSYSTEM_STDLIB,
 }
