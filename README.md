@@ -6,10 +6,10 @@
 
 <p align="center">
   <img src="https://img.shields.io/pypi/v/mol-lang?label=PyPI&color=blue" alt="PyPI">
-  <img src="https://img.shields.io/badge/version-2.0.0-blue" alt="version">
+  <img src="https://img.shields.io/badge/version-2.0.1-blue" alt="version">
   <img src="https://img.shields.io/badge/license-Proprietary-red" alt="license">
   <img src="https://img.shields.io/badge/python-3.12%2B-green" alt="python">
-  <img src="https://img.shields.io/badge/tests-202%20passed-brightgreen" alt="tests">
+  <img src="https://img.shields.io/badge/tests-213%20passed-brightgreen" alt="tests">
   <img src="https://img.shields.io/badge/stdlib-210%20functions-orange" alt="stdlib">
   <img src="https://img.shields.io/badge/playground-🔒%20sandboxed-10b981" alt="sandbox">
   <img src="https://img.shields.io/badge/docs-GitHub%20Pages-blueviolet" alt="docs">
@@ -901,11 +901,14 @@ Full documentation available at: **[https://crux-ecosystem.github.io/mol-lang/](
 
 ## Community
 
+Join the MOL community — we're building a dev circle of language developers, security researchers, AI engineers, and tool builders.
+
+- **Discord**: [Join the MOL server](https://discord.gg/cruxlabx) — chat with the team, get help, share projects
 - **GitHub Discussions**: [Ask questions, share ideas](https://github.com/crux-ecosystem/mol-lang/discussions)
 - **Issue Tracker**: [Report bugs, request features](https://github.com/crux-ecosystem/mol-lang/issues)
-- **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
+- **Security**: See [SECURITY.md](SECURITY.md) — report vulnerabilities, earn Hall of Fame credit
+- **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md) for all contribution tracks
 - **Code of Conduct**: See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
-- **Security**: See [SECURITY.md](SECURITY.md) for vulnerability reporting
 
 ---
 
@@ -914,6 +917,25 @@ Full documentation available at: **[https://crux-ecosystem.github.io/mol-lang/](
 Built for **IntraMind** by **CruxLabx**.
 
 **Creator:** Mounesh Kodi
+
+## Contributors & Security Researchers
+
+MOL is stronger because of the people who contribute code, report bugs, and responsibly disclose vulnerabilities.
+
+### 🏆 Security Hall of Fame
+
+| Researcher | Contribution | Version |
+|---|---|---|
+| **[a11ce](https://github.com/a11ce)** | Discovered & reported Full RCE vulnerability (Python class hierarchy traversal) | Fixed in v2.0.1 |
+
+### 🤝 How to Contribute
+
+We're building a community of developers, security researchers, and language enthusiasts. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+- **Security Researchers** — Found a vulnerability? Report it via [SECURITY.md](SECURITY.md). You'll be credited in the Hall of Fame.
+- **Language Developers** — Add new stdlib functions, improve the parser, or build tooling.
+- **Documentation** — Help write tutorials, guides, and examples.
+- **Community** — Share MOL, write blog posts, or help others in Discussions.
 
 ## License
 

@@ -6,6 +6,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [2.0.1] — 2026-02-23
+
+### 🔒 Security Patch
+
+- **Fixed Full RCE vulnerability** — Python class hierarchy traversal via dunder attributes (`__class__.__subclasses__()`) allowed arbitrary command execution on the playground server. Blocked all `__`-prefixed attribute and method access in the interpreter. Applied in all modes (sandbox + local) for defense in depth.
+- Added 11 security regression tests (213 total tests pass)
+
+### Security Credits
+
+- **[a11ce](https://github.com/a11ce)** — Reported the Full RCE vulnerability via responsible disclosure. Thank you for helping keep MOL safe.
+
+---
+
 ## [1.1.0] — 2026-02-16
 
 ### 🧠 Smart Functions & Developer Experience

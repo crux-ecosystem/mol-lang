@@ -51,3 +51,15 @@ We follow responsible disclosure practices. If you discover a vulnerability:
 3. We'll coordinate the disclosure timeline with you
 
 Thank you for helping keep MOL and its community safe.
+
+---
+
+## 🏆 Security Hall of Fame
+
+We gratefully acknowledge the following individuals who have responsibly disclosed security vulnerabilities, helping make MOL safer for everyone.
+
+| Researcher | Handle | Vulnerability | Severity | Date | Status |
+|---|---|---|---|---|---|
+| Sophia | **[a11ce](https://github.com/a11ce)** | Full RCE via Python class hierarchy traversal | 🔴 Critical | 2026-02 | ✅ Fixed in v2.0.1 |
+
+If you report a valid vulnerability, you'll be added to this list (unless you prefer anonymity). We believe in recognizing the people who make open-source security better.

@@ -31,7 +31,7 @@ pip install -e ".[dev]"
 python tests/test_mol.py
 ```
 
-All 43 tests must pass before any PR is merged.
+All 213 tests must pass before any PR is merged.
 
 ### Run Examples
 
@@ -114,10 +114,54 @@ Source (.mol) → Lark LALR Parser → AST (dataclasses) → Interpreter (Visito
 ```
 feat: add pipeline operator |> with auto-tracing
 fix: resolve comment parsing with LALR priority
+security: fix RCE via dunder attribute traversal
 docs: update README with RAG pipeline examples
 test: add pipe chain and guard test suite
 refactor: centralize function invocation logic
 ```
+
+---
+
+## Contribution Tracks
+
+MOL welcomes contributions across multiple tracks. Pick the one that fits your skills:
+
+### 🔐 Security Researchers
+Found a vulnerability? Report it privately via [SECURITY.md](SECURITY.md). Valid reports earn a spot in our **Security Hall of Fame** and release notes credit.
+
+### 🧠 Language Developers
+- Add new stdlib functions (see "Adding a Built-in Function" above)
+- Implement new language features (see "Adding a New Language Feature" above)
+- Improve the parser, interpreter, or transpiler
+- Build tooling (LSP, formatter, linter, REPL improvements)
+
+### 📝 Documentation & Tutorials
+- Write tutorials for specific use cases (RAG, data pipelines, AI agents)
+- Improve API reference documentation
+- Create example `.mol` programs
+- Translate docs to other languages
+
+### 🧪 Testing & QA
+- Expand the test suite (especially edge cases and security tests)
+- Fuzzing the parser and interpreter
+- Performance benchmarking
+- Cross-platform testing
+
+### 🌐 Community & Ecosystem
+- Write blog posts about MOL
+- Create video tutorials or demos
+- Help answer questions in GitHub Discussions
+- Build integrations with other tools (CI/CD, editors, etc.)
+- Create MOL packages and share them
+
+---
+
+## Recognition
+
+All contributors are recognized in:
+- **CHANGELOG.md** — Your changes are documented in the release they ship with
+- **Security Hall of Fame** (in SECURITY.md and README) — For vulnerability reporters
+- **GitHub Contributors** — Automatically tracked by GitHub
 
 ---
 
