@@ -1,0 +1,155 @@
+{
+  "benchmark": "03_execution_performance",
+  "note": "MOL runs on Python interpreter \u2014 overhead is expected. Value is productivity, not speed.",
+  "results": {
+    "arithmetic_loop": {
+      "description": "Sum numbers 1 to 1000 in a loop",
+      "mol": {
+        "mean_ms": 4.442,
+        "min_ms": 3.585,
+        "max_ms": 6.95,
+        "median_ms": 3.833,
+        "iterations": 50
+      },
+      "python": {
+        "mean_ms": 0.1,
+        "min_ms": 0.094,
+        "max_ms": 0.143,
+        "median_ms": 0.097,
+        "iterations": 50
+      },
+      "overhead_factor": 44.4
+    },
+    "list_pipeline": {
+      "description": "Filter + map + reduce on 100-element list",
+      "mol": {
+        "mean_ms": 0.94,
+        "min_ms": 0.848,
+        "max_ms": 1.745,
+        "median_ms": 0.874,
+        "iterations": 50
+      },
+      "python": {
+        "mean_ms": 0.007,
+        "min_ms": 0.007,
+        "max_ms": 0.014,
+        "median_ms": 0.007,
+        "iterations": 50
+      },
+      "overhead_factor": 134.3
+    },
+    "string_operations": {
+      "description": "String manipulation chain",
+      "mol": {
+        "mean_ms": 0.058,
+        "min_ms": 0.041,
+        "max_ms": 0.141,
+        "median_ms": 0.048,
+        "iterations": 50
+      },
+      "python": {
+        "mean_ms": 0.003,
+        "min_ms": 0.001,
+        "max_ms": 0.012,
+        "median_ms": 0.003,
+        "iterations": 50
+      },
+      "overhead_factor": 19.3
+    },
+    "recursive_fibonacci": {
+      "description": "Recursive Fibonacci(20)",
+      "mol": {
+        "mean_ms": 492.468,
+        "min_ms": 439.983,
+        "max_ms": 760.465,
+        "median_ms": 468.37,
+        "iterations": 50
+      },
+      "python": {
+        "mean_ms": 1.185,
+        "min_ms": 1.121,
+        "max_ms": 1.645,
+        "median_ms": 1.148,
+        "iterations": 50
+      },
+      "overhead_factor": 415.6
+    },
+    "map_operations": {
+      "description": "Create and access dictionaries",
+      "mol": {
+        "mean_ms": 0.037,
+        "min_ms": 0.034,
+        "max_ms": 0.084,
+        "median_ms": 0.035,
+        "iterations": 50
+      },
+      "python": {
+        "mean_ms": 0.003,
+        "min_ms": 0.002,
+        "max_ms": 0.008,
+        "median_ms": 0.002,
+        "iterations": 50
+      },
+      "overhead_factor": 12.3
+    },
+    "function_calls": {
+      "description": "Define and call functions 100 times",
+      "mol": {
+        "mean_ms": 4.054,
+        "min_ms": 3.326,
+        "max_ms": 6.011,
+        "median_ms": 3.7,
+        "iterations": 50
+      },
+      "python": {
+        "mean_ms": 0.026,
+        "min_ms": 0.025,
+        "max_ms": 0.035,
+        "median_ms": 0.026,
+        "iterations": 50
+      },
+      "overhead_factor": 155.9
+    },
+    "list_comprehension_equiv": {
+      "description": "Build list with functional operations",
+      "mol": {
+        "mean_ms": 0.683,
+        "min_ms": 0.599,
+        "max_ms": 1.147,
+        "median_ms": 0.628,
+        "iterations": 50
+      },
+      "python": {
+        "mean_ms": 0.008,
+        "min_ms": 0.005,
+        "max_ms": 0.13,
+        "median_ms": 0.006,
+        "iterations": 50
+      },
+      "overhead_factor": 85.4
+    },
+    "nested_data": {
+      "description": "Work with nested data structures",
+      "mol": {
+        "mean_ms": 0.186,
+        "min_ms": 0.155,
+        "max_ms": 0.459,
+        "median_ms": 0.163,
+        "iterations": 50
+      },
+      "python": {
+        "mean_ms": 0.029,
+        "min_ms": 0.027,
+        "max_ms": 0.063,
+        "median_ms": 0.028,
+        "iterations": 50
+      },
+      "overhead_factor": 6.4
+    }
+  },
+  "summary": {
+    "avg_overhead": 109.2,
+    "min_overhead": 6.4,
+    "max_overhead": 415.6
+  }
+}

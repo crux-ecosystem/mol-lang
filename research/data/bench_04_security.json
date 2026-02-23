@@ -1,0 +1,257 @@
+{
+  "benchmark": "04_security_features",
+  "features": {
+    "Sandbox Mode": {
+      "mol": {
+        "supported": true,
+        "built_in": true
+      },
+      "python": {
+        "supported": false,
+        "built_in": false
+      },
+      "javascript": {
+        "supported": true,
+        "built_in": false
+      },
+      "elixir": {
+        "supported": true,
+        "built_in": true
+      },
+      "rust": {
+        "supported": false,
+        "built_in": false
+      }
+    },
+    "Guard Assertions": {
+      "mol": {
+        "supported": true,
+        "built_in": true
+      },
+      "python": {
+        "supported": true,
+        "built_in": true
+      },
+      "javascript": {
+        "supported": false,
+        "built_in": false
+      },
+      "elixir": {
+        "supported": true,
+        "built_in": true
+      },
+      "rust": {
+        "supported": true,
+        "built_in": true
+      }
+    },
+    "Access Control": {
+      "mol": {
+        "supported": true,
+        "built_in": true
+      },
+      "python": {
+        "supported": false,
+        "built_in": false
+      },
+      "javascript": {
+        "supported": true,
+        "built_in": true
+      },
+      "elixir": {
+        "supported": true,
+        "built_in": true
+      },
+      "rust": {
+        "supported": true,
+        "built_in": true
+      }
+    },
+    "Memory Safety": {
+      "mol": {
+        "supported": true,
+        "built_in": true
+      },
+      "python": {
+        "supported": true,
+        "built_in": true
+      },
+      "javascript": {
+        "supported": true,
+        "built_in": true
+      },
+      "elixir": {
+        "supported": true,
+        "built_in": true
+      },
+      "rust": {
+        "supported": true,
+        "built_in": true
+      }
+    },
+    "Dunder/Internal Attribute Blocking": {
+      "mol": {
+        "supported": true,
+        "built_in": true
+      },
+      "python": {
+        "supported": false,
+        "built_in": false
+      },
+      "javascript": {
+        "supported": true,
+        "built_in": true
+      },
+      "elixir": {
+        "supported": true,
+        "built_in": true
+      },
+      "rust": {
+        "supported": true,
+        "built_in": true
+      }
+    },
+    "Type Safety": {
+      "mol": {
+        "supported": true,
+        "built_in": true
+      },
+      "python": {
+        "supported": true,
+        "built_in": false
+      },
+      "javascript": {
+        "supported": false,
+        "built_in": false
+      },
+      "elixir": {
+        "supported": true,
+        "built_in": false
+      },
+      "rust": {
+        "supported": true,
+        "built_in": true
+      }
+    },
+    "Execution Timeout": {
+      "mol": {
+        "supported": true,
+        "built_in": true
+      },
+      "python": {
+        "supported": false,
+        "built_in": false
+      },
+      "javascript": {
+        "supported": false,
+        "built_in": false
+      },
+      "elixir": {
+        "supported": true,
+        "built_in": true
+      },
+      "rust": {
+        "supported": false,
+        "built_in": false
+      }
+    },
+    "Rate Limiting": {
+      "mol": {
+        "supported": true,
+        "built_in": true
+      },
+      "python": {
+        "supported": false,
+        "built_in": false
+      },
+      "javascript": {
+        "supported": false,
+        "built_in": false
+      },
+      "elixir": {
+        "supported": false,
+        "built_in": false
+      },
+      "rust": {
+        "supported": false,
+        "built_in": false
+      }
+    },
+    "Homomorphic Encryption": {
+      "mol": {
+        "supported": true,
+        "built_in": true
+      },
+      "python": {
+        "supported": false,
+        "built_in": false
+      },
+      "javascript": {
+        "supported": false,
+        "built_in": false
+      },
+      "elixir": {
+        "supported": false,
+        "built_in": false
+      },
+      "rust": {
+        "supported": false,
+        "built_in": false
+      }
+    },
+    "Zero-Knowledge Proofs": {
+      "mol": {
+        "supported": true,
+        "built_in": true
+      },
+      "python": {
+        "supported": false,
+        "built_in": false
+      },
+      "javascript": {
+        "supported": false,
+        "built_in": false
+      },
+      "elixir": {
+        "supported": false,
+        "built_in": false
+      },
+      "rust": {
+        "supported": false,
+        "built_in": false
+      }
+    }
+  },
+  "scores": {
+    "mol": {
+      "supported": 10,
+      "built_in": 10,
+      "total": 10
+    },
+    "python": {
+      "supported": 3,
+      "built_in": 2,
+      "total": 10
+    },
+    "javascript": {
+      "supported": 4,
+      "built_in": 3,
+      "total": 10
+    },
+    "elixir": {
+      "supported": 7,
+      "built_in": 6,
+      "total": 10
+    },
+    "rust": {
+      "supported": 5,
+      "built_in": 5,
+      "total": 10
+    }
+  },
+  "mol_unique_features": [
+    "Rate Limiting",
+    "Homomorphic Encryption",
+    "Zero-Knowledge Proofs"
+  ]
+}

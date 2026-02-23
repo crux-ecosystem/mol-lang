@@ -1,0 +1,1191 @@
+{
+  "meta": {
+    "generated_at": "2026-02-23T17:53:27.659726",
+    "mol_version": "2.0.1",
+    "benchmark_count": 5,
+    "total_time_seconds": 26.3
+  },
+  "benchmarks": {
+    "bench_01_loc": {
+      "benchmark": "01_loc_comparison",
+      "tasks": {
+        "data_pipeline": {
+          "mol": {
+            "loc": 3,
+            "tokens": 63,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 21.0
+          },
+          "python": {
+            "loc": 3,
+            "tokens": 56,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 18.67
+          },
+          "javascript": {
+            "loc": 6,
+            "tokens": 77,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 12.83
+          },
+          "elixir": {
+            "loc": 6,
+            "tokens": 74,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 12.33
+          },
+          "rust": {
+            "loc": 8,
+            "tokens": 82,
+            "imports": 0,
+            "boilerplate": 2,
+            "readability_score": 12.81
+          }
+        },
+        "rag_pipeline": {
+          "mol": {
+            "loc": 4,
+            "tokens": 47,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 11.75
+          },
+          "python": {
+            "loc": 20,
+            "tokens": 130,
+            "imports": 6,
+            "boilerplate": 7,
+            "readability_score": 14.04
+          },
+          "javascript": {
+            "loc": 19,
+            "tokens": 164,
+            "imports": 6,
+            "boilerplate": 6,
+            "readability_score": 18.17
+          },
+          "elixir": {
+            "loc": 18,
+            "tokens": 292,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 16.22
+          },
+          "rust": {
+            "loc": 23,
+            "tokens": 275,
+            "imports": 4,
+            "boilerplate": 8,
+            "readability_score": 22.56
+          }
+        },
+        "statistics": {
+          "mol": {
+            "loc": 6,
+            "tokens": 79,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 13.17
+          },
+          "python": {
+            "loc": 7,
+            "tokens": 50,
+            "imports": 1,
+            "boilerplate": 1,
+            "readability_score": 8.98
+          },
+          "javascript": {
+            "loc": 13,
+            "tokens": 251,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 19.31
+          },
+          "elixir": {
+            "loc": 15,
+            "tokens": 201,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 13.4
+          },
+          "rust": {
+            "loc": 20,
+            "tokens": 255,
+            "imports": 0,
+            "boilerplate": 2,
+            "readability_score": 14.03
+          }
+        },
+        "safety_guards": {
+          "mol": {
+            "loc": 9,
+            "tokens": 63,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 7.0
+          },
+          "python": {
+            "loc": 9,
+            "tokens": 49,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 5.44
+          },
+          "javascript": {
+            "loc": 9,
+            "tokens": 111,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 12.33
+          },
+          "elixir": {
+            "loc": 9,
+            "tokens": 68,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 7.56
+          },
+          "rust": {
+            "loc": 11,
+            "tokens": 92,
+            "imports": 0,
+            "boilerplate": 2,
+            "readability_score": 9.88
+          }
+        },
+        "functional_pipeline": {
+          "mol": {
+            "loc": 11,
+            "tokens": 146,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 13.27
+          },
+          "python": {
+            "loc": 12,
+            "tokens": 123,
+            "imports": 1,
+            "boilerplate": 1,
+            "readability_score": 12.21
+          },
+          "javascript": {
+            "loc": 11,
+            "tokens": 166,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 15.09
+          },
+          "elixir": {
+            "loc": 11,
+            "tokens": 156,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 14.18
+          },
+          "rust": {
+            "loc": 20,
+            "tokens": 325,
+            "imports": 1,
+            "boilerplate": 3,
+            "readability_score": 20.56
+          }
+        },
+        "error_handling": {
+          "mol": {
+            "loc": 10,
+            "tokens": 39,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 3.9
+          },
+          "python": {
+            "loc": 8,
+            "tokens": 44,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 5.5
+          },
+          "javascript": {
+            "loc": 11,
+            "tokens": 81,
+            "imports": 0,
+            "boilerplate": 2,
+            "readability_score": 8.7
+          },
+          "elixir": {
+            "loc": 11,
+            "tokens": 57,
+            "imports": 0,
+            "boilerplate": 0,
+            "readability_score": 5.18
+          },
+          "rust": {
+            "loc": 11,
+            "tokens": 67,
+            "imports": 0,
+            "boilerplate": 4,
+            "readability_score": 8.31
+          }
+        }
+      },
+      "summary": {
+        "mol": {
+          "avg_loc": 7.2,
+          "avg_tokens": 72.8,
+          "avg_imports": 0.0,
+          "avg_readability": 11.68
+        },
+        "python": {
+          "avg_loc": 9.8,
+          "avg_tokens": 75.3,
+          "avg_imports": 1.3,
+          "avg_readability": 10.81
+        },
+        "javascript": {
+          "avg_loc": 11.5,
+          "avg_tokens": 141.7,
+          "avg_imports": 1.0,
+          "avg_readability": 14.41
+        },
+        "elixir": {
+          "avg_loc": 11.7,
+          "avg_tokens": 141.3,
+          "avg_imports": 0.0,
+          "avg_readability": 11.48
+        },
+        "rust": {
+          "avg_loc": 15.5,
+          "avg_tokens": 182.7,
+          "avg_imports": 0.8,
+          "avg_readability": 14.69
+        }
+      }
+    },
+    "bench_02_stdlib": {
+      "benchmark": "02_stdlib_coverage",
+      "categories": {
+        "Math & Arithmetic": {
+          "mol": {
+            "count": 15,
+            "import_needed": false
+          },
+          "python": {
+            "count": 5,
+            "import_needed": true
+          },
+          "javascript": {
+            "count": 20,
+            "import_needed": false
+          },
+          "elixir": {
+            "count": 3,
+            "import_needed": true
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": true
+          }
+        },
+        "Statistics": {
+          "mol": {
+            "count": 5,
+            "import_needed": false
+          },
+          "python": {
+            "count": 0,
+            "import_needed": true
+          },
+          "javascript": {
+            "count": 0,
+            "import_needed": true
+          },
+          "elixir": {
+            "count": 0,
+            "import_needed": true
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": true
+          }
+        },
+        "String Operations": {
+          "mol": {
+            "count": 16,
+            "import_needed": false
+          },
+          "python": {
+            "count": 15,
+            "import_needed": false
+          },
+          "javascript": {
+            "count": 15,
+            "import_needed": false
+          },
+          "elixir": {
+            "count": 20,
+            "import_needed": false
+          },
+          "rust": {
+            "count": 10,
+            "import_needed": false
+          }
+        },
+        "List/Array Operations": {
+          "mol": {
+            "count": 22,
+            "import_needed": false
+          },
+          "python": {
+            "count": 8,
+            "import_needed": false
+          },
+          "javascript": {
+            "count": 15,
+            "import_needed": false
+          },
+          "elixir": {
+            "count": 25,
+            "import_needed": false
+          },
+          "rust": {
+            "count": 15,
+            "import_needed": false
+          }
+        },
+        "Hashing & Encoding": {
+          "mol": {
+            "count": 6,
+            "import_needed": false
+          },
+          "python": {
+            "count": 0,
+            "import_needed": true
+          },
+          "javascript": {
+            "count": 1,
+            "import_needed": true
+          },
+          "elixir": {
+            "count": 2,
+            "import_needed": false
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": true
+          }
+        },
+        "File I/O": {
+          "mol": {
+            "count": 8,
+            "import_needed": false
+          },
+          "python": {
+            "count": 3,
+            "import_needed": true
+          },
+          "javascript": {
+            "count": 0,
+            "import_needed": true
+          },
+          "elixir": {
+            "count": 5,
+            "import_needed": false
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": true
+          }
+        },
+        "HTTP/Network": {
+          "mol": {
+            "count": 2,
+            "import_needed": false
+          },
+          "python": {
+            "count": 0,
+            "import_needed": true
+          },
+          "javascript": {
+            "count": 1,
+            "import_needed": false
+          },
+          "elixir": {
+            "count": 0,
+            "import_needed": true
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": true
+          }
+        },
+        "Concurrency": {
+          "mol": {
+            "count": 7,
+            "import_needed": false
+          },
+          "python": {
+            "count": 0,
+            "import_needed": true
+          },
+          "javascript": {
+            "count": 2,
+            "import_needed": false
+          },
+          "elixir": {
+            "count": 5,
+            "import_needed": false
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": true
+          }
+        },
+        "JSON Processing": {
+          "mol": {
+            "count": 4,
+            "import_needed": false
+          },
+          "python": {
+            "count": 0,
+            "import_needed": true
+          },
+          "javascript": {
+            "count": 2,
+            "import_needed": false
+          },
+          "elixir": {
+            "count": 0,
+            "import_needed": true
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": true
+          }
+        },
+        "AI/ML Domain Types": {
+          "mol": {
+            "count": 8,
+            "import_needed": false
+          },
+          "python": {
+            "count": 0,
+            "import_needed": true
+          },
+          "javascript": {
+            "count": 0,
+            "import_needed": true
+          },
+          "elixir": {
+            "count": 0,
+            "import_needed": true
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": true
+          }
+        },
+        "RAG Pipeline": {
+          "mol": {
+            "count": 6,
+            "import_needed": false
+          },
+          "python": {
+            "count": 0,
+            "import_needed": true
+          },
+          "javascript": {
+            "count": 0,
+            "import_needed": true
+          },
+          "elixir": {
+            "count": 0,
+            "import_needed": true
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": true
+          }
+        },
+        "Vector Operations": {
+          "mol": {
+            "count": 25,
+            "import_needed": false
+          },
+          "python": {
+            "count": 0,
+            "import_needed": true
+          },
+          "javascript": {
+            "count": 0,
+            "import_needed": true
+          },
+          "elixir": {
+            "count": 0,
+            "import_needed": true
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": true
+          }
+        },
+        "Encryption": {
+          "mol": {
+            "count": 15,
+            "import_needed": false
+          },
+          "python": {
+            "count": 0,
+            "import_needed": true
+          },
+          "javascript": {
+            "count": 0,
+            "import_needed": true
+          },
+          "elixir": {
+            "count": 0,
+            "import_needed": true
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": true
+          }
+        },
+        "Pipeline Operator": {
+          "mol": {
+            "count": 1,
+            "import_needed": false
+          },
+          "python": {
+            "count": 0,
+            "import_needed": false
+          },
+          "javascript": {
+            "count": 0,
+            "import_needed": false
+          },
+          "elixir": {
+            "count": 1,
+            "import_needed": false
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": false
+          }
+        },
+        "Auto-Tracing": {
+          "mol": {
+            "count": 1,
+            "import_needed": false
+          },
+          "python": {
+            "count": 0,
+            "import_needed": true
+          },
+          "javascript": {
+            "count": 0,
+            "import_needed": true
+          },
+          "elixir": {
+            "count": 0,
+            "import_needed": true
+          },
+          "rust": {
+            "count": 0,
+            "import_needed": true
+          }
+        },
+        "Safety Guards": {
+          "mol": {
+            "count": 2,
+            "import_needed": false
+          },
+          "python": {
+            "count": 1,
+            "import_needed": false
+          },
+          "javascript": {
+            "count": 0,
+            "import_needed": false
+          },
+          "elixir": {
+            "count": 1,
+            "import_needed": false
+          },
+          "rust": {
+            "count": 2,
+            "import_needed": false
+          }
+        }
+      },
+      "totals": {
+        "mol": {
+          "total_funcs": 143,
+          "categories_covered": 16,
+          "no_import_needed": 16
+        },
+        "python": {
+          "total_funcs": 32,
+          "categories_covered": 5,
+          "no_import_needed": 3
+        },
+        "javascript": {
+          "total_funcs": 56,
+          "categories_covered": 7,
+          "no_import_needed": 6
+        },
+        "elixir": {
+          "total_funcs": 62,
+          "categories_covered": 8,
+          "no_import_needed": 7
+        },
+        "rust": {
+          "total_funcs": 27,
+          "categories_covered": 3,
+          "no_import_needed": 3
+        }
+      },
+      "unique_to_mol": [
+        "Statistics",
+        "AI/ML Domain Types",
+        "RAG Pipeline",
+        "Vector Operations",
+        "Encryption",
+        "Auto-Tracing"
+      ]
+    },
+    "bench_03_performance": {
+      "benchmark": "03_execution_performance",
+      "note": "MOL runs on Python interpreter \u2014 overhead is expected. Value is productivity, not speed.",
+      "results": {
+        "arithmetic_loop": {
+          "description": "Sum numbers 1 to 1000 in a loop",
+          "mol": {
+            "mean_ms": 4.442,
+            "min_ms": 3.585,
+            "max_ms": 6.95,
+            "median_ms": 3.833,
+            "iterations": 50
+          },
+          "python": {
+            "mean_ms": 0.1,
+            "min_ms": 0.094,
+            "max_ms": 0.143,
+            "median_ms": 0.097,
+            "iterations": 50
+          },
+          "overhead_factor": 44.4
+        },
+        "list_pipeline": {
+          "description": "Filter + map + reduce on 100-element list",
+          "mol": {
+            "mean_ms": 0.94,
+            "min_ms": 0.848,
+            "max_ms": 1.745,
+            "median_ms": 0.874,
+            "iterations": 50
+          },
+          "python": {
+            "mean_ms": 0.007,
+            "min_ms": 0.007,
+            "max_ms": 0.014,
+            "median_ms": 0.007,
+            "iterations": 50
+          },
+          "overhead_factor": 134.3
+        },
+        "string_operations": {
+          "description": "String manipulation chain",
+          "mol": {
+            "mean_ms": 0.058,
+            "min_ms": 0.041,
+            "max_ms": 0.141,
+            "median_ms": 0.048,
+            "iterations": 50
+          },
+          "python": {
+            "mean_ms": 0.003,
+            "min_ms": 0.001,
+            "max_ms": 0.012,
+            "median_ms": 0.003,
+            "iterations": 50
+          },
+          "overhead_factor": 19.3
+        },
+        "recursive_fibonacci": {
+          "description": "Recursive Fibonacci(20)",
+          "mol": {
+            "mean_ms": 492.468,
+            "min_ms": 439.983,
+            "max_ms": 760.465,
+            "median_ms": 468.37,
+            "iterations": 50
+          },
+          "python": {
+            "mean_ms": 1.185,
+            "min_ms": 1.121,
+            "max_ms": 1.645,
+            "median_ms": 1.148,
+            "iterations": 50
+          },
+          "overhead_factor": 415.6
+        },
+        "map_operations": {
+          "description": "Create and access dictionaries",
+          "mol": {
+            "mean_ms": 0.037,
+            "min_ms": 0.034,
+            "max_ms": 0.084,
+            "median_ms": 0.035,
+            "iterations": 50
+          },
+          "python": {
+            "mean_ms": 0.003,
+            "min_ms": 0.002,
+            "max_ms": 0.008,
+            "median_ms": 0.002,
+            "iterations": 50
+          },
+          "overhead_factor": 12.3
+        },
+        "function_calls": {
+          "description": "Define and call functions 100 times",
+          "mol": {
+            "mean_ms": 4.054,
+            "min_ms": 3.326,
+            "max_ms": 6.011,
+            "median_ms": 3.7,
+            "iterations": 50
+          },
+          "python": {
+            "mean_ms": 0.026,
+            "min_ms": 0.025,
+            "max_ms": 0.035,
+            "median_ms": 0.026,
+            "iterations": 50
+          },
+          "overhead_factor": 155.9
+        },
+        "list_comprehension_equiv": {
+          "description": "Build list with functional operations",
+          "mol": {
+            "mean_ms": 0.683,
+            "min_ms": 0.599,
+            "max_ms": 1.147,
+            "median_ms": 0.628,
+            "iterations": 50
+          },
+          "python": {
+            "mean_ms": 0.008,
+            "min_ms": 0.005,
+            "max_ms": 0.13,
+            "median_ms": 0.006,
+            "iterations": 50
+          },
+          "overhead_factor": 85.4
+        },
+        "nested_data": {
+          "description": "Work with nested data structures",
+          "mol": {
+            "mean_ms": 0.186,
+            "min_ms": 0.155,
+            "max_ms": 0.459,
+            "median_ms": 0.163,
+            "iterations": 50
+          },
+          "python": {
+            "mean_ms": 0.029,
+            "min_ms": 0.027,
+            "max_ms": 0.063,
+            "median_ms": 0.028,
+            "iterations": 50
+          },
+          "overhead_factor": 6.4
+        }
+      },
+      "summary": {
+        "avg_overhead": 109.2,
+        "min_overhead": 6.4,
+        "max_overhead": 415.6
+      }
+    },
+    "bench_04_security": {
+      "benchmark": "04_security_features",
+      "features": {
+        "Sandbox Mode": {
+          "mol": {
+            "supported": true,
+            "built_in": true
+          },
+          "python": {
+            "supported": false,
+            "built_in": false
+          },
+          "javascript": {
+            "supported": true,
+            "built_in": false
+          },
+          "elixir": {
+            "supported": true,
+            "built_in": true
+          },
+          "rust": {
+            "supported": false,
+            "built_in": false
+          }
+        },
+        "Guard Assertions": {
+          "mol": {
+            "supported": true,
+            "built_in": true
+          },
+          "python": {
+            "supported": true,
+            "built_in": true
+          },
+          "javascript": {
+            "supported": false,
+            "built_in": false
+          },
+          "elixir": {
+            "supported": true,
+            "built_in": true
+          },
+          "rust": {
+            "supported": true,
+            "built_in": true
+          }
+        },
+        "Access Control": {
+          "mol": {
+            "supported": true,
+            "built_in": true
+          },
+          "python": {
+            "supported": false,
+            "built_in": false
+          },
+          "javascript": {
+            "supported": true,
+            "built_in": true
+          },
+          "elixir": {
+            "supported": true,
+            "built_in": true
+          },
+          "rust": {
+            "supported": true,
+            "built_in": true
+          }
+        },
+        "Memory Safety": {
+          "mol": {
+            "supported": true,
+            "built_in": true
+          },
+          "python": {
+            "supported": true,
+            "built_in": true
+          },
+          "javascript": {
+            "supported": true,
+            "built_in": true
+          },
+          "elixir": {
+            "supported": true,
+            "built_in": true
+          },
+          "rust": {
+            "supported": true,
+            "built_in": true
+          }
+        },
+        "Dunder/Internal Attribute Blocking": {
+          "mol": {
+            "supported": true,
+            "built_in": true
+          },
+          "python": {
+            "supported": false,
+            "built_in": false
+          },
+          "javascript": {
+            "supported": true,
+            "built_in": true
+          },
+          "elixir": {
+            "supported": true,
+            "built_in": true
+          },
+          "rust": {
+            "supported": true,
+            "built_in": true
+          }
+        },
+        "Type Safety": {
+          "mol": {
+            "supported": true,
+            "built_in": true
+          },
+          "python": {
+            "supported": true,
+            "built_in": false
+          },
+          "javascript": {
+            "supported": false,
+            "built_in": false
+          },
+          "elixir": {
+            "supported": true,
+            "built_in": false
+          },
+          "rust": {
+            "supported": true,
+            "built_in": true
+          }
+        },
+        "Execution Timeout": {
+          "mol": {
+            "supported": true,
+            "built_in": true
+          },
+          "python": {
+            "supported": false,
+            "built_in": false
+          },
+          "javascript": {
+            "supported": false,
+            "built_in": false
+          },
+          "elixir": {
+            "supported": true,
+            "built_in": true
+          },
+          "rust": {
+            "supported": false,
+            "built_in": false
+          }
+        },
+        "Rate Limiting": {
+          "mol": {
+            "supported": true,
+            "built_in": true
+          },
+          "python": {
+            "supported": false,
+            "built_in": false
+          },
+          "javascript": {
+            "supported": false,
+            "built_in": false
+          },
+          "elixir": {
+            "supported": false,
+            "built_in": false
+          },
+          "rust": {
+            "supported": false,
+            "built_in": false
+          }
+        },
+        "Homomorphic Encryption": {
+          "mol": {
+            "supported": true,
+            "built_in": true
+          },
+          "python": {
+            "supported": false,
+            "built_in": false
+          },
+          "javascript": {
+            "supported": false,
+            "built_in": false
+          },
+          "elixir": {
+            "supported": false,
+            "built_in": false
+          },
+          "rust": {
+            "supported": false,
+            "built_in": false
+          }
+        },
+        "Zero-Knowledge Proofs": {
+          "mol": {
+            "supported": true,
+            "built_in": true
+          },
+          "python": {
+            "supported": false,
+            "built_in": false
+          },
+          "javascript": {
+            "supported": false,
+            "built_in": false
+          },
+          "elixir": {
+            "supported": false,
+            "built_in": false
+          },
+          "rust": {
+            "supported": false,
+            "built_in": false
+          }
+        }
+      },
+      "scores": {
+        "mol": {
+          "supported": 10,
+          "built_in": 10,
+          "total": 10
+        },
+        "python": {
+          "supported": 3,
+          "built_in": 2,
+          "total": 10
+        },
+        "javascript": {
+          "supported": 4,
+          "built_in": 3,
+          "total": 10
+        },
+        "elixir": {
+          "supported": 7,
+          "built_in": 6,
+          "total": 10
+        },
+        "rust": {
+          "supported": 5,
+          "built_in": 5,
+          "total": 10
+        }
+      },
+      "mol_unique_features": [
+        "Rate Limiting",
+        "Homomorphic Encryption",
+        "Zero-Knowledge Proofs"
+      ]
+    },
+    "bench_05_innovation": {
+      "benchmark": "05_innovation_matrix",
+      "features": {
+        "Auto-Tracing Pipelines": {
+          "mol": true,
+          "python": false,
+          "javascript": false,
+          "elixir": false,
+          "rust": false,
+          "fsharp": false
+        },
+        "Native Pipe Operator |>": {
+          "mol": true,
+          "python": false,
+          "javascript": false,
+          "elixir": true,
+          "rust": false,
+          "fsharp": true
+        },
+        "First-Class AI Domain Types": {
+          "mol": true,
+          "python": false,
+          "javascript": false,
+          "elixir": false,
+          "rust": false,
+          "fsharp": false
+        },
+        "Built-in RAG Pipeline": {
+          "mol": true,
+          "python": false,
+          "javascript": false,
+          "elixir": false,
+          "rust": false,
+          "fsharp": false
+        },
+        "Homomorphic Encryption (Built-in)": {
+          "mol": true,
+          "python": false,
+          "javascript": false,
+          "elixir": false,
+          "rust": false,
+          "fsharp": false
+        },
+        "Zero-Knowledge Proofs (Built-in)": {
+          "mol": true,
+          "python": false,
+          "javascript": false,
+          "elixir": false,
+          "rust": false,
+          "fsharp": false
+        },
+        "Ownership/Borrow Checker": {
+          "mol": true,
+          "python": false,
+          "javascript": false,
+          "elixir": false,
+          "rust": true,
+          "fsharp": false
+        },
+        "JIT Tracing with Hot-Path Detection": {
+          "mol": true,
+          "python": false,
+          "javascript": true,
+          "elixir": false,
+          "rust": false,
+          "fsharp": true
+        },
+        "Swarm/Distributed Runtime (Built-in)": {
+          "mol": true,
+          "python": false,
+          "javascript": false,
+          "elixir": true,
+          "rust": false,
+          "fsharp": false
+        },
+        "Native Vector Engine": {
+          "mol": true,
+          "python": false,
+          "javascript": false,
+          "elixir": false,
+          "rust": false,
+          "fsharp": false
+        },
+        "Dual Transpilation (Python + JS)": {
+          "mol": true,
+          "python": false,
+          "javascript": false,
+          "elixir": false,
+          "rust": true,
+          "fsharp": true
+        },
+        "Online Playground with Sandbox": {
+          "mol": true,
+          "python": true,
+          "javascript": true,
+          "elixir": true,
+          "rust": true,
+          "fsharp": true
+        }
+      },
+      "scores": {
+        "mol": 100,
+        "python": 6,
+        "javascript": 13,
+        "elixir": 22,
+        "rust": 21,
+        "fsharp": 28
+      },
+      "max_possible": 100,
+      "mol_unique": [
+        "Auto-Tracing Pipelines",
+        "First-Class AI Domain Types",
+        "Built-in RAG Pipeline",
+        "Homomorphic Encryption (Built-in)",
+        "Zero-Knowledge Proofs (Built-in)",
+        "Native Vector Engine"
+      ]
+    }
+  }
+}

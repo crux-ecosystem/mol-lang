@@ -1,0 +1,392 @@
+{
+  "benchmark": "02_stdlib_coverage",
+  "categories": {
+    "Math & Arithmetic": {
+      "mol": {
+        "count": 15,
+        "import_needed": false
+      },
+      "python": {
+        "count": 5,
+        "import_needed": true
+      },
+      "javascript": {
+        "count": 20,
+        "import_needed": false
+      },
+      "elixir": {
+        "count": 3,
+        "import_needed": true
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": true
+      }
+    },
+    "Statistics": {
+      "mol": {
+        "count": 5,
+        "import_needed": false
+      },
+      "python": {
+        "count": 0,
+        "import_needed": true
+      },
+      "javascript": {
+        "count": 0,
+        "import_needed": true
+      },
+      "elixir": {
+        "count": 0,
+        "import_needed": true
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": true
+      }
+    },
+    "String Operations": {
+      "mol": {
+        "count": 16,
+        "import_needed": false
+      },
+      "python": {
+        "count": 15,
+        "import_needed": false
+      },
+      "javascript": {
+        "count": 15,
+        "import_needed": false
+      },
+      "elixir": {
+        "count": 20,
+        "import_needed": false
+      },
+      "rust": {
+        "count": 10,
+        "import_needed": false
+      }
+    },
+    "List/Array Operations": {
+      "mol": {
+        "count": 22,
+        "import_needed": false
+      },
+      "python": {
+        "count": 8,
+        "import_needed": false
+      },
+      "javascript": {
+        "count": 15,
+        "import_needed": false
+      },
+      "elixir": {
+        "count": 25,
+        "import_needed": false
+      },
+      "rust": {
+        "count": 15,
+        "import_needed": false
+      }
+    },
+    "Hashing & Encoding": {
+      "mol": {
+        "count": 6,
+        "import_needed": false
+      },
+      "python": {
+        "count": 0,
+        "import_needed": true
+      },
+      "javascript": {
+        "count": 1,
+        "import_needed": true
+      },
+      "elixir": {
+        "count": 2,
+        "import_needed": false
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": true
+      }
+    },
+    "File I/O": {
+      "mol": {
+        "count": 8,
+        "import_needed": false
+      },
+      "python": {
+        "count": 3,
+        "import_needed": true
+      },
+      "javascript": {
+        "count": 0,
+        "import_needed": true
+      },
+      "elixir": {
+        "count": 5,
+        "import_needed": false
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": true
+      }
+    },
+    "HTTP/Network": {
+      "mol": {
+        "count": 2,
+        "import_needed": false
+      },
+      "python": {
+        "count": 0,
+        "import_needed": true
+      },
+      "javascript": {
+        "count": 1,
+        "import_needed": false
+      },
+      "elixir": {
+        "count": 0,
+        "import_needed": true
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": true
+      }
+    },
+    "Concurrency": {
+      "mol": {
+        "count": 7,
+        "import_needed": false
+      },
+      "python": {
+        "count": 0,
+        "import_needed": true
+      },
+      "javascript": {
+        "count": 2,
+        "import_needed": false
+      },
+      "elixir": {
+        "count": 5,
+        "import_needed": false
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": true
+      }
+    },
+    "JSON Processing": {
+      "mol": {
+        "count": 4,
+        "import_needed": false
+      },
+      "python": {
+        "count": 0,
+        "import_needed": true
+      },
+      "javascript": {
+        "count": 2,
+        "import_needed": false
+      },
+      "elixir": {
+        "count": 0,
+        "import_needed": true
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": true
+      }
+    },
+    "AI/ML Domain Types": {
+      "mol": {
+        "count": 8,
+        "import_needed": false
+      },
+      "python": {
+        "count": 0,
+        "import_needed": true
+      },
+      "javascript": {
+        "count": 0,
+        "import_needed": true
+      },
+      "elixir": {
+        "count": 0,
+        "import_needed": true
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": true
+      }
+    },
+    "RAG Pipeline": {
+      "mol": {
+        "count": 6,
+        "import_needed": false
+      },
+      "python": {
+        "count": 0,
+        "import_needed": true
+      },
+      "javascript": {
+        "count": 0,
+        "import_needed": true
+      },
+      "elixir": {
+        "count": 0,
+        "import_needed": true
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": true
+      }
+    },
+    "Vector Operations": {
+      "mol": {
+        "count": 25,
+        "import_needed": false
+      },
+      "python": {
+        "count": 0,
+        "import_needed": true
+      },
+      "javascript": {
+        "count": 0,
+        "import_needed": true
+      },
+      "elixir": {
+        "count": 0,
+        "import_needed": true
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": true
+      }
+    },
+    "Encryption": {
+      "mol": {
+        "count": 15,
+        "import_needed": false
+      },
+      "python": {
+        "count": 0,
+        "import_needed": true
+      },
+      "javascript": {
+        "count": 0,
+        "import_needed": true
+      },
+      "elixir": {
+        "count": 0,
+        "import_needed": true
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": true
+      }
+    },
+    "Pipeline Operator": {
+      "mol": {
+        "count": 1,
+        "import_needed": false
+      },
+      "python": {
+        "count": 0,
+        "import_needed": false
+      },
+      "javascript": {
+        "count": 0,
+        "import_needed": false
+      },
+      "elixir": {
+        "count": 1,
+        "import_needed": false
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": false
+      }
+    },
+    "Auto-Tracing": {
+      "mol": {
+        "count": 1,
+        "import_needed": false
+      },
+      "python": {
+        "count": 0,
+        "import_needed": true
+      },
+      "javascript": {
+        "count": 0,
+        "import_needed": true
+      },
+      "elixir": {
+        "count": 0,
+        "import_needed": true
+      },
+      "rust": {
+        "count": 0,
+        "import_needed": true
+      }
+    },
+    "Safety Guards": {
+      "mol": {
+        "count": 2,
+        "import_needed": false
+      },
+      "python": {
+        "count": 1,
+        "import_needed": false
+      },
+      "javascript": {
+        "count": 0,
+        "import_needed": false
+      },
+      "elixir": {
+        "count": 1,
+        "import_needed": false
+      },
+      "rust": {
+        "count": 2,
+        "import_needed": false
+      }
+    }
+  },
+  "totals": {
+    "mol": {
+      "total_funcs": 143,
+      "categories_covered": 16,
+      "no_import_needed": 16
+    },
+    "python": {
+      "total_funcs": 32,
+      "categories_covered": 5,
+      "no_import_needed": 3
+    },
+    "javascript": {
+      "total_funcs": 56,
+      "categories_covered": 7,
+      "no_import_needed": 6
+    },
+    "elixir": {
+      "total_funcs": 62,
+      "categories_covered": 8,
+      "no_import_needed": 7
+    },
+    "rust": {
+      "total_funcs": 27,
+      "categories_covered": 3,
+      "no_import_needed": 3
+    }
+  },
+  "unique_to_mol": [
+    "Statistics",
+    "AI/ML Domain Types",
+    "RAG Pipeline",
+    "Vector Operations",
+    "Encryption",
+    "Auto-Tracing"
+  ]
+}

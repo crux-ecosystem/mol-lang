@@ -1,0 +1,118 @@
+{
+  "benchmark": "05_innovation_matrix",
+  "features": {
+    "Auto-Tracing Pipelines": {
+      "mol": true,
+      "python": false,
+      "javascript": false,
+      "elixir": false,
+      "rust": false,
+      "fsharp": false
+    },
+    "Native Pipe Operator |>": {
+      "mol": true,
+      "python": false,
+      "javascript": false,
+      "elixir": true,
+      "rust": false,
+      "fsharp": true
+    },
+    "First-Class AI Domain Types": {
+      "mol": true,
+      "python": false,
+      "javascript": false,
+      "elixir": false,
+      "rust": false,
+      "fsharp": false
+    },
+    "Built-in RAG Pipeline": {
+      "mol": true,
+      "python": false,
+      "javascript": false,
+      "elixir": false,
+      "rust": false,
+      "fsharp": false
+    },
+    "Homomorphic Encryption (Built-in)": {
+      "mol": true,
+      "python": false,
+      "javascript": false,
+      "elixir": false,
+      "rust": false,
+      "fsharp": false
+    },
+    "Zero-Knowledge Proofs (Built-in)": {
+      "mol": true,
+      "python": false,
+      "javascript": false,
+      "elixir": false,
+      "rust": false,
+      "fsharp": false
+    },
+    "Ownership/Borrow Checker": {
+      "mol": true,
+      "python": false,
+      "javascript": false,
+      "elixir": false,
+      "rust": true,
+      "fsharp": false
+    },
+    "JIT Tracing with Hot-Path Detection": {
+      "mol": true,
+      "python": false,
+      "javascript": true,
+      "elixir": false,
+      "rust": false,
+      "fsharp": true
+    },
+    "Swarm/Distributed Runtime (Built-in)": {
+      "mol": true,
+      "python": false,
+      "javascript": false,
+      "elixir": true,
+      "rust": false,
+      "fsharp": false
+    },
+    "Native Vector Engine": {
+      "mol": true,
+      "python": false,
+      "javascript": false,
+      "elixir": false,
+      "rust": false,
+      "fsharp": false
+    },
+    "Dual Transpilation (Python + JS)": {
+      "mol": true,
+      "python": false,
+      "javascript": false,
+      "elixir": false,
+      "rust": true,
+      "fsharp": true
+    },
+    "Online Playground with Sandbox": {
+      "mol": true,
+      "python": true,
+      "javascript": true,
+      "elixir": true,
+      "rust": true,
+      "fsharp": true
+    }
+  },
+  "scores": {
+    "mol": 100,
+    "python": 6,
+    "javascript": 13,
+    "elixir": 22,
+    "rust": 21,
+    "fsharp": 28
+  },
+  "max_possible": 100,
+  "mol_unique": [
+    "Auto-Tracing Pipelines",
+    "First-Class AI Domain Types",
+    "Built-in RAG Pipeline",
+    "Homomorphic Encryption (Built-in)",
+    "Zero-Knowledge Proofs (Built-in)",
+    "Native Vector Engine"
+  ]
+}
