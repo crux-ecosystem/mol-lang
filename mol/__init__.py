@@ -17,4 +17,4 @@ File extension: .mol
 """
 
 __version__ = "2.0.1"
-__author__ = "IntraMind / CruxLabx"
+__author__ = "Mounesh Kodi"

@@ -1,7 +1,7 @@
 # MOL Language Specification v0.2.0
 
 **Status:** Active Development
-**Author:** Mounesh — CruxLabx / IntraMind
+**Author:** Mounesh Kodi — CruxLabx / IntraMind
 **File Extension:** `.mol`
 
 ---
