@@ -893,6 +893,85 @@ See [CHANGELOG.md](CHANGELOG.md) for full details.
 
 See [ROADMAP.md](ROADMAP.md) for the full plan.
 
+---
+
+## 📊 Benchmarks — MOL vs The World
+
+We ran **5 independent benchmarks** comparing MOL against Python, JavaScript, Elixir, Rust, and F# across real AI/data tasks. Full methodology, raw data, and reproducible scripts are in [`research/`](research/).
+
+### 1. Lines of Code — 27–54% Fewer Lines
+
+| Language | Avg LOC | Avg Tokens | Avg Imports | Reduction vs MOL |
+|----------|---------|------------|-------------|------------------|
+| **MOL** | **7.2** | **72.8** | **0** | — |
+| Python | 9.8 | 75.3 | 1.3 | +36% more code |
+| JavaScript | 11.5 | 141.7 | 1.0 | +60% more code |
+| Elixir | 11.7 | 141.3 | 0.0 | +63% more code |
+| Rust | 15.5 | 182.7 | 0.8 | +115% more code |
+
+> Measured across 6 equivalent tasks: data pipeline, RAG pipeline, statistics, safety guards, functional pipeline, error handling.
+
+### 2. Standard Library — 143 Zero-Import Functions
+
+| Metric | MOL | Python | JavaScript | Elixir | Rust |
+|--------|-----|--------|------------|--------|------|
+| **Built-in functions** | **143** | 32 | 56 | 62 | 27 |
+| **Categories covered** | **16/16** | 5/16 | 7/16 | 8/16 | 3/16 |
+
+**6 categories ONLY MOL provides** with zero imports:
+- ⚡ **Statistics** — `mean`, `median`, `stdev`, `variance`, `percentile`
+- 🧠 **AI Domain Types** — `Thought`, `Memory`, `Node`, `Stream`, `Document`, `Chunk`, `Embedding`, `VectorStore`
+- 🔍 **RAG Pipeline** — `chunk`, `embed`, `store`, `retrieve`, `think`, `recall`
+- 📐 **Vector Operations** — 25 functions: `vec_cosine`, `vec_softmax`, `vec_relu`, `vec_quantize`, `vec_index_search`...
+- 🔐 **Encryption** — 15 functions: `he_encrypt`, `he_add`, `zk_commit`, `zk_verify`, `sym_encrypt`...
+- 👁️ **Auto-Tracing** — Built-in: 3+ stage pipes auto-traced with timing
+
+### 3. Security — 10/10 Built-in Features
+
+| Feature | MOL | Python | JS | Elixir | Rust |
+|---------|-----|--------|----|--------|------|
+| Sandbox Mode | ✅ | ❌ | ⚠️ | ✅ | ❌ |
+| Guard Assertions | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Dunder Blocking | ✅ | ❌ | ✅ | ✅ | ✅ |
+| Homomorphic Encryption | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Zero-Knowledge Proofs | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Rate Limiting | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Built-in Score** | **10/10** | **2/10** | **3/10** | **6/10** | **5/10** |
+
+### 4. Innovation Score — 100/100
+
+12 weighted features evaluated. MOL: **100/100** (6 exclusive capabilities).
+
+| | MOL | Python | JS | Elixir | Rust | F# |
+|---|---|---|---|---|---|---|
+| **Score** | **100** | 6 | 13 | 22 | 21 | 28 |
+
+**MOL-exclusive features** (no other compared language has these built-in):
+- 🔭 Auto-Tracing Pipelines
+- 🧠 First-Class AI Domain Types
+- 🔍 Built-in RAG Pipeline
+- 🔐 Homomorphic Encryption
+- 🛡️ Zero-Knowledge Proofs
+- 📐 Native Vector Engine
+
+### 5. Execution Performance — Honest Trade-offs
+
+MOL is an interpreted language running on CPython. Average overhead: **109x** vs native Python. This is the cost of auto-tracing, type safety, and observability.
+
+**But MOL isn't competing on raw speed.** In real AI workloads, LLM inference takes 100–5000ms. MOL's interpreter overhead is negligible compared to I/O-bound operations. MOL wins on:
+- **27–54% less code** to write and maintain
+- **Zero-config observability** (no OpenTelemetry setup)
+- **143 built-in functions** (no dependency management)
+- **10/10 security** out of the box
+
+> 📄 **Full research paper**: [`research/paper.tex`](research/paper.tex) — LaTeX paper with all methodology, data, and 12 academic references.
+>
+> 📊 **Reproducible benchmarks**: [`research/benchmarks/`](research/benchmarks/) — Run `python run_all.py` to regenerate all data.
+>
+> 📈 **10 publication charts**: [`research/figures/`](research/figures/) — PNG + SVG figures for every benchmark.
+
+---
+
 ### Documentation
 
 Full documentation available at: **[https://crux-ecosystem.github.io/mol-lang/](https://crux-ecosystem.github.io/mol-lang/)**
