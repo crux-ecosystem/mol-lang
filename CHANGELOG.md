@@ -6,6 +6,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [2.0.2] — 2026-02-26
+
+### Fixed
+
+- Updated all install instructions to recommend `pipx install mol-lang` (fixes PEP 668 `externally-managed-environment` error on Python 3.12+)
+- Updated sandbox error message to recommend `pipx` instead of `pip`
+- Added installation troubleshooting guide with PATH fixes
+- Added enterprise domain positioning: Use Cases page, 3 domain examples
+
+---
+
 ## [2.0.1] — 2026-02-23
 
 ### 🔒 Security Patch
