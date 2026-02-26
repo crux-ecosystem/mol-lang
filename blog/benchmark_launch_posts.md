@@ -186,7 +186,7 @@ Built at @CruxLabx by @mouneshkodi
 
 Star it. Try it. Break it.
 
-pip install mol-lang
+pipx install mol-lang
 
 ---
 ---
@@ -313,7 +313,7 @@ MOL v2.0.1 is live. Open-source. 213 tests passing.
 
 **Install:**
 ```
-pip install mol-lang
+pipx install mol-lang
 ```
 
 **GitHub:** https://github.com/crux-ecosystem/mol-lang

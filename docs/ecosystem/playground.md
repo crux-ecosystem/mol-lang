@@ -42,7 +42,7 @@ Run your own playground:
 
 ```bash
 # Install with server dependencies
-pip install mol-lang
+pipx install mol-lang
 pip install fastapi uvicorn
 
 # Start the server

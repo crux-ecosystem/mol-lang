@@ -663,7 +663,7 @@ Full IDE support included in `mol-vscode/`:
 ### Install
 
 ```bash
-pip install mol-lang[lsp]
+pipx install 'mol-lang[lsp]'
 cp -r mol-vscode/ ~/.vscode/extensions/mol-language-0.5.0
 # Restart VS Code
 ```

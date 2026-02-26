@@ -42,7 +42,7 @@ Welcome to the MOL Language community! 🎉
 MOL is a programming language with auto-tracing pipelines, built for AI/RAG workflows.
 
 **Quick Links:**
-📦 Install: `pip install mol-lang`
+📦 Install: `pipx install mol-lang`
 🎮 Playground: https://mol.cruxlabx.in
 💻 GitHub: https://github.com/crux-ecosystem/mol-lang
 📖 Docs: https://crux-ecosystem.github.io/mol-lang/

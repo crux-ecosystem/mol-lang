@@ -133,7 +133,7 @@ def _sandbox_blocked(name):
     def _blocked(*args, **kwargs):
         raise MOLSecurityError(
             f"'{name}()' is not available in the playground for security reasons. "
-            f"Install MOL locally to use this function: pip install mol-lang"
+            f"Install MOL locally to use this function: pipx install mol-lang"
         )
     _blocked.__name__ = name
     _blocked.__doc__ = f"[BLOCKED in playground] {name}"

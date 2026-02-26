@@ -117,7 +117,7 @@ let results be wait_all([t1, t2])
 
 MOL 1.0 ships with a complete ecosystem:
 
-- **PyPI**: `pip install mol-lang`
+- **PyPI**: `pipx install mol-lang`
 - **Online playground**: [mol.cruxlabx.in](https://mol.cruxlabx.in) — no installation needed, sandboxed for safety
 - **VS Code extension**: Full LSP with autocomplete, hover docs, diagnostics, go-to-definition
 - **Transpilation**: Compile `.mol` to Python or JavaScript
@@ -137,7 +137,7 @@ MOL is being developed as part of the IntraMind sovereign AI ecosystem at CruxLa
 ## Try It
 
 ```bash
-pip install mol-lang
+pipx install mol-lang
 mol repl
 ```
 

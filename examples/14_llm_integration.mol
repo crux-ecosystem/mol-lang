@@ -28,7 +28,7 @@ show "--- Document Q&A Pipeline ---"
 
 let docs be [
   Document("api_docs.txt", "The sort function takes a list and returns a new sorted list in ascending order. Use sort_desc for descending order. The sort_by function sorts a list of maps by a specific key."),
-  Document("tutorial.txt", "To get started with MOL, install it with pip install mol-lang. Create a file with .mol extension and run it with mol run yourfile.mol. MOL uses natural English-like syntax."),
+  Document("tutorial.txt", "To get started with MOL, install it with pipx install mol-lang. Create a file with .mol extension and run it with mol run yourfile.mol. MOL uses natural English-like syntax."),
   Document("faq.txt", "MOL supports 90+ standard library functions including map, filter, reduce for functional programming, mean, median, stdev for statistics, and md5, sha256 for hashing.")
 ]
 

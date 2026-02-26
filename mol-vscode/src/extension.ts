@@ -106,7 +106,7 @@ function startLanguageServer(context: vscode.ExtensionContext) {
     (err) => {
       console.error("Failed to start MOL Language Server:", err);
       vscode.window.showErrorMessage(
-        `MOL Language Server failed to start. Make sure mol-lang is installed: pip install mol-lang\n\nError: ${err.message}`
+        `MOL Language Server failed to start. Make sure mol-lang is installed: pipx install mol-lang\n\nError: ${err.message}`
       );
     }
   );

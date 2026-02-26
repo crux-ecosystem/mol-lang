@@ -13,7 +13,7 @@ Two months ago, I introduced MOL — a programming language where pipelines trac
 ## You Can Now Install MOL in 5 Seconds
 
 ```bash
-pip install mol-lang
+pipx install mol-lang
 mol repl
 ```
 
@@ -165,7 +165,7 @@ We also support Nuitka (compiles to C) and standard wheel distribution. The buil
 ## Try It
 
 ```bash
-pip install mol-lang
+pipx install mol-lang
 mol repl
 ```
 

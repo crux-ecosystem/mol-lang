@@ -374,12 +374,12 @@ This is the first stable release of MOL, consolidating all features from v0.5.0 
 
 ### Dependencies
 
-- Added optional LSP dependencies: `pygls>=2.0`, `lsprotocol>=2024.0.0` (`pip install mol-lang[lsp]`)
+- Added optional LSP dependencies: `pygls>=2.0`, `lsprotocol>=2024.0.0` (`pipx install 'mol-lang[lsp]'`)
 - VS Code extension: `vscode-languageclient ^9.0.1`
 
 ### Infrastructure
 
-- Published to PyPI: `pip install mol-lang`
+- Published to PyPI: `pipx install mol-lang`
 - Online playground deployed at https://mol.cruxlabx.in
 - Blog post and social media launch materials
 - Strategy document for distribution

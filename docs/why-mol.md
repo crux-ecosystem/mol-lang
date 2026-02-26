@@ -128,7 +128,7 @@ One `.mol` file targets three runtimes.
 ## Try It Now
 
 ```bash
-pip install mol-lang
+pipx install mol-lang
 mol repl
 ```
 

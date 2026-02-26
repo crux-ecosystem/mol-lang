@@ -48,7 +48,7 @@ What's in MOL 1.0:
 - Sandboxed online playground: https://mol.cruxlabx.in
 - 181 tests passing
 
-Install: `pip install mol-lang`
+Install: `pipx install mol-lang`
 
 Built with Python + Lark (LALR parser). MIT-style license.
 
@@ -104,7 +104,7 @@ This automatically prints a trace table with timing, types, and values. No loggi
 
 **Install:**
 ```
-pip install mol-lang
+pipx install mol-lang
 mol repl
 ```
 
@@ -152,7 +152,7 @@ Auto-generates a trace table showing input/output types and timing at every step
 
 **The numbers:** 143 stdlib functions, 181 tests, ~10,800 lines of Python, 44 example programs.
 
-Install: `pip install mol-lang`
+Install: `pipx install mol-lang`
 
 Source: https://github.com/crux-ecosystem/mol-lang
 
@@ -169,7 +169,7 @@ A programming language where pipe chains auto-trace themselves.
 
 No logging. No print statements. The language shows you what happened.
 
-pip install mol-lang
+pipx install mol-lang
 
 🧵👇
 
@@ -215,7 +215,7 @@ No curly braces. No semicolons. No parentheses for show.
 Try MOL:
 
 🎮 Playground: mol.cruxlabx.in
-📦 PyPI: pip install mol-lang
+📦 PyPI: pipx install mol-lang
 💻 GitHub: github.com/crux-ecosystem/mol-lang
 
 Built by @CruxLabx for the IntraMind ecosystem.
@@ -247,7 +247,7 @@ The technical foundation:
 • Built on Python with Lark (LALR parser)
 • 181 tests passing
 • Sandboxed online playground at mol.cruxlabx.in
-• Published on PyPI: pip install mol-lang
+• Published on PyPI: pipx install mol-lang
 
 MOL is being developed as part of the IntraMind sovereign AI ecosystem at CruxLabx.
 
@@ -278,7 +278,7 @@ This release consolidates all features from v0.5.0 through v0.10.0 into a produc
 - Module system with package manager
 
 **Ecosystem:**
-- PyPI: `pip install mol-lang`
+- PyPI: `pipx install mol-lang`
 - Sandboxed playground at https://mol.cruxlabx.in
 - VS Code extension with full LSP
 - Docker support
@@ -292,7 +292,7 @@ This release consolidates all features from v0.5.0 through v0.10.0 into a produc
 
 **Get started:**
 ```bash
-pip install mol-lang
+pipx install mol-lang
 mol repl
 ```
 

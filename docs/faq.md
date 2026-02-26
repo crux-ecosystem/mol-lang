@@ -25,7 +25,7 @@ Python 3.10 or higher. Python 3.12+ is recommended.
 ### How do I install MOL?
 
 ```bash
-pip install mol-lang
+pipx install mol-lang
 ```
 
 ### How do I run a MOL program?

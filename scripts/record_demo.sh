@@ -63,7 +63,7 @@ echo "MOL v0.4.0"
 pause 1
 
 echo ""
-echo '$ pip install mol-lang  # Available on PyPI!'
+echo '$ pipx install mol-lang  # Available on PyPI!'
 pause 1.5
 
 echo ""

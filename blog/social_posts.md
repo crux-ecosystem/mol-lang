@@ -49,7 +49,7 @@ let result be "  Hello, World!  "
 
 **Try it:**
 - Online playground: http://135.235.138.217:8000
-- Install: `pip install mol-lang`
+- Install: `pipx install mol-lang`
 - GitHub: https://github.com/crux-ecosystem/mol-lang
 
 I'd love feedback on the language design, especially the auto-tracing semantics. What would you change?
@@ -68,7 +68,7 @@ I'd love feedback on the language design, especially the auto-tracing semantics.
 I built a domain-specific language called **MOL** using Python and the Lark parser library. It's now on PyPI:
 
 ```bash
-pip install mol-lang
+pipx install mol-lang
 mol repl
 ```
 
@@ -135,7 +135,7 @@ The `|>` operator **auto-traces** — you get timing, types, and data shapes at 
 **Built-in types:** Document, Chunk, Embedding, VectorStore, Thought, Memory, Node, Stream
 
 **Try it:**
-- `pip install mol-lang`
+- `pipx install mol-lang`
 - Online playground: http://135.235.138.217:8000
 - GitHub: https://github.com/crux-ecosystem/mol-lang
 
@@ -172,7 +172,7 @@ Other features:
 - Transpiles to Python and JavaScript
 - LALR parser using Lark
 
-The interpreter is written in Python (~3,500 lines). 68 tests passing. On PyPI: `pip install mol-lang`.
+The interpreter is written in Python (~3,500 lines). 68 tests passing. On PyPI: `pipx install mol-lang`.
 
 Online playground (no install needed): http://135.235.138.217:8000
 
@@ -188,7 +188,7 @@ We're building this as part of IntraMind, a cognitive computing platform at Crux
 We built a programming language where pipelines trace themselves.
 
 MOL v0.3.0 is live:
-→ pip install mol-lang
+→ pipx install mol-lang
 → 90+ stdlib functions
 → Auto-tracing pipe operator |>
 → Online playground
@@ -216,14 +216,14 @@ MOL is a programming language I built for AI pipelines. The core innovation: the
 What's new in v0.3.0:
 • 90+ standard library functions
 • Online playground (try it in your browser)
-• pip install mol-lang
+• pipx install mol-lang
 • Standalone binary (8.7 MB, no Python needed)
 • 68 tests passing
 
 The problem it solves: every AI pipeline I've built has more debugging scaffolding than actual logic. print(), logging, timing decorators — all added after the fact. MOL makes pipeline visibility a language feature, not an afterthought.
 
 Try the playground: http://135.235.138.217:8000
-Install: pip install mol-lang
+Install: pipx install mol-lang
 GitHub: https://github.com/crux-ecosystem/mol-lang
 
 Built at CruxLabx as part of IntraMind, our cognitive computing platform.

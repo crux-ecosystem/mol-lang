@@ -15,7 +15,7 @@ writing raw Python for AI/ML workflows.
 
 | Channel | Status | Action |
 |---------|--------|--------|
-| **PyPI** (`pip install mol-lang`) | Ready | Publish wheel to PyPI |
+| **PyPI** (`pipx install mol-lang`) | Ready | Publish wheel to PyPI |
 | **GitHub Public Repo** | ✅ Live | `crux-ecosystem/mol-lang` — showcase, docs, examples |
 | **Standalone Binary** | ✅ Built | 8.7 MB single executable via PyInstaller |
 | **Online Playground** | ✅ Built | `localhost:8000` — deploy to cloud |
