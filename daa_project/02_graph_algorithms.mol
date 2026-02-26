@@ -1,0 +1,466 @@
+-- ══════════════════════════════════════════════════════════════════════════
+--  AlgoVerse — Module 2: Graph Algorithms
+--  BFS, DFS, Dijkstra, Kruskal's MST, Topological Sort
+--  DAA Mini Project · CruxLabx · MOL Language
+-- ══════════════════════════════════════════════════════════════════════════
+
+show "╔══════════════════════════════════════════════════════════════╗"
+show "║         MODULE 2: GRAPH ALGORITHMS (5 Algorithms)          ║"
+show "╚══════════════════════════════════════════════════════════════╝"
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  GRAPH REPRESENTATION: Adjacency List via Maps
+-- ══════════════════════════════════════════════════════════════════════
+
+-- Build an adjacency list from a list of edges
+-- Each edge: {"from": "A", "to": "B", "weight": 5}
+define build_graph(edges, directed)
+  let adj be {}
+  for edge in edges do
+    let u be edge["from"]
+    let v be edge["to"]
+    -- ensure both nodes exist
+    if not contains(keys(adj), u) then
+      set adj[u] to []
+    end
+    if not contains(keys(adj), v) then
+      set adj[v] to []
+    end
+    push(adj[u], {"node": v, "weight": edge["weight"]})
+    if not directed then
+      push(adj[v], {"node": u, "weight": edge["weight"]})
+    end
+  end
+  return adj
+end
+
+define print_graph(adj)
+  for node in keys(adj) do
+    let neighbors be []
+    for nb in adj[node] do
+      let nb_node be nb["node"]
+      let nb_wt be nb["weight"]
+      push(neighbors, f"{nb_node}({nb_wt})")
+    end
+    show f"  {node} → {neighbors}"
+  end
+end
+
+-- ══════════════════════════════════════════════════════════════════════
+--  SAMPLE GRAPHS
+-- ══════════════════════════════════════════════════════════════════════
+
+-- Undirected weighted graph for BFS, DFS, Dijkstra, Kruskal
+let undirected_edges be [
+  {"from": "A", "to": "B", "weight": 4},
+  {"from": "A", "to": "C", "weight": 2},
+  {"from": "B", "to": "C", "weight": 1},
+  {"from": "B", "to": "D", "weight": 5},
+  {"from": "C", "to": "D", "weight": 8},
+  {"from": "C", "to": "E", "weight": 10},
+  {"from": "D", "to": "E", "weight": 2},
+  {"from": "D", "to": "F", "weight": 6},
+  {"from": "E", "to": "F", "weight": 3}
+]
+
+-- Directed Acyclic Graph for Topological Sort
+let dag_edges be [
+  {"from": "CS101", "to": "CS201", "weight": 1},
+  {"from": "CS101", "to": "CS202", "weight": 1},
+  {"from": "CS201", "to": "CS301", "weight": 1},
+  {"from": "CS202", "to": "CS301", "weight": 1},
+  {"from": "CS202", "to": "CS302", "weight": 1},
+  {"from": "MATH101", "to": "CS201", "weight": 1},
+  {"from": "MATH101", "to": "MATH201", "weight": 1},
+  {"from": "MATH201", "to": "CS301", "weight": 1}
+]
+
+let graph be build_graph(undirected_edges, false)
+let dag be build_graph(dag_edges, true)
+
+show "─── Graph Structure (Undirected, Weighted) ───"
+print_graph(graph)
+show ""
+
+show "─── DAG Structure (Course Prerequisites) ───"
+print_graph(dag)
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  1. BREADTH-FIRST SEARCH (BFS) — O(V + E)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  1. BREADTH-FIRST SEARCH (BFS)"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+define bfs(adj, start)
+  let visited be []
+  let queue be [start]
+  let order be []
+  let parent be {}
+
+  push(visited, start)
+  set parent[start] to "null"
+
+  while len(queue) > 0 do
+    -- dequeue: take first element
+    let current be queue[0]
+    set queue to slice(queue, 1)
+    push(order, current)
+
+    -- visit neighbors
+    if contains(keys(adj), current) then
+      for nb in adj[current] do
+        if not contains(visited, nb["node"]) then
+          push(visited, nb["node"])
+          push(queue, nb["node"])
+          set parent[nb["node"]] to current
+        end
+      end
+    end
+  end
+
+  return {"order": order, "parent": parent}
+end
+
+let bfs_result be bfs(graph, "A")
+let bfs_order be bfs_result["order"]
+show f"  BFS from A: {bfs_order}"
+show f"  BFS tree (parent map):"
+let bfs_parents be bfs_result["parent"]
+for node in keys(bfs_parents) do
+  let par be bfs_parents[node]
+  show f"    {node} ← {par}"
+end
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  2. DEPTH-FIRST SEARCH (DFS) — O(V + E)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  2. DEPTH-FIRST SEARCH (DFS)"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+-- Iterative DFS using a stack
+define dfs(adj, start)
+  let visited be []
+  let stack be [start]
+  let order be []
+  let discovery_time be {}
+  let timer be 0
+
+  while len(stack) > 0 do
+    -- pop from stack
+    let current be stack[len(stack) - 1]
+    set stack to slice(stack, 0, len(stack) - 1)
+
+    if not contains(visited, current) then
+      push(visited, current)
+      push(order, current)
+      set timer to timer + 1
+      set discovery_time[current] to timer
+
+      -- push neighbors in reverse for correct order
+      if contains(keys(adj), current) then
+        let neighbors be adj[current]
+        let i be len(neighbors) - 1
+        while i >= 0 do
+          let nb be neighbors[i]
+          if not contains(visited, nb["node"]) then
+            push(stack, nb["node"])
+          end
+          set i to i - 1
+        end
+      end
+    end
+  end
+
+  return {"order": order, "discovery": discovery_time}
+end
+
+let dfs_result be dfs(graph, "A")
+let dfs_order be dfs_result["order"]
+show f"  DFS from A: {dfs_order}"
+show f"  Discovery times:"
+let dfs_disc be dfs_result["discovery"]
+for node in keys(dfs_disc) do
+  let t_val be dfs_disc[node]
+  show f"    {node}: t={t_val}"
+end
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  3. DIJKSTRA'S SHORTEST PATH — O((V + E) log V) with min-heap
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  3. DIJKSTRA'S SHORTEST PATH"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+-- Simple Dijkstra using a list-based priority queue
+define dijkstra(adj, source)
+  let all_nodes be keys(adj)
+  let dist be {}
+  let prev be {}
+  let unvisited be []
+
+  -- Initialize distances to infinity (using 999999)
+  for node in all_nodes do
+    set dist[node] to 999999
+    set prev[node] to "none"
+    push(unvisited, node)
+  end
+  set dist[source] to 0
+
+  while len(unvisited) > 0 do
+    -- Find node with minimum distance in unvisited
+    let min_dist be 999999
+    let min_node be ""
+    for node in unvisited do
+      if dist[node] < min_dist then
+        set min_dist to dist[node]
+        set min_node to node
+      end
+    end
+
+    if min_node is "" then
+      -- All remaining are unreachable
+      break
+    end
+
+    -- Remove min_node from unvisited
+    let new_unvisited be []
+    for node in unvisited do
+      if node != min_node then
+        push(new_unvisited, node)
+      end
+    end
+    set unvisited to new_unvisited
+
+    -- Relax neighbors
+    if contains(keys(adj), min_node) then
+      for nb in adj[min_node] do
+        let alt be dist[min_node] + nb["weight"]
+        if alt < dist[nb["node"]] then
+          set dist[nb["node"]] to alt
+          set prev[nb["node"]] to min_node
+        end
+      end
+    end
+  end
+
+  return {"dist": dist, "prev": prev}
+end
+
+-- Reconstruct path from source to target
+define reconstruct_path(prev, source, target)
+  let path be []
+  let current be target
+  while current != "none" and current != source do
+    push(path, current)
+    set current to prev[current]
+  end
+  push(path, source)
+  return reverse(path)
+end
+
+let source be "A"
+let dijkstra_result be dijkstra(graph, source)
+
+show f"  Shortest distances from {source}:"
+for node in keys(dijkstra_result["dist"]) do
+  let d be dijkstra_result["dist"][node]
+  let path be reconstruct_path(dijkstra_result["prev"], source, node)
+  show f"    {source} → {node}: distance = {d}, path = {path}"
+end
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  4. KRUSKAL'S MINIMUM SPANNING TREE — O(E log E)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  4. KRUSKAL'S MST (Union-Find)"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+-- Union-Find data structure using maps
+define make_uf(nodes)
+  let parent be {}
+  let rank be {}
+  for node in nodes do
+    set parent[node] to node
+    set rank[node] to 0
+  end
+  return {"parent": parent, "rank": rank}
+end
+
+define uf_find(uf, x)
+  let current be x
+  while uf["parent"][current] != current do
+    -- path compression: point to grandparent
+    let gp be uf["parent"][uf["parent"][current]]
+    set uf["parent"][current] to gp
+    set current to gp
+  end
+  return current
+end
+
+define uf_union(uf, x, y)
+  let rx be uf_find(uf, x)
+  let ry be uf_find(uf, y)
+  if rx is ry then
+    return false
+  end
+  -- union by rank
+  if uf["rank"][rx] < uf["rank"][ry] then
+    set uf["parent"][rx] to ry
+  elif uf["rank"][rx] > uf["rank"][ry] then
+    set uf["parent"][ry] to rx
+  else
+    set uf["parent"][ry] to rx
+    set uf["rank"][rx] to uf["rank"][rx] + 1
+  end
+  return true
+end
+
+define kruskal(edges, nodes)
+  -- Sort edges by weight
+  let sorted_edges be sort_by(edges, fn(e) -> e["weight"])
+
+  let uf be make_uf(nodes)
+  let mst be []
+  let total_weight be 0
+
+  for edge in sorted_edges do
+    let u be edge["from"]
+    let v be edge["to"]
+    if uf_find(uf, u) != uf_find(uf, v) then
+      uf_union(uf, u, v)
+      push(mst, edge)
+      set total_weight to total_weight + edge["weight"]
+    end
+  end
+
+  return {"edges": mst, "total_weight": total_weight}
+end
+
+let all_nodes be keys(graph)
+let mst_result be kruskal(undirected_edges, all_nodes)
+
+let mst_tw be mst_result["total_weight"]
+show f"  MST edges (total weight: {mst_tw}):"
+for edge in mst_result["edges"] do
+  let ef be edge["from"]
+  let ew be edge["weight"]
+  let et be edge["to"]
+  show f"    {ef} ──({ew})── {et}"
+end
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  5. TOPOLOGICAL SORT (Kahn's Algorithm) — O(V + E)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  5. TOPOLOGICAL SORT (Kahn's Algorithm)"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+define topological_sort(adj)
+  let all_nodes be keys(adj)
+
+  -- Calculate in-degree for each node
+  let in_degree be {}
+  for node in all_nodes do
+    set in_degree[node] to 0
+  end
+  for node in all_nodes do
+    for nb in adj[node] do
+      set in_degree[nb["node"]] to in_degree[nb["node"]] + 1
+    end
+  end
+
+  -- Start with nodes that have in-degree 0
+  let queue be []
+  for node in all_nodes do
+    if in_degree[node] is 0 then
+      push(queue, node)
+    end
+  end
+
+  let order be []
+  while len(queue) > 0 do
+    let current be queue[0]
+    set queue to slice(queue, 1)
+    push(order, current)
+
+    -- Reduce in-degree of neighbors
+    if contains(keys(adj), current) then
+      for nb in adj[current] do
+        set in_degree[nb["node"]] to in_degree[nb["node"]] - 1
+        if in_degree[nb["node"]] is 0 then
+          push(queue, nb["node"])
+        end
+      end
+    end
+  end
+
+  -- Check for cycle
+  if len(order) != len(all_nodes) then
+    show "  ⚠ Graph has a cycle! Topological sort not possible."
+    return []
+  end
+
+  return order
+end
+
+let topo_order be topological_sort(dag)
+show "  Course prerequisite order (topological):"
+show f"    {topo_order}"
+show ""
+show "  Semester plan:"
+for i in range(len(topo_order)) do
+  let semester be floor(i / 2) + 1
+  show f"    Semester {semester}: {topo_order[i]}"
+end
+
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  TIMING COMPARISON
+-- ══════════════════════════════════════════════════════════════════════
+show "─── Performance Summary ───"
+show ""
+
+let start be clock()
+bfs(graph, "A")
+let bfs_time be round((clock() - start) * 1000, 3)
+
+set start to clock()
+dfs(graph, "A")
+let dfs_time be round((clock() - start) * 1000, 3)
+
+set start to clock()
+dijkstra(graph, "A")
+let dijkstra_time be round((clock() - start) * 1000, 3)
+
+set start to clock()
+kruskal(undirected_edges, all_nodes)
+let kruskal_time be round((clock() - start) * 1000, 3)
+
+set start to clock()
+topological_sort(dag)
+let topo_time be round((clock() - start) * 1000, 3)
+
+show "  Algorithm         | Time (ms)  | Complexity"
+show "  ──────────────────+────────────+───────────────────"
+show f"  BFS               | {bfs_time}ms    | O(V + E)"
+show f"  DFS               | {dfs_time}ms    | O(V + E)"
+show f"  Dijkstra          | {dijkstra_time}ms    | O(V² ) naive"
+show f"  Kruskal MST       | {kruskal_time}ms    | O(E log E)"
+show f"  Topological Sort  | {topo_time}ms    | O(V + E)"
+show ""
+
+show "═══ Module 2: Graph Algorithms Complete ═══"

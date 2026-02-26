@@ -1,0 +1,528 @@
+-- ══════════════════════════════════════════════════════════════════════════
+--  AlgoVerse — Module 5: Empirical Complexity Analyzer
+--  Runs algorithms at multiple sizes, fits curves, verifies Big-O
+--  DAA Mini Project · CruxLabx · MOL Language
+-- ══════════════════════════════════════════════════════════════════════════
+
+show "╔══════════════════════════════════════════════════════════════╗"
+show "║       MODULE 5: EMPIRICAL COMPLEXITY ANALYZER              ║"
+show "╚══════════════════════════════════════════════════════════════╝"
+show ""
+show "  This module runs each algorithm at increasing input sizes,"
+show "  measures execution time, computes growth ratios, and"
+show "  empirically verifies the theoretical Big-O complexity."
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  RE-IMPLEMENT KEY ALGORITHMS INLINE (self-contained module)
+-- ══════════════════════════════════════════════════════════════════════
+
+define copy_list(arr)
+  let result be []
+  for item in arr do
+    push(result, item)
+  end
+  return result
+end
+
+define swap(arr, i, j)
+  let temp be arr[i]
+  set arr[i] to arr[j]
+  set arr[j] to temp
+end
+
+define generate_random_array(n)
+  let arr be []
+  let i be 0
+  while i < n do
+    push(arr, random_int(1, 100000))
+    set i to i + 1
+  end
+  return arr
+end
+
+-- Bubble Sort O(n²)
+define bubble_sort(input)
+  let arr be copy_list(input)
+  let n be len(arr)
+  let i be 0
+  while i < n do
+    let j be 0
+    while j < n - i - 1 do
+      if arr[j] > arr[j + 1] then
+        swap(arr, j, j + 1)
+      end
+      set j to j + 1
+    end
+    set i to i + 1
+  end
+  return arr
+end
+
+-- Insertion Sort O(n²)
+define insertion_sort(input)
+  let arr be copy_list(input)
+  let n be len(arr)
+  let i be 1
+  while i < n do
+    let key be arr[i]
+    let j be i - 1
+    while j >= 0 and arr[j] > key do
+      set arr[j + 1] to arr[j]
+      set j to j - 1
+    end
+    set arr[j + 1] to key
+    set i to i + 1
+  end
+  return arr
+end
+
+-- Merge Sort O(n log n)
+define merge_halves(left, right)
+  let result be []
+  let i be 0
+  let j be 0
+  while i < len(left) and j < len(right) do
+    if left[i] <= right[j] then
+      push(result, left[i])
+      set i to i + 1
+    else
+      push(result, right[j])
+      set j to j + 1
+    end
+  end
+  while i < len(left) do
+    push(result, left[i])
+    set i to i + 1
+  end
+  while j < len(right) do
+    push(result, right[j])
+    set j to j + 1
+  end
+  return result
+end
+
+define merge_sort(input)
+  if len(input) <= 1 then
+    return input
+  end
+  let mid be floor(len(input) / 2)
+  let left be merge_sort(slice(input, 0, mid))
+  let right be merge_sort(slice(input, mid))
+  return merge_halves(left, right)
+end
+
+-- Quick Sort O(n log n) avg
+define quick_sort(input)
+  if len(input) <= 1 then
+    return input
+  end
+  let pivot be input[0]
+  let less be []
+  let equal be []
+  let greater be []
+  for item in input do
+    if item < pivot then
+      push(less, item)
+    elif item is pivot then
+      push(equal, item)
+    else
+      push(greater, item)
+    end
+  end
+  let result be []
+  for x in quick_sort(less) do
+    push(result, x)
+  end
+  for x in equal do
+    push(result, x)
+  end
+  for x in quick_sort(greater) do
+    push(result, x)
+  end
+  return result
+end
+
+-- Linear Search O(n)
+define linear_search(arr, target)
+  for i in range(len(arr)) do
+    if arr[i] is target then
+      return i
+    end
+  end
+  return -1
+end
+
+-- Binary Search O(log n)
+define binary_search_impl(arr, target)
+  let low be 0
+  let high be len(arr) - 1
+  while low <= high do
+    let mid be floor((low + high) / 2)
+    if arr[mid] is target then
+      return mid
+    elif arr[mid] < target then
+      set low to mid + 1
+    else
+      set high to mid - 1
+    end
+  end
+  return -1
+end
+
+-- ══════════════════════════════════════════════════════════════════════
+--  BENCHMARKING ENGINE
+-- ══════════════════════════════════════════════════════════════════════
+
+define time_algo(algo_fn, data)
+  let start be clock()
+  algo_fn(data)
+  let elapsed be clock() - start
+  return round(elapsed * 1000, 4)
+end
+
+-- Run algo at multiple sizes and return timing data
+define profile_algo(algo_name, algo_fn, sizes, data_generator)
+  let results be []
+  for n in sizes do
+    let data be data_generator(n)
+    let t be time_algo(algo_fn, data)
+    push(results, {"size": n, "time": t})
+  end
+  return {"name": algo_name, "results": results}
+end
+
+-- Compute growth ratio between consecutive measurements
+-- If T(2n)/T(n) ≈ 2 → O(n), ≈ 4 → O(n²), ≈ 2 → could be O(n log n)
+define analyze_growth(profile)
+  let results be profile["results"]
+  let ratios be []
+  let i be 1
+  while i < len(results) do
+    let prev be results[i - 1]
+    let curr be results[i]
+    let size_ratio be curr["size"] / prev["size"]
+    if prev["time"] > 0 then
+      let time_ratio be curr["time"] / prev["time"]
+      push(ratios, {
+        "from": prev["size"],
+        "to": curr["size"],
+        "size_ratio": round(size_ratio, 1),
+        "time_ratio": round(time_ratio, 2)
+      })
+    end
+    set i to i + 1
+  end
+  return ratios
+end
+
+-- Classify complexity based on growth ratios
+-- size doubles: ratio ≈ 1 → O(1), ≈ 2 → O(n), ≈ 4 → O(n²), ≈ 8 → O(n³)
+-- For O(n log n): ratio ≈ 2.0-2.5 when size doubles
+define classify_complexity(ratios)
+  if len(ratios) is 0 then
+    return "Insufficient data"
+  end
+
+  -- Average the time ratios
+  let total be 0
+  for r in ratios do
+    set total to total + r["time_ratio"]
+  end
+  let avg_ratio be total / len(ratios)
+
+  -- Classify based on average doubling ratio
+  if avg_ratio < 1.5 then
+    return "O(n) or better"
+  elif avg_ratio < 2.8 then
+    return "O(n log n)"
+  elif avg_ratio < 5.0 then
+    return "O(n²)"
+  elif avg_ratio < 10.0 then
+    return "O(n³)"
+  else
+    return "O(2^n) exponential"
+  end
+end
+
+-- ══════════════════════════════════════════════════════════════════════
+--  ANALYSIS 1: SORTING ALGORITHMS
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  ANALYSIS 1: Sorting Complexity"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+let sort_sizes be [50, 100, 200, 400, 800]
+
+show f"  Testing at sizes: {sort_sizes}"
+show ""
+
+-- Profile each sorting algorithm
+let bubble_profile be profile_algo("Bubble Sort", bubble_sort, sort_sizes, generate_random_array)
+let insert_profile be profile_algo("Insertion Sort", insertion_sort, sort_sizes, generate_random_array)
+let merge_profile be profile_algo("Merge Sort", merge_sort, sort_sizes, generate_random_array)
+let quick_profile be profile_algo("Quick Sort", quick_sort, sort_sizes, generate_random_array)
+
+-- Display timing table
+show "  Timing Results (ms):"
+show "  Algorithm        |    50  |   100  |   200  |   400  |   800"
+show "  ─────────────────+────────+────────+────────+────────+────────"
+
+let profiles be [bubble_profile, insert_profile, merge_profile, quick_profile]
+
+for p in profiles do
+  let pname be p["name"]
+  let row be f"  " + pad_right(pname, 17, " ") + " |"
+  for r in p["results"] do
+    set row to row + pad_left(to_text(r["time"]), 7, " ") + " |"
+  end
+  show row
+end
+show ""
+
+-- Growth Analysis
+show "  Growth Ratio Analysis (when input doubles):"
+show "  Algorithm        | Ratios              | Empirical Class  | Theoretical"
+show "  ─────────────────+─────────────────────+──────────────────+────────────"
+
+let theoretical be ["O(n²)", "O(n²)", "O(n log n)", "O(n log n)"]
+let idx be 0
+for p in profiles do
+  let ratios be analyze_growth(p)
+  let classification be classify_complexity(ratios)
+
+  let ratio_str be ""
+  for r in ratios do
+    if len(ratio_str) > 0 then
+      set ratio_str to ratio_str + ", "
+    end
+    set ratio_str to ratio_str + to_text(r["time_ratio"]) + "x"
+  end
+
+  let match_symbol be "✓"
+  if classification != theoretical[idx] then
+    set match_symbol to "~"
+  end
+
+  let pname2 be p["name"]
+  let col_name be pad_right(pname2, 17, " ")
+  let col_ratio be pad_right(ratio_str, 19, " ")
+  let col_class be pad_right(classification, 16, " ")
+  show f"  {col_name} | {col_ratio} | {col_class} | {theoretical[idx]} {match_symbol}"
+  set idx to idx + 1
+end
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  ANALYSIS 2: SEARCH ALGORITHMS
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  ANALYSIS 2: Search Complexity"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+let search_sizes be [1000, 2000, 4000, 8000, 16000]
+show f"  Testing at sizes: {search_sizes}"
+show ""
+
+-- For search: generate sorted data, search for a non-existent element (worst case)
+define gen_sorted_array(n)
+  let arr be []
+  for i in range(n) do
+    push(arr, i * 2)
+  end
+  return arr
+end
+
+-- Profile linear search
+let linear_times be []
+for n in search_sizes do
+  let data be gen_sorted_array(n)
+  let target be n * 2 + 1
+  let start be clock()
+  -- Run multiple iterations for measurability
+  let reps be 10
+  for r in range(reps) do
+    linear_search(data, target)
+  end
+  let elapsed be round((clock() - start) * 1000 / reps, 4)
+  push(linear_times, {"size": n, "time": elapsed})
+end
+
+-- Profile binary search
+let binary_times be []
+for n in search_sizes do
+  let data be gen_sorted_array(n)
+  let target be n * 2 + 1
+  let start be clock()
+  let reps be 100
+  for r in range(reps) do
+    binary_search_impl(data, target)
+  end
+  let elapsed be round((clock() - start) * 1000 / reps, 4)
+  push(binary_times, {"size": n, "time": elapsed})
+end
+
+show "  Size    | Linear Search | Binary Search | Ratio"
+show "  ────────+───────────────+───────────────+──────"
+for i in range(len(search_sizes)) do
+  let n be search_sizes[i]
+  let lt be linear_times[i]["time"]
+  let bt be binary_times[i]["time"]
+  let ratio be "N/A"
+  if bt > 0 then
+    set ratio to to_text(round(lt / bt, 1)) + "x"
+  end
+  let sn be pad_left(to_text(n), 6, " ")
+  let slt be pad_left(to_text(lt), 11, " ")
+  let sbt be pad_left(to_text(bt), 11, " ")
+  show f"  {sn} | {slt}ms | {sbt}ms | {ratio}"
+end
+show ""
+
+let lin_profile be {"name": "Linear", "results": linear_times}
+let bin_profile be {"name": "Binary", "results": binary_times}
+let lin_ratios be analyze_growth(lin_profile)
+let bin_ratios be analyze_growth(bin_profile)
+show f"  Linear search growth: {classify_complexity(lin_ratios)}   (theoretical: O(n))"
+show f"  Binary search growth: {classify_complexity(bin_ratios)}   (theoretical: O(log n))"
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  ANALYSIS 3: GROWTH CURVES VISUALIZATION (ASCII)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  ANALYSIS 3: Complexity Growth Curves"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+-- Theoretical growth functions (normalized)
+show "  Theoretical growth (normalized to n=16):"
+show ""
+show "  n     | O(1) | O(log n) | O(n)  | O(n log n) | O(n²)   | O(2^n)"
+show "  ──────+──────+──────────+───────+────────────+─────────+──────────"
+
+let theory_sizes be [1, 2, 4, 8, 16, 32]
+for n in theory_sizes do
+  let o1 be 1
+  let ologn be round(log(n, 2), 1)
+  if n is 1 then
+    set ologn to 0.0
+  end
+  let on be n
+  let onlogn be n * log(n, 2)
+  if n is 1 then
+    set onlogn to 0.0
+  end
+  set onlogn to round(onlogn, 1)
+  let on2 be n * n
+  let o2n be pow(2, n)
+  if o2n > 999999 then
+    let c1 be pad_left(to_text(n), 5, " ")
+    let c2 be pad_left(to_text(o1), 4, " ")
+    let c3 be pad_left(to_text(ologn), 8, " ")
+    let c4 be pad_left(to_text(on), 5, " ")
+    let c5 be pad_left(to_text(onlogn), 10, " ")
+    let c6 be pad_left(to_text(on2), 7, " ")
+    show f"  {c1} | {c2} | {c3} | {c4} | {c5} | {c6} | OVERFLOW"
+  else
+    let c1 be pad_left(to_text(n), 5, " ")
+    let c2 be pad_left(to_text(o1), 4, " ")
+    let c3 be pad_left(to_text(ologn), 8, " ")
+    let c4 be pad_left(to_text(on), 5, " ")
+    let c5 be pad_left(to_text(onlogn), 10, " ")
+    let c6 be pad_left(to_text(on2), 7, " ")
+    let c7 be pad_left(to_text(o2n), 8, " ")
+    show f"  {c1} | {c2} | {c3} | {c4} | {c5} | {c6} | {c7}"
+  end
+end
+show ""
+
+-- ASCII growth chart
+show "  Visual Growth Comparison (scale: each █ = ~2 units):"
+show ""
+let chart_n be 16
+let scale be 2
+
+-- O(1)
+let bar1 be "█"
+show f"  O(1)       : {bar1}  ({1})"
+
+-- O(log n)
+let val2 be round(log(chart_n, 2), 0)
+let bar2 be repeat("█", val2)
+show f"  O(log n)   : {bar2}  ({val2})"
+
+-- O(n)
+let bar3_len be floor(chart_n / scale)
+let bar3 be repeat("█", bar3_len)
+show f"  O(n)       : {bar3}  ({chart_n})"
+
+-- O(n log n)
+let val4 be round(chart_n * log(chart_n, 2), 0)
+let bar4_len be floor(val4 / scale)
+if bar4_len > 40 then
+  set bar4_len to 40
+end
+let bar4 be repeat("█", bar4_len)
+show f"  O(n log n) : {bar4}  ({val4})"
+
+-- O(n²)
+let val5 be chart_n * chart_n
+let bar5_len be floor(val5 / scale)
+if bar5_len > 40 then
+  set bar5_len to 40
+end
+let bar5 be repeat("█", bar5_len) + "→"
+show f"  O(n²)      : {bar5}  ({val5})"
+
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  FINAL SUMMARY: All Algorithms Classified
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  FINAL CLASSIFICATION TABLE"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+show "  ┌───────────────────────┬────────────┬────────────┬────────────┬──────────┐"
+show "  │ Algorithm             │ Best       │ Average    │ Worst      │ Space    │"
+show "  ├───────────────────────┼────────────┼────────────┼────────────┼──────────┤"
+show "  │ Bubble Sort           │ O(n)       │ O(n²)      │ O(n²)      │ O(1)     │"
+show "  │ Selection Sort        │ O(n²)      │ O(n²)      │ O(n²)      │ O(1)     │"
+show "  │ Insertion Sort        │ O(n)       │ O(n²)      │ O(n²)      │ O(1)     │"
+show "  │ Merge Sort            │ O(n log n) │ O(n log n) │ O(n log n) │ O(n)     │"
+show "  │ Quick Sort            │ O(n log n) │ O(n log n) │ O(n²)      │ O(log n) │"
+show "  │ Heap Sort             │ O(n log n) │ O(n log n) │ O(n log n) │ O(1)     │"
+show "  ├───────────────────────┼────────────┼────────────┼────────────┼──────────┤"
+show "  │ BFS                   │ O(V+E)     │ O(V+E)     │ O(V+E)     │ O(V)     │"
+show "  │ DFS                   │ O(V+E)     │ O(V+E)     │ O(V+E)     │ O(V)     │"
+show "  │ Dijkstra              │ O(V²)      │ O(V²)      │ O(V²)      │ O(V)     │"
+show "  │ Kruskal MST           │ O(E log E) │ O(E log E) │ O(E log E) │ O(V)     │"
+show "  │ Topological Sort      │ O(V+E)     │ O(V+E)     │ O(V+E)     │ O(V)     │"
+show "  ├───────────────────────┼────────────┼────────────┼────────────┼──────────┤"
+show "  │ 0/1 Knapsack          │ O(nW)      │ O(nW)      │ O(nW)      │ O(nW)    │"
+show "  │ LCS                   │ O(mn)      │ O(mn)      │ O(mn)      │ O(mn)    │"
+show "  │ Matrix Chain          │ O(n³)      │ O(n³)      │ O(n³)      │ O(n²)    │"
+show "  │ Edit Distance         │ O(mn)      │ O(mn)      │ O(mn)      │ O(mn)    │"
+show "  ├───────────────────────┼────────────┼────────────┼────────────┼──────────┤"
+show "  │ Closest Pair (D&C)    │ O(n log n) │ O(n log n) │ O(n log n) │ O(n)     │"
+show "  │ Strassen Multiply     │ O(n^2.807) │ O(n^2.807) │ O(n^2.807) │ O(n²)    │"
+show "  │ Activity Selection    │ O(n log n) │ O(n log n) │ O(n log n) │ O(n)     │"
+show "  │ Huffman Coding        │ O(n log n) │ O(n log n) │ O(n log n) │ O(n)     │"
+show "  ├───────────────────────┼────────────┼────────────┼────────────┼──────────┤"
+show "  │ Linear Search         │ O(1)       │ O(n)       │ O(n)       │ O(1)     │"
+show "  │ Binary Search         │ O(1)       │ O(log n)   │ O(log n)   │ O(1)     │"
+show "  └───────────────────────┴────────────┴────────────┴────────────┴──────────┘"
+show ""
+
+show "  Key Takeaways:"
+show "  • O(n²) algorithms (Bubble, Selection, Insertion) are only practical for n < 1000"
+show "  • O(n log n) algorithms (Merge, Quick, Heap) scale to millions of elements"
+show "  • DP algorithms trade O(n²) space for polynomial-time optimal solutions"
+show "  • Greedy algorithms achieve O(n log n) but only when greedy choice property holds"
+show "  • D&C recurrences: T(n) = aT(n/b) + f(n) → solved by Master Theorem"
+show ""
+
+show "═══ Module 5: Complexity Analyzer Complete ═══"

@@ -1,0 +1,384 @@
+-- ══════════════════════════════════════════════════════════════════════════
+--  AlgoVerse — Module 1: Sorting Arena
+--  Implements 6 classic sorting algorithms, benchmarks & compares them
+--  DAA Mini Project · CruxLabx · MOL Language
+-- ══════════════════════════════════════════════════════════════════════════
+
+show "╔══════════════════════════════════════════════════════════════╗"
+show "║          MODULE 1: SORTING ARENA (6 Algorithms)            ║"
+show "╚══════════════════════════════════════════════════════════════╝"
+show ""
+
+-- ── Helper: swap two elements in a list by index ─────────────────────
+define swap(arr, i, j)
+  let temp be arr[i]
+  set arr[i] to arr[j]
+  set arr[j] to temp
+end
+
+-- ── Helper: copy a list (so original isn't mutated) ──────────────────
+define copy_list(arr)
+  let result be []
+  for item in arr do
+    push(result, item)
+  end
+  return result
+end
+
+-- ══════════════════════════════════════════════════════════════════════
+--  1. BUBBLE SORT — O(n²) average & worst
+-- ══════════════════════════════════════════════════════════════════════
+define bubble_sort(input)
+  let arr be copy_list(input)
+  let n be len(arr)
+  let comparisons be 0
+  let swaps be 0
+  let i be 0
+  while i < n do
+    let j be 0
+    while j < n - i - 1 do
+      set comparisons to comparisons + 1
+      if arr[j] > arr[j + 1] then
+        swap(arr, j, j + 1)
+        set swaps to swaps + 1
+      end
+      set j to j + 1
+    end
+    set i to i + 1
+  end
+  return {"sorted": arr, "comparisons": comparisons, "swaps": swaps}
+end
+
+-- ══════════════════════════════════════════════════════════════════════
+--  2. SELECTION SORT — O(n²) all cases
+-- ══════════════════════════════════════════════════════════════════════
+define selection_sort(input)
+  let arr be copy_list(input)
+  let n be len(arr)
+  let comparisons be 0
+  let swaps be 0
+  let i be 0
+  while i < n - 1 do
+    let min_idx be i
+    let j be i + 1
+    while j < n do
+      set comparisons to comparisons + 1
+      if arr[j] < arr[min_idx] then
+        set min_idx to j
+      end
+      set j to j + 1
+    end
+    if min_idx != i then
+      swap(arr, i, min_idx)
+      set swaps to swaps + 1
+    end
+    set i to i + 1
+  end
+  return {"sorted": arr, "comparisons": comparisons, "swaps": swaps}
+end
+
+-- ══════════════════════════════════════════════════════════════════════
+--  3. INSERTION SORT — O(n²) average, O(n) best
+-- ══════════════════════════════════════════════════════════════════════
+define insertion_sort(input)
+  let arr be copy_list(input)
+  let n be len(arr)
+  let comparisons be 0
+  let shifts be 0
+  let i be 1
+  while i < n do
+    let key be arr[i]
+    let j be i - 1
+    set comparisons to comparisons + 1
+    while j >= 0 and arr[j] > key do
+      set comparisons to comparisons + 1
+      set arr[j + 1] to arr[j]
+      set shifts to shifts + 1
+      set j to j - 1
+    end
+    set arr[j + 1] to key
+    set i to i + 1
+  end
+  return {"sorted": arr, "comparisons": comparisons, "swaps": shifts}
+end
+
+-- ══════════════════════════════════════════════════════════════════════
+--  4. MERGE SORT — O(n log n) all cases
+-- ══════════════════════════════════════════════════════════════════════
+define merge(left, right)
+  let result be []
+  let i be 0
+  let j be 0
+  while i < len(left) and j < len(right) do
+    if left[i] <= right[j] then
+      push(result, left[i])
+      set i to i + 1
+    else
+      push(result, right[j])
+      set j to j + 1
+    end
+  end
+  while i < len(left) do
+    push(result, left[i])
+    set i to i + 1
+  end
+  while j < len(right) do
+    push(result, right[j])
+    set j to j + 1
+  end
+  return result
+end
+
+define merge_sort(input)
+  let arr be copy_list(input)
+  let n be len(arr)
+  if n <= 1 then
+    return arr
+  end
+  let mid be floor(n / 2)
+  let left be slice(arr, 0, mid)
+  let right be slice(arr, mid)
+  let sorted_left be merge_sort(left)
+  let sorted_right be merge_sort(right)
+  return merge(sorted_left, sorted_right)
+end
+
+-- ══════════════════════════════════════════════════════════════════════
+--  5. QUICK SORT — O(n log n) avg, O(n²) worst
+-- ══════════════════════════════════════════════════════════════════════
+define quick_sort(input)
+  let arr be copy_list(input)
+  if len(arr) <= 1 then
+    return arr
+  end
+  -- Use middle element as pivot to avoid worst-case on sorted input
+  let mid be floor(len(arr) / 2)
+  let pivot be arr[mid]
+  let less be []
+  let equal be []
+  let greater be []
+  for item in arr do
+    if item < pivot then
+      push(less, item)
+    elif item is pivot then
+      push(equal, item)
+    else
+      push(greater, item)
+    end
+  end
+  let sorted_less be quick_sort(less)
+  let sorted_greater be quick_sort(greater)
+  -- combine: sorted_less + equal + sorted_greater
+  let result be []
+  for x in sorted_less do
+    push(result, x)
+  end
+  for x in equal do
+    push(result, x)
+  end
+  for x in sorted_greater do
+    push(result, x)
+  end
+  return result
+end
+
+-- ══════════════════════════════════════════════════════════════════════
+--  6. HEAP SORT — O(n log n) all cases
+-- ══════════════════════════════════════════════════════════════════════
+define heapify(arr, n, i)
+  let largest be i
+  let left be 2 * i + 1
+  let right_child be 2 * i + 2
+  if left < n and arr[left] > arr[largest] then
+    set largest to left
+  end
+  if right_child < n and arr[right_child] > arr[largest] then
+    set largest to right_child
+  end
+  if largest != i then
+    swap(arr, i, largest)
+    heapify(arr, n, largest)
+  end
+end
+
+define heap_sort(input)
+  let arr be copy_list(input)
+  let n be len(arr)
+  -- Build max heap
+  let i be floor(n / 2) - 1
+  while i >= 0 do
+    heapify(arr, n, i)
+    set i to i - 1
+  end
+  -- Extract elements from heap one by one
+  set i to n - 1
+  while i > 0 do
+    swap(arr, 0, i)
+    heapify(arr, i, 0)
+    set i to i - 1
+  end
+  return arr
+end
+
+-- ══════════════════════════════════════════════════════════════════════
+--  CORRECTNESS VERIFICATION
+-- ══════════════════════════════════════════════════════════════════════
+show "─── Correctness Verification ───"
+show ""
+
+let test_cases be [
+  [64, 34, 25, 12, 22, 11, 90],
+  [5, 1, 4, 2, 8],
+  [1],
+  [3, 3, 3, 3],
+  [10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+]
+
+let expected be sort(test_cases[0])
+show f"Expected: {expected}"
+
+let algos be ["Bubble", "Selection", "Insertion", "Merge", "Quick", "Heap"]
+
+-- Test case 1
+let tc be test_cases[0]
+show f"Input:    {tc}"
+show ""
+
+let r1 be bubble_sort(tc)
+let r1s be r1["sorted"]
+let r1c be r1["comparisons"]
+let r1w be r1["swaps"]
+show f"  Bubble:    {r1s}  (comps: {r1c}, swaps: {r1w})"
+
+let r2 be selection_sort(tc)
+let r2s be r2["sorted"]
+let r2c be r2["comparisons"]
+let r2w be r2["swaps"]
+show f"  Selection: {r2s}  (comps: {r2c}, swaps: {r2w})"
+
+let r3 be insertion_sort(tc)
+let r3s be r3["sorted"]
+let r3c be r3["comparisons"]
+let r3w be r3["swaps"]
+show f"  Insertion: {r3s}  (comps: {r3c}, shifts: {r3w})"
+
+let r4 be merge_sort(tc)
+show f"  Merge:     {r4}"
+
+let r5 be quick_sort(tc)
+show f"  Quick:     {r5}"
+
+let r6 be heap_sort(tc)
+show f"  Heap:      {r6}"
+
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  BENCHMARKING: Timing each algo on various input sizes
+-- ══════════════════════════════════════════════════════════════════════
+show "─── Performance Benchmark ───"
+show ""
+
+define generate_random_array(n)
+  let arr be []
+  let i be 0
+  while i < n do
+    push(arr, random_int(1, 100000))
+    set i to i + 1
+  end
+  return arr
+end
+
+define time_sort(sort_fn, data)
+  let start be clock()
+  let result be sort_fn(data)
+  let elapsed be clock() - start
+  return round(elapsed * 1000, 2)
+end
+
+let sizes be [100, 500, 1000]
+
+show "  Size    | Bubble   | Select   | Insert   | Merge    | Quick    | Heap"
+show "  ────────+──────────+──────────+──────────+──────────+──────────+──────────"
+
+for n in sizes do
+  let data be generate_random_array(n)
+
+  let t1 be time_sort(bubble_sort, data)
+  let t2 be time_sort(selection_sort, data)
+  let t3 be time_sort(insertion_sort, data)
+  let t4 be time_sort(merge_sort, data)
+  let t5 be time_sort(quick_sort, data)
+  let t6 be time_sort(heap_sort, data)
+
+  show f"  {n}     | {t1}ms | {t2}ms | {t3}ms | {t4}ms | {t5}ms | {t6}ms"
+end
+
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  ANALYSIS: Best / Worst / Average case demonstration
+-- ══════════════════════════════════════════════════════════════════════
+show "─── Case Analysis (n=500) ───"
+show ""
+
+let n be 500
+
+-- Best case: already sorted
+let best_case be []
+for i in range(1, n + 1) do
+  push(best_case, i)
+end
+
+-- Worst case: reverse sorted
+let worst_case be reverse(best_case)
+
+-- Average case: random
+let avg_case be generate_random_array(n)
+
+show "  Algorithm   | Best (sorted) | Worst (reverse) | Average (random)"
+show "  ────────────+───────────────+─────────────────+─────────────────"
+
+-- Bubble Sort cases
+let bb be time_sort(bubble_sort, best_case)
+let bw be time_sort(bubble_sort, worst_case)
+let ba be time_sort(bubble_sort, avg_case)
+show f"  Bubble      | {bb}ms       | {bw}ms        | {ba}ms"
+
+-- Insertion Sort cases (shows dramatic best-case improvement)
+let ib be time_sort(insertion_sort, best_case)
+let iw be time_sort(insertion_sort, worst_case)
+let ia be time_sort(insertion_sort, avg_case)
+show f"  Insertion   | {ib}ms       | {iw}ms        | {ia}ms"
+
+-- Merge Sort cases (should be consistent)
+let mb be time_sort(merge_sort, best_case)
+let mw be time_sort(merge_sort, worst_case)
+let ma be time_sort(merge_sort, avg_case)
+show f"  Merge       | {mb}ms       | {mw}ms        | {ma}ms"
+
+-- Quick Sort cases
+let qb be time_sort(quick_sort, best_case)
+let qw be time_sort(quick_sort, worst_case)
+let qa be time_sort(quick_sort, avg_case)
+show f"  Quick       | {qb}ms       | {qw}ms        | {qa}ms"
+
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  STABILITY ANALYSIS
+-- ══════════════════════════════════════════════════════════════════════
+show "─── Stability Classification ───"
+show ""
+show "  Algorithm    | Time (Best)  | Time (Avg)   | Time (Worst) | Space   | Stable?"
+show "  ─────────────+──────────────+──────────────+──────────────+-────────+────────"
+show "  Bubble       | O(n)         | O(n²)        | O(n²)        | O(1)    | Yes"
+show "  Selection    | O(n²)        | O(n²)        | O(n²)        | O(1)    | No"
+show "  Insertion    | O(n)         | O(n²)        | O(n²)        | O(1)    | Yes"
+show "  Merge        | O(n log n)   | O(n log n)   | O(n log n)   | O(n)    | Yes"
+show "  Quick        | O(n log n)   | O(n log n)   | O(n²)        | O(log n)| No"
+show "  Heap         | O(n log n)   | O(n log n)   | O(n log n)   | O(1)    | No"
+show ""
+
+show "═══ Module 1: Sorting Arena Complete ═══"

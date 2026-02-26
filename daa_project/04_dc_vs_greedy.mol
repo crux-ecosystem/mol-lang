@@ -1,0 +1,586 @@
+-- ══════════════════════════════════════════════════════════════════════════
+--  AlgoVerse — Module 4: Divide & Conquer vs Greedy
+--  Closest Pair, Strassen's (D&C) • Activity Selection, Huffman (Greedy)
+--  DAA Mini Project · CruxLabx · MOL Language
+-- ══════════════════════════════════════════════════════════════════════════
+
+show "╔══════════════════════════════════════════════════════════════╗"
+show "║     MODULE 4: DIVIDE & CONQUER vs GREEDY (4 Problems)      ║"
+show "╚══════════════════════════════════════════════════════════════╝"
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--                    DIVIDE & CONQUER SECTION
+-- ══════════════════════════════════════════════════════════════════════
+show "┌──────────────────────────────────────────────────────────┐"
+show "│                  DIVIDE & CONQUER                       │"
+show "└──────────────────────────────────────────────────────────┘"
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  1. CLOSEST PAIR OF POINTS — O(n log n)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  1. CLOSEST PAIR OF POINTS (D&C)"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+define distance(p1, p2)
+  let dx be p1["x"] - p2["x"]
+  let dy be p1["y"] - p2["y"]
+  return sqrt(dx * dx + dy * dy)
+end
+
+-- Brute force for small sets
+define closest_brute(points)
+  let n be len(points)
+  let min_dist be 999999
+  let pair be [points[0], points[1]]
+  let i be 0
+  while i < n do
+    let j be i + 1
+    while j < n do
+      let d be distance(points[i], points[j])
+      if d < min_dist then
+        set min_dist to d
+        set pair to [points[i], points[j]]
+      end
+      set j to j + 1
+    end
+    set i to i + 1
+  end
+  return {"dist": min_dist, "pair": pair}
+end
+
+-- Strip closest: check points in the strip
+define strip_closest(strip, d)
+  let min_dist be d
+  let best_pair be []
+
+  -- Sort strip by y-coordinate
+  let sorted_strip be sort_by(strip, fn(p) -> p["y"])
+  let n be len(sorted_strip)
+
+  let i be 0
+  while i < n do
+    let j be i + 1
+    while j < n and (sorted_strip[j]["y"] - sorted_strip[i]["y"]) < min_dist do
+      let dist be distance(sorted_strip[i], sorted_strip[j])
+      if dist < min_dist then
+        set min_dist to dist
+        set best_pair to [sorted_strip[i], sorted_strip[j]]
+      end
+      set j to j + 1
+    end
+    set i to i + 1
+  end
+
+  return {"dist": min_dist, "pair": best_pair}
+end
+
+-- Main divide & conquer closest pair
+define closest_pair_dc(points_sorted)
+  let n be len(points_sorted)
+
+  -- Base case: brute force for small sets
+  if n <= 3 then
+    return closest_brute(points_sorted)
+  end
+
+  let mid be floor(n / 2)
+  let mid_point be points_sorted[mid]
+
+  let left be slice(points_sorted, 0, mid)
+  let right be slice(points_sorted, mid)
+
+  let dl be closest_pair_dc(left)
+  let dr be closest_pair_dc(right)
+
+  -- Take the smaller of the two
+  let d be dl["dist"]
+  let best_pair be dl["pair"]
+  if dr["dist"] < d then
+    set d to dr["dist"]
+    set best_pair to dr["pair"]
+  end
+
+  -- Build strip of points within d of the midline
+  let strip be []
+  for p in points_sorted do
+    if abs(p["x"] - mid_point["x"]) < d then
+      push(strip, p)
+    end
+  end
+
+  -- Check strip
+  if len(strip) >= 2 then
+    let strip_result be strip_closest(strip, d)
+    if strip_result["dist"] < d then
+      set d to strip_result["dist"]
+      set best_pair to strip_result["pair"]
+    end
+  end
+
+  return {"dist": d, "pair": best_pair}
+end
+
+define closest_pair(points)
+  let sorted_points be sort_by(points, fn(p) -> p["x"])
+  return closest_pair_dc(sorted_points)
+end
+
+-- Generate random 2D points
+let points be []
+for i in range(20) do
+  push(points, {"x": random_int(0, 100), "y": random_int(0, 100), "id": i})
+end
+
+show f"  {len(points)} random points in 100×100 space"
+show "  First 5 points:"
+for i in range(5) do
+  let pi be points[i]
+  let pid be pi["id"]
+  let px be pi["x"]
+  let py be pi["y"]
+  show f"    P{pid}: ({px}, {py})"
+end
+show ""
+
+let start be clock()
+let cp_result be closest_pair(points)
+let cp_time be round((clock() - start) * 1000, 3)
+
+let cp_dist be round(cp_result["dist"], 4)
+let cp_p0 be cp_result["pair"][0]
+let cp_p1 be cp_result["pair"][1]
+let cp_p0x be cp_p0["x"]
+let cp_p0y be cp_p0["y"]
+let cp_p1x be cp_p1["x"]
+let cp_p1y be cp_p1["y"]
+show f"  ✓ Closest pair distance: {cp_dist}"
+show f"  ✓ Points: ({cp_p0x},{cp_p0y}) and ({cp_p1x},{cp_p1y})"
+show f"  ⏱ D&C time: {cp_time}ms"
+
+-- Compare with brute force
+set start to clock()
+let bf_result be closest_brute(points)
+let bf_time be round((clock() - start) * 1000, 3)
+let bf_dist be round(bf_result["dist"], 4)
+show f"  ⏱ Brute force time: {bf_time}ms"
+show f"  ✓ Both give same distance: {bf_dist}"
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  2. STRASSEN'S MATRIX MULTIPLICATION — O(n^2.807)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  2. STRASSEN'S MATRIX MULTIPLICATION (D&C)"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+-- Helpers for 2×2 matrix operations
+define mat_add(A, B)
+  let rows be len(A)
+  let cols be len(A[0])
+  let result be []
+  let i be 0
+  while i < rows do
+    let row be []
+    let j be 0
+    while j < cols do
+      push(row, A[i][j] + B[i][j])
+      set j to j + 1
+    end
+    push(result, row)
+    set i to i + 1
+  end
+  return result
+end
+
+define mat_sub(A, B)
+  let rows be len(A)
+  let cols be len(A[0])
+  let result be []
+  let i be 0
+  while i < rows do
+    let row be []
+    let j be 0
+    while j < cols do
+      push(row, A[i][j] - B[i][j])
+      set j to j + 1
+    end
+    push(result, row)
+    set i to i + 1
+  end
+  return result
+end
+
+-- Naive matrix multiply for comparison
+define naive_multiply(A, B)
+  let n be len(A)
+  let m be len(B[0])
+  let p be len(B)
+  let mults be 0
+
+  let result be []
+  let i be 0
+  while i < n do
+    let row be []
+    let j be 0
+    while j < m do
+      let s be 0
+      let k be 0
+      while k < p do
+        set s to s + A[i][k] * B[k][j]
+        set mults to mults + 1
+        set k to k + 1
+      end
+      push(row, s)
+      set j to j + 1
+    end
+    push(result, row)
+    set i to i + 1
+  end
+  return {"result": result, "multiplications": mults}
+end
+
+-- Strassen's for 2×2 matrices (demonstrating the 7-multiplication trick)
+define strassen_2x2(A, B)
+  let a11 be A[0][0]
+  let a12 be A[0][1]
+  let a21 be A[1][0]
+  let a22 be A[1][1]
+
+  let b11 be B[0][0]
+  let b12 be B[0][1]
+  let b21 be B[1][0]
+  let b22 be B[1][1]
+
+  -- 7 multiplications (instead of 8 in naive)
+  let m1 be (a11 + a22) * (b11 + b22)
+  let m2 be (a21 + a22) * b11
+  let m3 be a11 * (b12 - b22)
+  let m4 be a22 * (b21 - b11)
+  let m5 be (a11 + a12) * b22
+  let m6 be (a21 - a11) * (b11 + b12)
+  let m7 be (a12 - a22) * (b21 + b22)
+
+  let c11 be m1 + m4 - m5 + m7
+  let c12 be m3 + m5
+  let c21 be m2 + m4
+  let c22 be m1 - m2 + m3 + m6
+
+  return {
+    "result": [[c11, c12], [c21, c22]],
+    "multiplications": 7
+  }
+end
+
+-- Test matrices
+let A be [[1, 3], [7, 5]]
+let B be [[6, 8], [4, 2]]
+
+show "  Matrix A:           Matrix B:"
+show f"  | {A[0][0]}  {A[0][1]} |         | {B[0][0]}  {B[0][1]} |"
+show f"  | {A[1][0]}  {A[1][1]} |         | {B[1][0]}  {B[1][1]} |"
+show ""
+
+set start to clock()
+let naive_res be naive_multiply(A, B)
+let naive_time be round((clock() - start) * 1000, 3)
+
+set start to clock()
+let strassen_res be strassen_2x2(A, B)
+let strassen_time be round((clock() - start) * 1000, 3)
+
+let nr be naive_res["result"]
+let nr_mults be naive_res["multiplications"]
+show f"  Naive result:     | {nr[0][0]}  {nr[0][1]} |   ({nr_mults} multiplications)"
+show f"                    | {nr[1][0]}  {nr[1][1]} |"
+show ""
+let sr be strassen_res["result"]
+let sr_mults be strassen_res["multiplications"]
+show f"  Strassen result:  | {sr[0][0]}  {sr[0][1]} |   ({sr_mults} multiplications)"
+show f"                    | {sr[1][0]}  {sr[1][1]} |"
+show ""
+let match_result be nr is sr
+let saved be nr_mults - sr_mults
+show f"  ✓ Results match: {match_result}"
+show f"  ✓ Strassen saves: {saved} multiplications per 2×2 block"
+show f"  ✓ For n×n: Naive O(n³) = n³ mults, Strassen O(n^2.807)"
+show ""
+
+-- Larger matrix demo (4x4 naive multiply to show scaling)
+let C be [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
+let D be [[16, 15, 14, 13], [12, 11, 10, 9], [8, 7, 6, 5], [4, 3, 2, 1]]
+let big_result be naive_multiply(C, D)
+let big_mults be big_result["multiplications"]
+show f"  4×4 naive: {big_mults} scalar multiplications"
+show f"  4×4 Strassen would use: ~49 scalar multiplications (7 recursive × 7)"
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--                        GREEDY SECTION
+-- ══════════════════════════════════════════════════════════════════════
+show "┌──────────────────────────────────────────────────────────┐"
+show "│                     GREEDY ALGORITHMS                   │"
+show "└──────────────────────────────────────────────────────────┘"
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  3. ACTIVITY SELECTION — O(n log n)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  3. ACTIVITY SELECTION (Greedy)"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+define activity_selection(activities)
+  -- Sort by finish time (greedy choice)
+  let sorted be sort_by(activities, fn(a) -> a["end"])
+
+  let selected be [sorted[0]]
+  let last_end be sorted[0]["end"]
+
+  for i in range(1, len(sorted)) do
+    if sorted[i]["start"] >= last_end then
+      push(selected, sorted[i])
+      set last_end to sorted[i]["end"]
+    end
+  end
+
+  return selected
+end
+
+let activities be [
+  {"name": "Lecture",     "start": 1,  "end": 4},
+  {"name": "Lab",         "start": 3,  "end": 5},
+  {"name": "Tutorial",    "start": 0,  "end": 6},
+  {"name": "Seminar",     "start": 5,  "end": 7},
+  {"name": "Workshop",    "start": 3,  "end": 9},
+  {"name": "Study",       "start": 5,  "end": 9},
+  {"name": "Project",     "start": 6,  "end": 10},
+  {"name": "Club",        "start": 8,  "end": 11},
+  {"name": "Sports",      "start": 8,  "end": 12},
+  {"name": "Review",      "start": 2,  "end": 14},
+  {"name": "Exam Prep",   "start": 12, "end": 16}
+]
+
+show "  All activities:"
+show "  Activity      | Start | End  | Timeline"
+show "  ──────────────+───────+──────+──────────────────"
+for a in activities do
+  -- Build timeline bar
+  let bar be ""
+  let t be 0
+  while t < 16 do
+    if t >= a["start"] and t < a["end"] then
+      set bar to bar + "█"
+    else
+      set bar to bar + "·"
+    end
+    set t to t + 1
+  end
+  let aname be a["name"]
+  let astart be to_text(a["start"])
+  let aend be to_text(a["end"])
+  let col1 be pad_right(aname, 13, " ")
+  let col2 be pad_left(astart, 5, " ")
+  let col3 be pad_left(aend, 4, " ")
+  show f"  {col1} | {col2} | {col3} | {bar}"
+end
+show ""
+
+set start to clock()
+let selected be activity_selection(activities)
+let act_time be round((clock() - start) * 1000, 3)
+
+show f"  ✓ Selected {len(selected)} activities (max non-overlapping):"
+for a in selected do
+  let sname be a["name"]
+  let sstart be a["start"]
+  let send be a["end"]
+  show f"    • {sname} [{sstart}-{send}]"
+end
+
+-- Build combined timeline
+let timeline be ""
+let t be 0
+while t < 16 do
+  let active be false
+  for a in selected do
+    if t >= a["start"] and t < a["end"] then
+      set active to true
+    end
+  end
+  if active then
+    set timeline to timeline + "█"
+  else
+    set timeline to timeline + "·"
+  end
+  set t to t + 1
+end
+show f"  Combined:     {timeline}"
+show f"  ⏱ Time: {act_time}ms"
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  4. HUFFMAN CODING — O(n log n)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  4. HUFFMAN CODING (Greedy)"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+-- Build frequency table from text
+define char_frequency(text)
+  let freq be {}
+  for c in chars(text) do
+    if contains(keys(freq), c) then
+      set freq[c] to freq[c] + 1
+    else
+      set freq[c] to 1
+    end
+  end
+  return freq
+end
+
+-- Huffman using a sorted-list approach (simulates priority queue)
+define huffman_build(freq)
+  -- Create leaf nodes
+  let nodes be []
+  for c in keys(freq) do
+    push(nodes, {"char": c, "freq": freq[c], "left": null, "right": null, "is_leaf": true})
+  end
+
+  -- Build tree: repeatedly merge two smallest
+  while len(nodes) > 1 do
+    -- Sort by frequency
+    set nodes to sort_by(nodes, fn(n) -> n["freq"])
+
+    -- Take two smallest
+    let left be nodes[0]
+    let right be nodes[1]
+
+    -- Create merged internal node
+    let merged be {
+      "char": left["char"] + right["char"],
+      "freq": left["freq"] + right["freq"],
+      "left": left,
+      "right": right,
+      "is_leaf": false
+    }
+
+    -- Replace first two with merged
+    let new_nodes be [merged]
+    let i be 2
+    while i < len(nodes) do
+      push(new_nodes, nodes[i])
+      set i to i + 1
+    end
+    set nodes to new_nodes
+  end
+
+  return nodes[0]
+end
+
+-- Generate codes from tree
+define huffman_codes_helper(node, prefix, codes)
+  if node["is_leaf"] then
+    if prefix is "" then
+      set codes[node["char"]] to "0"
+    else
+      set codes[node["char"]] to prefix
+    end
+    return codes
+  end
+  if node["left"] != null then
+    huffman_codes_helper(node["left"], prefix + "0", codes)
+  end
+  if node["right"] != null then
+    huffman_codes_helper(node["right"], prefix + "1", codes)
+  end
+  return codes
+end
+
+define huffman_codes(tree)
+  let codes be {}
+  return huffman_codes_helper(tree, "", codes)
+end
+
+-- Encode text
+define huffman_encode(text, codes)
+  let encoded be ""
+  for c in chars(text) do
+    set encoded to encoded + codes[c]
+  end
+  return encoded
+end
+
+let sample_text be "ABRACADABRA SIMSALABIM"
+show "  Input text: \"" + sample_text + "\""
+show f"  Length: {len(sample_text)} characters"
+show ""
+
+set start to clock()
+let freq be char_frequency(sample_text)
+let tree be huffman_build(freq)
+let codes be huffman_codes(tree)
+let encoded be huffman_encode(sample_text, codes)
+let huff_time be round((clock() - start) * 1000, 3)
+
+-- Sort by frequency for display
+let freq_list be []
+for c in keys(freq) do
+  push(freq_list, {"char": c, "freq": freq[c]})
+end
+let sorted_freq be sort_by(freq_list, fn(x) -> 0 - x["freq"])
+
+show "  Character frequencies & Huffman codes:"
+show "  Char | Freq | Code          | Bits"
+show "  ─────+──────+───────────────+──────"
+for item in sorted_freq do
+  let c be item["char"]
+  let display_char be c
+  if c is " " then
+    set display_char to "SP"
+  end
+  let code be codes[c]
+  let item_freq be to_text(item["freq"])
+  let col_char be pad_right(display_char, 3, " ")
+  let col_freq be pad_left(item_freq, 4, " ")
+  let col_code be pad_right(code, 13, " ")
+  let code_len be len(code)
+  show f"   {col_char} | {col_freq} | {col_code} | {code_len}"
+end
+show ""
+
+let original_bits be len(sample_text) * 8
+let huffman_bits be len(encoded)
+let compression be round((1 - huffman_bits / original_bits) * 100, 1)
+
+show f"  ✓ Encoded: {encoded}"
+show f"  ✓ Original size:   {original_bits} bits ({len(sample_text)} chars × 8)"
+show f"  ✓ Huffman size:    {huffman_bits} bits"
+show f"  ✓ Compression:     {compression}%"
+show f"  ⏱ Time: {huff_time}ms"
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  HEAD-TO-HEAD: D&C vs Greedy Philosophy
+-- ══════════════════════════════════════════════════════════════════════
+show "─── D&C vs Greedy: Design Philosophy ───"
+show ""
+show "  ┌────────────────┬────────────────────────┬──────────────────────────┐"
+show "  │ Aspect         │ Divide & Conquer       │ Greedy                   │"
+show "  ├────────────────┼────────────────────────┼──────────────────────────┤"
+show "  │ Strategy       │ Split → Solve → Merge  │ Pick local best each    │"
+show "  │ Optimality     │ Always optimal         │ Optimal if proof exists  │"
+show "  │ Subproblems    │ Independent            │ Not revisited            │"
+show "  │ Complexity     │ T(n) = aT(n/b) + f(n) │ Usually O(n log n)       │"
+show "  │ Space          │ O(log n) stack         │ O(1) - O(n)             │"
+show "  │ Examples here  │ Closest Pair, Strassen │ Activity Sel, Huffman    │"
+show "  └────────────────┴────────────────────────┴──────────────────────────┘"
+show ""
+
+show "═══ Module 4: D&C vs Greedy Complete ═══"

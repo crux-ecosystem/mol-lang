@@ -1,0 +1,471 @@
+-- ══════════════════════════════════════════════════════════════════════════
+--  AlgoVerse — Module 3: Dynamic Programming
+--  0/1 Knapsack, LCS, Matrix Chain Multiplication, Edit Distance
+--  DAA Mini Project · CruxLabx · MOL Language
+-- ══════════════════════════════════════════════════════════════════════════
+
+show "╔══════════════════════════════════════════════════════════════╗"
+show "║        MODULE 3: DYNAMIC PROGRAMMING (4 Problems)          ║"
+show "╚══════════════════════════════════════════════════════════════╝"
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  HELPER: 2D table creation & display
+-- ══════════════════════════════════════════════════════════════════════
+define make_2d(rows, cols, default)
+  let table be []
+  let r be 0
+  while r < rows do
+    let row be []
+    let c be 0
+    while c < cols do
+      push(row, default)
+      set c to c + 1
+    end
+    push(table, row)
+    set r to r + 1
+  end
+  return table
+end
+
+-- ══════════════════════════════════════════════════════════════════════
+--  1. 0/1 KNAPSACK PROBLEM — O(nW)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  1. 0/1 KNAPSACK PROBLEM"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+define knapsack(weights, values, capacity)
+  let n be len(weights)
+  -- dp[i][w] = max value using items 0..i with capacity w
+  let dp be make_2d(n + 1, capacity + 1, 0)
+
+  -- Fill the DP table
+  let i be 1
+  while i <= n do
+    let w be 0
+    while w <= capacity do
+      -- Don't take item i
+      set dp[i][w] to dp[i - 1][w]
+      -- Take item i if it fits
+      if weights[i - 1] <= w then
+        let with_item be dp[i - 1][w - weights[i - 1]] + values[i - 1]
+        if with_item > dp[i][w] then
+          set dp[i][w] to with_item
+        end
+      end
+      set w to w + 1
+    end
+    set i to i + 1
+  end
+
+  -- Backtrack to find selected items
+  let selected be []
+  set i to n
+  let w be capacity
+  while i > 0 and w > 0 do
+    if dp[i][w] != dp[i - 1][w] then
+      push(selected, i - 1)
+      set w to w - weights[i - 1]
+    end
+    set i to i - 1
+  end
+
+  return {
+    "max_value": dp[n][capacity],
+    "selected": reverse(selected),
+    "table": dp
+  }
+end
+
+-- Problem instance
+let items be [
+  {"name": "Laptop",     "weight": 3, "value": 4000},
+  {"name": "Headphones", "weight": 1, "value": 1500},
+  {"name": "Book",       "weight": 1, "value": 300},
+  {"name": "Camera",     "weight": 4, "value": 5000},
+  {"name": "Charger",    "weight": 1, "value": 200},
+  {"name": "Tablet",     "weight": 2, "value": 3500},
+  {"name": "Flask",      "weight": 1, "value": 100},
+  {"name": "Mouse",      "weight": 1, "value": 800}
+]
+
+let weights be []
+let item_values be []
+let item_names be []
+for item in items do
+  push(weights, item["weight"])
+  push(item_values, item["value"])
+  push(item_names, item["name"])
+end
+
+let capacity be 7
+show f"  Items available: {len(items)}"
+show f"  Knapsack capacity: {capacity} kg"
+show ""
+
+show "  Item          | Weight | Value"
+show "  ──────────────+────────+──────"
+for item in items do
+  let iname be item["name"]
+  let iweight be item["weight"]
+  let ivalue be item["value"]
+  show f"  {iname}       | {iweight} kg   | ${ivalue}"
+end
+show ""
+
+let start be clock()
+let ks_result be knapsack(weights, item_values, capacity)
+let ks_time be round((clock() - start) * 1000, 3)
+
+let ks_maxval be ks_result["max_value"]
+show f"  ✓ Maximum value: ${ks_maxval}"
+show f"  ✓ Selected items:"
+for idx in ks_result["selected"] do
+  show f"      • {item_names[idx]} (w={weights[idx]}, v=${item_values[idx]})"
+end
+show f"  ⏱ Time: {ks_time}ms"
+show ""
+
+-- Show DP table (last few rows for readability)
+show "  DP Table (last 3 items × capacity 0..7):"
+show "  cap →  0    1    2    3    4    5    6    7"
+let dp be ks_result["table"]
+let row_start be len(dp) - 3
+if row_start < 0 then
+  set row_start to 0
+end
+let ri be row_start
+while ri < len(dp) do
+  let row_str be f"  i={ri}:  "
+  let ci be 0
+  while ci <= capacity do
+    set row_str to row_str + pad_left(to_text(dp[ri][ci]), 4, " ") + " "
+    set ci to ci + 1
+  end
+  show row_str
+  set ri to ri + 1
+end
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  2. LONGEST COMMON SUBSEQUENCE (LCS) — O(mn)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  2. LONGEST COMMON SUBSEQUENCE (LCS)"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+define lcs(str1, str2)
+  let s1 be chars(str1)
+  let s2 be chars(str2)
+  let m be len(s1)
+  let n be len(s2)
+  let dp be make_2d(m + 1, n + 1, 0)
+
+  -- Fill DP table
+  let i be 1
+  while i <= m do
+    let j be 1
+    while j <= n do
+      if s1[i - 1] is s2[j - 1] then
+        set dp[i][j] to dp[i - 1][j - 1] + 1
+      else
+        if dp[i - 1][j] > dp[i][j - 1] then
+          set dp[i][j] to dp[i - 1][j]
+        else
+          set dp[i][j] to dp[i][j - 1]
+        end
+      end
+      set j to j + 1
+    end
+    set i to i + 1
+  end
+
+  -- Backtrack to find the actual subsequence
+  let lcs_str be ""
+  set i to m
+  let j be n
+  while i > 0 and j > 0 do
+    if s1[i - 1] is s2[j - 1] then
+      set lcs_str to s1[i - 1] + lcs_str
+      set i to i - 1
+      set j to j - 1
+    elif dp[i - 1][j] > dp[i][j - 1] then
+      set i to i - 1
+    else
+      set j to j - 1
+    end
+  end
+
+  return {"length": dp[m][n], "subsequence": lcs_str, "table": dp}
+end
+
+let text1 be "ALGORITHM"
+let text2 be "ALTRUISTIC"
+
+show "  String 1: \"" + text1 + "\""
+show "  String 2: \"" + text2 + "\""
+show ""
+
+set start to clock()
+let lcs_result be lcs(text1, text2)
+let lcs_time be round((clock() - start) * 1000, 3)
+
+let lcs_len be lcs_result["length"]
+let lcs_subseq be lcs_result["subsequence"]
+show f"  ✓ LCS length: {lcs_len}"
+show "  ✓ LCS string: \"" + lcs_subseq + "\""
+show f"  ⏱ Time: {lcs_time}ms"
+show ""
+
+-- Visualize alignment
+show "  Alignment visualization:"
+let lcs_chars be chars(lcs_result["subsequence"])
+let align1 be ""
+let align2 be ""
+for c in chars(text1) do
+  if contains(lcs_chars, c) then
+    set align1 to align1 + "[" + c + "]"
+  else
+    set align1 to align1 + " " + c + " "
+  end
+end
+for c in chars(text2) do
+  if contains(lcs_chars, c) then
+    set align2 to align2 + "[" + c + "]"
+  else
+    set align2 to align2 + " " + c + " "
+  end
+end
+show f"    S1: {align1}"
+show f"    S2: {align2}"
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  3. MATRIX CHAIN MULTIPLICATION — O(n³)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  3. MATRIX CHAIN MULTIPLICATION"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+-- dims[i] = rows of matrix i, dims[n] = cols of last matrix
+-- So matrix i has dimensions dims[i] × dims[i+1]
+define matrix_chain(dims)
+  let n be len(dims) - 1
+  let cost be make_2d(n, n, 0)
+  let split be make_2d(n, n, 0)
+
+  -- chain_len is the length of the chain being considered
+  let chain_len be 2
+  while chain_len <= n do
+    let i be 0
+    while i <= n - chain_len do
+      let j be i + chain_len - 1
+      set cost[i][j] to 999999999
+
+      let k be i
+      while k < j do
+        let q be cost[i][k] + cost[k + 1][j] + dims[i] * dims[k + 1] * dims[j + 1]
+        if q < cost[i][j] then
+          set cost[i][j] to q
+          set split[i][j] to k
+        end
+        set k to k + 1
+      end
+      set i to i + 1
+    end
+    set chain_len to chain_len + 1
+  end
+
+  return {"min_cost": cost[0][n - 1], "cost_table": cost, "split_table": split}
+end
+
+-- Reconstruct optimal parenthesization
+define parenthesize(split, i, j)
+  if i is j then
+    return f"M{i + 1}"
+  end
+  let k be split[i][j]
+  let left be parenthesize(split, i, k)
+  let right be parenthesize(split, k + 1, j)
+  return f"({left} × {right})"
+end
+
+-- 6 matrices: 30×35, 35×15, 15×5, 5×10, 10×20, 20×25
+let dims be [30, 35, 15, 5, 10, 20, 25]
+let n_matrices be len(dims) - 1
+
+show f"  {n_matrices} Matrices:"
+let mi be 0
+while mi < n_matrices do
+  show f"    M{mi + 1}: {dims[mi]} × {dims[mi + 1]}"
+  set mi to mi + 1
+end
+show ""
+
+set start to clock()
+let mcm_result be matrix_chain(dims)
+let mcm_time be round((clock() - start) * 1000, 3)
+
+let optimal_parens be parenthesize(mcm_result["split_table"], 0, n_matrices - 1)
+
+let mcm_cost be mcm_result["min_cost"]
+show f"  ✓ Minimum scalar multiplications: {mcm_cost}"
+show f"  ✓ Optimal parenthesization: {optimal_parens}"
+show f"  ⏱ Time: {mcm_time}ms"
+show ""
+
+-- Naive cost comparison
+let naive_cost be dims[0] * dims[1] * dims[2]
+let mi2 be 2
+while mi2 < n_matrices do
+  set naive_cost to naive_cost + dims[0] * dims[mi2] * dims[mi2 + 1]
+  set mi2 to mi2 + 1
+end
+show f"  Naive (left-to-right) cost: ~{naive_cost}"
+let savings be round((1 - mcm_cost / naive_cost) * 100, 1)
+show f"  Savings: {savings}%"
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  4. EDIT DISTANCE (Levenshtein) — O(mn)
+-- ══════════════════════════════════════════════════════════════════════
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show "  4. EDIT DISTANCE (Levenshtein)"
+show "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+show ""
+
+define edit_distance(str1, str2)
+  let s1 be chars(str1)
+  let s2 be chars(str2)
+  let m be len(s1)
+  let n be len(s2)
+  let dp be make_2d(m + 1, n + 1, 0)
+
+  -- Base cases
+  let i be 0
+  while i <= m do
+    set dp[i][0] to i
+    set i to i + 1
+  end
+  let j be 0
+  while j <= n do
+    set dp[0][j] to j
+    set j to j + 1
+  end
+
+  -- Fill DP table
+  set i to 1
+  while i <= m do
+    set j to 1
+    while j <= n do
+      if s1[i - 1] is s2[j - 1] then
+        set dp[i][j] to dp[i - 1][j - 1]
+      else
+        let insert_op be dp[i][j - 1] + 1
+        let delete_op be dp[i - 1][j] + 1
+        let replace_op be dp[i - 1][j - 1] + 1
+        set dp[i][j] to min([insert_op, delete_op, replace_op])
+      end
+      set j to j + 1
+    end
+    set i to i + 1
+  end
+
+  -- Backtrack to find operations
+  let ops be []
+  set i to m
+  set j to n
+  while i > 0 or j > 0 do
+    if i > 0 and j > 0 and s1[i - 1] is s2[j - 1] then
+      let kc be s1[i - 1]
+      push(ops, "KEEP " + kc)
+      set i to i - 1
+      set j to j - 1
+    elif i > 0 and j > 0 and dp[i][j] is dp[i - 1][j - 1] + 1 then
+      let rc1 be s1[i - 1]
+      let rc2 be s2[j - 1]
+      push(ops, "REPLACE " + rc1 + " → " + rc2)
+      set i to i - 1
+      set j to j - 1
+    elif j > 0 and dp[i][j] is dp[i][j - 1] + 1 then
+      let ic be s2[j - 1]
+      push(ops, "INSERT " + ic)
+      set j to j - 1
+    else
+      let dc be s1[i - 1]
+      push(ops, "DELETE " + dc)
+      set i to i - 1
+    end
+  end
+
+  return {"distance": dp[m][n], "operations": reverse(ops), "table": dp}
+end
+
+let word1 be "SUNDAY"
+let word2 be "SATURDAY"
+
+show "  Word 1: \"" + word1 + "\""
+show "  Word 2: \"" + word2 + "\""
+show ""
+
+set start to clock()
+let ed_result be edit_distance(word1, word2)
+let ed_time be round((clock() - start) * 1000, 3)
+
+let ed_dist be ed_result["distance"]
+show f"  ✓ Edit Distance: {ed_dist}"
+show f"  ✓ Operations:"
+for op in ed_result["operations"] do
+  show f"      {op}"
+end
+show f"  ⏱ Time: {ed_time}ms"
+show ""
+
+-- Show DP table
+show "  DP Table:"
+let ed_dp be ed_result["table"]
+let w2_chars be chars(word2)
+let header be "       "
+for c in w2_chars do
+  set header to header + pad_left(c, 4, " ")
+end
+show f"      -  {header}"
+let w1_chars be chars(word1)
+let ri be 0
+while ri <= len(w1_chars) do
+  let label be "-"
+  if ri > 0 then
+    set label to w1_chars[ri - 1]
+  end
+  let row_str be f"  {label}  "
+  let ci be 0
+  while ci <= len(w2_chars) do
+    set row_str to row_str + pad_left(to_text(ed_dp[ri][ci]), 4, " ")
+    set ci to ci + 1
+  end
+  show row_str
+  set ri to ri + 1
+end
+show ""
+
+-- ══════════════════════════════════════════════════════════════════════
+--  SUMMARY
+-- ══════════════════════════════════════════════════════════════════════
+show "─── Dynamic Programming Summary ───"
+show ""
+show "  Problem                    | Complexity | Time"
+show "  ────────────────────────────+────────────+──────────"
+show f"  0/1 Knapsack               | O(nW)      | {ks_time}ms"
+show f"  Longest Common Subseq      | O(mn)      | {lcs_time}ms"
+show f"  Matrix Chain Multiply      | O(n³)      | {mcm_time}ms"
+show f"  Edit Distance              | O(mn)      | {ed_time}ms"
+show ""
+show "  Key insight: DP trades SPACE for TIME by storing subproblem solutions."
+show "  All 4 algorithms demonstrate optimal substructure + overlapping subproblems."
+show ""
+
+show "═══ Module 3: Dynamic Programming Complete ═══"
