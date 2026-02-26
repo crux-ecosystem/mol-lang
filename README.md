@@ -7,7 +7,7 @@
 <p align="center">
   <img src="https://img.shields.io/pypi/v/mol-lang?label=PyPI&color=blue" alt="PyPI">
   <img src="https://img.shields.io/badge/version-2.0.1-blue" alt="version">
-  <img src="https://img.shields.io/badge/license-Proprietary-red" alt="license">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="license">
   <img src="https://img.shields.io/badge/python-3.12%2B-green" alt="python">
   <img src="https://img.shields.io/badge/tests-213%20passed-brightgreen" alt="tests">
   <img src="https://img.shields.io/badge/stdlib-210%20functions-orange" alt="stdlib">
@@ -1050,4 +1050,4 @@ We're building a community of developers, security researchers, and language ent
 
 ## License
 
-Proprietary — CruxLabx / IntraMind. All rights reserved.
+MIT License — Copyright (c) 2026 CruxLabx / IntraMind. See [LICENSE](LICENSE).
