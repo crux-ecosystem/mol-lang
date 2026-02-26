@@ -236,11 +236,26 @@ swarm_rebalance(cluster)
 
 Choose the method that works best for you:
 
-### 1. Install from PyPI (Recommended)
+### 1. `pipx` (Recommended)
 
 ```bash
+# Install pipx (if not installed)
+sudo apt install pipx && pipx ensurepath   # Ubuntu/Debian
+brew install pipx && pipx ensurepath        # macOS
+
+# Install MOL
+pipx install mol-lang
+```
+
+### 2. `pip` in a Virtual Environment
+
+```bash
+python3 -m venv mol-env && source mol-env/bin/activate
 pip install mol-lang
 ```
+
+> **⚠️ Getting `externally-managed-environment` error?**
+> Modern Python 3.12+ blocks `pip install` system-wide ([PEP 668](https://peps.python.org/pep-0668/)). Use `pipx` instead.
 
 Then use anywhere:
 ```bash
@@ -249,7 +264,7 @@ mol repl
 mol version
 ```
 
-### 2. Docker
+### 3. Docker
 
 ```bash
 # Run a program
@@ -264,7 +279,7 @@ docker run --rm -p 8000:8000 ghcr.io/crux-ecosystem/mol playground
 
 Image size: ~144 MB (Python 3.12-slim based)
 
-### 3. From Source
+### 4. From Source
 
 ```bash
 git clone https://github.com/crux-ecosystem/mol-lang.git
@@ -274,9 +289,11 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-### 4. With LSP Support (for VS Code)
+### 5. With LSP Support (for VS Code)
 
 ```bash
+pipx install 'mol-lang[lsp]'
+# or in a venv:
 pip install mol-lang[lsp]
 ```
 
@@ -285,7 +302,7 @@ Then install the VS Code extension from `mol-vscode/` or copy it:
 cp -r mol-vscode/ ~/.vscode/extensions/mol-language-0.5.0
 ```
 
-### 5. Online Playground (No Install)
+### 6. Online Playground (No Install)
 
 Try MOL directly in your browser: **[https://mol.cruxlabx.in](https://mol.cruxlabx.in)**
 

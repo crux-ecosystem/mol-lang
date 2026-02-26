@@ -162,7 +162,9 @@ show json_stringify(response)
 ## Try It
 
 ```bash
-pip install mol-lang
+pipx install mol-lang    # recommended
+# or: pip install mol-lang  (in a venv)
+
 mol run your_pipeline.mol
 ```
 
