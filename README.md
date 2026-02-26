@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="mol-banner.svg" alt="MOL Language" width="600">
+  <img src="https://raw.githubusercontent.com/crux-ecosystem/mol-lang/main/mol-banner.svg" alt="MOL Language" width="600">
 </p>
 
 <h1 align="center">MOL — The IntraMind Programming Language</h1>
@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="MOL Demo" width="700">
+  <img src="https://raw.githubusercontent.com/crux-ecosystem/mol-lang/main/assets/demo.gif" alt="MOL Demo" width="700">
 </p>
 
 ---
@@ -234,22 +234,33 @@ swarm_rebalance(cluster)
 
 ## Installation
 
-> **⚠️ Note:** PyPI shows `pip install mol-lang` above, but on modern systems (Python 3.12+) this will fail with `externally-managed-environment`. Use `pipx` instead.
-
-### 1. `pipx` (Recommended)
+### Quick Start
 
 ```bash
-# Install pipx (if not installed)
-python -m pip install --user pipx && python -m pipx ensurepath  # Windows
-sudo apt install pipx && pipx ensurepath   # Ubuntu/Debian
-brew install pipx && pipx ensurepath        # macOS
-python -m pip install --user pipx && pipx ensurepath   # Windows (PowerShell)
+pip install mol-lang
+mol version
+```
 
-# Install MOL
+> **⚠️ Getting `externally-managed-environment` error?** (Python 3.12+ on Ubuntu/Debian/Fedora)
+> Your OS blocks system-wide pip installs ([PEP 668](https://peps.python.org/pep-0668/)). Use one of these instead:
+
+### Option A: Use `pipx` (installs in isolation)
+
+```bash
+# Ubuntu/Debian
+sudo apt install pipx && pipx ensurepath
+
+# macOS
+brew install pipx && pipx ensurepath
+
+# Windows (PowerShell)
+python -m pip install --user pipx && python -m pipx ensurepath
+
+# Then install MOL:
 pipx install mol-lang
 ```
 
-### 2. `pip` in a Virtual Environment
+### Option B: Use a Virtual Environment
 
 ```bash
 # Linux/macOS
@@ -260,9 +271,6 @@ python -m venv mol-env; mol-env\Scripts\Activate.ps1
 
 pip install mol-lang
 ```
-
-> **⚠️ Getting `externally-managed-environment` error?**
-> Modern Python 3.12+ blocks `pip install` system-wide ([PEP 668](https://peps.python.org/pep-0668/)). Use `pipx` instead.
 
 Then use anywhere:
 ```bash
