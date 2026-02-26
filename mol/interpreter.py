@@ -1142,9 +1142,10 @@ class Interpreter:
             ms = t["time_ms"]
             desc = t["value_desc"]
 
+            dash = "\u2500"
             if step == 0:
                 line = (f"  {C_CYAN}\u2502{C_RST} {C_DIM}{step}.{C_RST}  "
-                        f"{C_YEL}{name:<16}{C_RST} {C_DIM}{'\u2500':>8}{C_RST}  {desc}")
+                        f"{C_YEL}{name:<16}{C_RST} {C_DIM}{dash:>8}{C_RST}  {desc}")
             else:
                 line = (f"  {C_CYAN}\u2502{C_RST} {C_DIM}{step}.{C_RST}  "
                         f"{C_YEL}{name:<16}{C_RST} {C_DIM}{ms:>6.1f}ms{C_RST}  "
