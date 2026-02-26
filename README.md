@@ -240,6 +240,7 @@ Choose the method that works best for you:
 
 ```bash
 # Install pipx (if not installed)
+python -m pip install --user pipx && python -m pipx ensurepath  # Windows
 sudo apt install pipx && pipx ensurepath   # Ubuntu/Debian
 brew install pipx && pipx ensurepath        # macOS
 
