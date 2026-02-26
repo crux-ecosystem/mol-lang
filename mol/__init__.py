@@ -16,5 +16,5 @@ Features:
 File extension: .mol
 """
 
-__version__ = "2.0.2"
+__version__ = "2.0.3"
 __author__ = "Mounesh Kodi"

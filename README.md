@@ -234,7 +234,7 @@ swarm_rebalance(cluster)
 
 ## Installation
 
-Choose the method that works best for you:
+> **⚠️ Note:** PyPI shows `pip install mol-lang` above, but on modern systems (Python 3.12+) this will fail with `externally-managed-environment`. Use `pipx` instead.
 
 ### 1. `pipx` (Recommended)
 
@@ -243,6 +243,7 @@ Choose the method that works best for you:
 python -m pip install --user pipx && python -m pipx ensurepath  # Windows
 sudo apt install pipx && pipx ensurepath   # Ubuntu/Debian
 brew install pipx && pipx ensurepath        # macOS
+python -m pip install --user pipx && pipx ensurepath   # Windows (PowerShell)
 
 # Install MOL
 pipx install mol-lang
@@ -251,7 +252,12 @@ pipx install mol-lang
 ### 2. `pip` in a Virtual Environment
 
 ```bash
+# Linux/macOS
 python3 -m venv mol-env && source mol-env/bin/activate
+
+# Windows (PowerShell)
+python -m venv mol-env; mol-env\Scripts\Activate.ps1
+
 pip install mol-lang
 ```
 

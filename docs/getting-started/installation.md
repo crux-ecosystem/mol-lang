@@ -13,31 +13,60 @@
 
 `pipx` installs MOL in an isolated environment and makes the `mol` command available globally. **This is the recommended method** — it avoids permission errors and doesn't conflict with system Python.
 
-```bash
-# Install pipx if you don't have it
-# Ubuntu/Debian:
-sudo apt install pipx
-pipx ensurepath
+=== "Ubuntu / Debian"
 
-# macOS:
-brew install pipx
-pipx ensurepath
+    ```bash
+    sudo apt install pipx
+    pipx ensurepath
+    pipx install mol-lang
+    ```
 
-# Then install MOL:
-pipx install mol-lang
-```
+=== "macOS"
+
+    ```bash
+    brew install pipx
+    pipx ensurepath
+    pipx install mol-lang
+    ```
+
+=== "Windows (PowerShell)"
+
+    ```powershell
+    python -m pip install --user pipx
+    python -m pipx ensurepath
+    pipx install mol-lang
+    ```
+
+    !!! tip "Restart your terminal after `ensurepath`"
+        Close and reopen PowerShell (or Command Prompt) so the PATH update takes effect.
 
 ### Option B: `pip` in a Virtual Environment
 
 If you prefer `pip`, create a virtual environment first:
 
-```bash
-python3 -m venv mol-env
-source mol-env/bin/activate    # Linux/macOS
-# mol-env\Scripts\activate     # Windows
+=== "Linux / macOS"
 
-pip install mol-lang
-```
+    ```bash
+    python3 -m venv mol-env
+    source mol-env/bin/activate
+    pip install mol-lang
+    ```
+
+=== "Windows (PowerShell)"
+
+    ```powershell
+    python -m venv mol-env
+    mol-env\Scripts\Activate.ps1
+    pip install mol-lang
+    ```
+
+=== "Windows (CMD)"
+
+    ```cmd
+    python -m venv mol-env
+    mol-env\Scripts\activate.bat
+    pip install mol-lang
+    ```
 
 !!! warning "Getting `externally-managed-environment` error?"
     Modern Python (3.12+ on Ubuntu/Debian/Fedora) blocks `pip install` system-wide (PEP 668).
@@ -57,22 +86,38 @@ pip install --user mol-lang
 
 ```bash
 mol version
-# MOL v1.1.0
+# MOL v2.0.2
 ```
 
 If `mol` isn't found after installation:
 
-```bash
-# Check if it's in your PATH
-which mol
+=== "Linux / macOS"
 
-# If using pipx, ensure PATH is set:
-pipx ensurepath
-# Then restart your terminal
+    ```bash
+    # Check if it's in your PATH
+    which mol
 
-# If using --user install, add to PATH:
-export PATH="$HOME/.local/bin:$PATH"
-```
+    # If using pipx, ensure PATH is set:
+    pipx ensurepath
+    # Then restart your terminal
+
+    # If using --user install, add to PATH:
+    export PATH="$HOME/.local/bin:$PATH"
+    ```
+
+=== "Windows (PowerShell)"
+
+    ```powershell
+    # Check if mol is available
+    Get-Command mol
+
+    # If using pipx, ensure PATH is set:
+    python -m pipx ensurepath
+    # Then restart PowerShell
+
+    # If using --user install, add to PATH:
+    $env:PATH += ";$env:APPDATA\Python\Scripts"
+    ```
 
 ## Install from Source
 

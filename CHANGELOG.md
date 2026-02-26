@@ -6,6 +6,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [2.0.3] — 2026-02-26
+
+### Fixed
+
+- Added Windows installation instructions (`pipx`, venv, PowerShell, CMD)
+- Updated PyPI description with pipx-first install guide and PEP 668 warning
+- Added platform-specific PATH troubleshooting (Linux, macOS, Windows)
+
+---
+
 ## [2.0.2] — 2026-02-26
 
 ### Fixed
